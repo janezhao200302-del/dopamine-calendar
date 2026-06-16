@@ -9,17 +9,13 @@
   "background_color": "#FFF9F0",
   "theme_color": "#7EC8A0",
   "lang": "zh-CN",
+  "id": "dopamine-calendar",
   "icons": [
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
-    },
-    {
-      "src": "icon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
     }
   ]
 }
