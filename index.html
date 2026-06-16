@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>多巴胺日历 - Dopamine Planner</title>
-<!-- PWA 支持 (安卓安装为桌面应用) -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7EC8A0">
 <meta name="mobile-web-app-capable" content="yes">
@@ -15,387 +14,215 @@
 <style>
 /* ============ CSS 变量 ============ */
 :root {
-  --mint: #7EC8A0;
-  --lime: #C7E990;
-  --purple: #B5A0D8;
-  --blue: #8EC8E8;
-  --dogwood: #EDCFD0;
-  --green: #8ED8B8;
-  --bg-page: #FFF9F0;
-  --bg-card: #FFFFFF;
+  --mint: #7EC8A0; --lime: #C7E990; --purple: #B5A0D8; --blue: #8EC8E8;
+  --dogwood: #EDCFD0; --green: #8ED8B8;
+  --bg-page: #FFF9F0; --bg-card: #FFFFFF;
   --bg-header: linear-gradient(135deg, #7EC8A0, #8EC8E8);
   --bg-today: #E8F8F0;
-  --text-primary: #2D3436;
-  --text-muted: #636E72;
-  --text-light: #B2BEC3;
-  --border: #E0E8E3;
-  --done-color: #7EC8A0;
-  --shadow: 0 4px 20px rgba(0,0,0,0.06);
-  --radius: 14px;
+  --text-primary: #2D3436; --text-muted: #636E72; --text-light: #B2BEC3;
+  --border: #E0E8E3; --done-color: #7EC8A0;
+  --urgent-red: #E74C3C; --important-blue: #3498DB; --normal-gray: #B2BEC3;
+  --holiday-bg: #FFF0F0; --festival-bg: #FFF8E8;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06); --radius: 14px;
 }
 
 /* ============ 全局 ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  background: var(--bg-page);
-  color: var(--text-primary);
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  background: var(--bg-page); color: var(--text-primary); min-height: 100vh; overflow-x: hidden;
 }
-
-/* ============ 应用容器 ============ */
-.app-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-.main-content {
-  display: flex;
-  flex: 1;
-  overflow: hidden;
-}
+.app-container { display: flex; flex-direction: column; height: 100vh; max-width: 1200px; margin: 0 auto; }
+.main-content { display: flex; flex: 1; overflow: hidden; }
 
 /* ============ 头部 ============ */
 .header {
-  background: var(--bg-header);
-  color: #fff;
-  padding: 16px 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(126,200,160,0.3);
-  user-select: none;
-}
-.header-title {
-  font-size: 1.5rem;
-  font-weight: 700;
-  min-width: 160px;
-  text-align: center;
-  letter-spacing: 2px;
+  background: var(--bg-header); color: #fff; padding: 12px 20px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  flex-shrink: 0; box-shadow: 0 2px 12px rgba(126,200,160,0.3); user-select: none;
 }
 .nav-btn, .today-btn {
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: #fff;
-  padding: 8px 16px;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  font-family: inherit;
-  transition: background 0.2s, transform 0.1s;
+  background: rgba(255,255,255,0.2); border: none; color: #fff;
+  padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;
+  font-family: inherit; transition: background 0.2s,transform 0.1s;
 }
+.nav-btn { font-size: 1.1rem; padding: 4px 12px; }
 .nav-btn:hover, .today-btn:hover { background: rgba(255,255,255,0.35); }
 .nav-btn:active, .today-btn:active { transform: scale(0.95); }
-.nav-btn { font-size: 1.2rem; padding: 6px 14px; }
-.today-btn { font-size: 0.9rem; }
+.year-text, .month-text {
+  cursor: pointer; font-weight: 700; font-size: 1.4rem; padding: 2px 6px;
+  border-radius: 8px; transition: background 0.2s;
+}
+.year-text:hover, .month-text:hover { background: rgba(255,255,255,0.25); }
+.header-sep { font-size: 1.2rem; opacity: 0.8; }
+
+/* 年月选择器弹窗 */
+.picker-overlay {
+  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center;
+}
+.picker-overlay.show { display: flex; }
+.picker-popup {
+  background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  max-width: 340px; width: 90%;
+}
+.picker-popup h3 { text-align: center; margin-bottom: 12px; color: var(--text-primary); }
+.picker-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.picker-item {
+  padding: 10px 6px; text-align: center; border-radius: 10px; cursor: pointer;
+  font-size: 0.9rem; transition: all 0.15s; background: #f5f5f5;
+}
+.picker-item:hover { background: var(--mint); color: #fff; }
+.picker-item.active { background: var(--purple); color: #fff; font-weight: 700; }
+.picker-year-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 12px; }
+.picker-year-row input {
+  width: 80px; padding: 8px; border: 2px solid var(--border); border-radius: 8px;
+  text-align: center; font-size: 1.1rem; font-family: inherit;
+}
+.picker-year-row button {
+  padding: 8px 16px; border: none; border-radius: 8px; background: var(--mint); color: #fff;
+  cursor: pointer; font-family: inherit;
+}
+.picker-close {
+  display: block; margin: 12px auto 0; padding: 6px 20px; border: none;
+  background: #eee; border-radius: 20px; cursor: pointer; font-family: inherit;
+}
 
 /* ============ 日历面板 ============ */
-.calendar-panel {
-  flex: 2;
-  padding: 20px 24px;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-}
-.weekday-row {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  margin-bottom: 6px;
-}
-.weekday-cell {
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  padding: 4px 0;
-}
+.calendar-panel { flex: 2; padding: 16px 20px; display: flex; flex-direction: column; overflow-y: auto; }
+.weekday-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 4px; }
+.weekday-cell { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 2px 0; }
 .weekday-cell.weekend { color: var(--mint); }
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  flex: 1;
-}
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; }
 .calendar-cell {
-  aspect-ratio: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 6px 4px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
-  position: relative;
-  min-height: 50px;
-  background: var(--bg-card);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  aspect-ratio: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: flex-start; padding: 3px 2px; border-radius: 10px; cursor: pointer;
+  transition: background 0.15s,transform 0.1s; position: relative; min-height: 54px;
+  background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;
 }
-.calendar-cell:hover {
-  background: #FFF3E0;
-  transform: scale(1.04);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+.calendar-cell:hover { background: #F0F8F4; transform: scale(1.03); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 .calendar-cell:active { transform: scale(0.96); }
-.calendar-cell.today {
-  background: var(--bg-today);
-  box-shadow: 0 2px 10px rgba(126,200,160,0.35);
-  font-weight: 700;
-}
-.calendar-cell.today .day-num {
-  background: var(--lime);
-  border-radius: 50%;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.calendar-cell.selected {
-  outline: 3px solid var(--purple);
-  outline-offset: -3px;
-  box-shadow: 0 2px 14px rgba(181,160,216,0.45);
-}
-.calendar-cell.other-month {
-  opacity: 0.32;
-  pointer-events: none;
-}
-.day-num {
-  font-size: 0.95rem;
-  margin-bottom: 2px;
-  z-index: 1;
-  transition: all 0.15s;
-}
-.task-dots {
-  display: flex;
-  gap: 3px;
-  flex-wrap: wrap;
-  justify-content: center;
-  max-width: 100%;
-}
-.task-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.task-dot.more {
-  font-size: 0.6rem;
-  color: var(--text-muted);
-  line-height: 7px;
-}
+.calendar-cell.today { background: var(--bg-today); box-shadow: 0 2px 10px rgba(126,200,160,0.35); font-weight: 700; }
+.calendar-cell.today .day-num { background: var(--lime); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
+.calendar-cell.selected { outline: 3px solid var(--purple); outline-offset: -3px; box-shadow: 0 2px 14px rgba(181,160,216,0.45); }
+.calendar-cell.other-month { opacity: 0.35; pointer-events: none; }
+.calendar-cell.holiday { background: #e8f5ee; }
+.calendar-cell.rest-day { background: #f0faf5; }
+
+.day-num { font-size: 0.9rem; margin-bottom: 1px; z-index: 1; transition: all 0.15s; }
+.lunar-text { font-size: 0.62rem; color: var(--text-muted); line-height: 1.1; z-index: 1; }
+.lunar-text.festival { color: #2E7D52; font-weight: 600; }
+.lunar-text.term { color: #7EC8A0; }
+.lunar-text.observance { color: #2E7D52; font-weight: 600; font-size: 0.62rem; }
+.holiday-label { font-size: 0.58rem; color: #2E7D52; font-weight: 600; z-index: 1; line-height: 1.1; }
+.memorial-icon { font-size: 0.7rem; z-index: 1; position: absolute; top: 2px; right: 3px; }
+.task-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 100%; z-index: 1; }
+.task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.task-dot.more { font-size: 0.55rem; color: var(--text-muted); line-height: 6px; }
 
 /* ============ 侧面板 ============ */
-.side-panel {
-  flex: 1;
-  padding: 24px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background: var(--bg-card);
-  border-left: 1px solid var(--border);
-  overflow-y: auto;
-  min-width: 280px;
-}
-.panel-date {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  text-align: center;
-}
-.panel-date small {
-  display: block;
-  font-weight: 400;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-.panel-empty {
-  text-align: center;
-  color: var(--text-light);
-  padding: 40px 20px;
-  font-size: 1rem;
-  line-height: 1.8;
-}
-.panel-empty .emoji { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+.side-panel { flex: 1; padding: 16px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-card); border-left: 1px solid var(--border); overflow-y: auto; min-width: 280px; }
+.panel-date { font-size: 1.1rem; font-weight: 700; text-align: center; }
+.panel-date small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--text-muted); margin-top: 1px; }
+.panel-empty { text-align: center; color: var(--text-light); padding: 30px 16px; font-size: 0.9rem; line-height: 1.8; }
+.panel-empty .emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
 
-/* 添加任务表单 */
-.add-task-form {
-  display: flex;
-  gap: 8px;
-}
-.add-task-input {
-  flex: 1;
-  padding: 10px 14px;
-  border: 2px solid var(--border);
-  border-radius: 25px;
-  font-size: 0.9rem;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-  background: #fafafa;
-}
+/* 添加任务 */
+.add-task-row { display: flex; gap: 6px; align-items: center; }
+.add-task-input { flex: 1; padding: 8px 12px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; font-family: inherit; outline: none; transition: border-color 0.2s; background: #fafafa; }
 .add-task-input:focus { border-color: var(--purple); }
-.add-task-btn {
-  padding: 10px 20px;
-  background: var(--purple);
-  color: #fff;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  transition: background 0.2s, transform 0.1s;
-  white-space: nowrap;
-}
-.add-task-btn:hover { background: #5B4BD5; }
-.add-task-btn:active { transform: scale(0.95); }
+.priority-select { display: flex; gap: 3px; }
+.priority-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; }
+.priority-dot.p0 { background: #eee; } .priority-dot.p1 { background: #DBEAFE; } .priority-dot.p2 { background: #FFF3E0; } .priority-dot.p3 { background: #FFE0E0; }
+.priority-dot.selected { border-color: var(--text-primary); transform: scale(1.2); }
+.add-task-btn { padding: 8px 16px; background: var(--purple); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
+.add-task-btn:hover { background: #9B8AD0; }
 
 /* 任务列表 */
-.task-list { display: flex; flex-direction: column; gap: 6px; }
-.task-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  transition: background 0.15s;
-}
+.task-list { display: flex; flex-direction: column; gap: 4px; }
+.task-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; transition: background 0.15s; border-left: 3px solid transparent; }
 .task-item:hover { background: #fafafa; }
-.task-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 22px; height: 22px;
-  border: 2px solid #ddd;
-  border-radius: 50%;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: all 0.2s;
-  position: relative;
-}
-.task-checkbox:checked {
-  background: var(--mint);
-  border-color: var(--mint);
-}
-.task-checkbox:checked::after {
-  content: '✓';
-  position: absolute;
-  top: -1px; left: 4px;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-}
-.task-text {
-  flex: 1;
-  font-size: 0.95rem;
-  word-break: break-word;
-}
-.task-item.done .task-text {
-  text-decoration: line-through;
-  color: var(--text-light);
-  text-decoration-color: var(--mint);
-  text-decoration-thickness: 2px;
-}
-.task-delete {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1rem;
-  opacity: 0;
-  transition: opacity 0.15s, transform 0.1s;
-  padding: 4px;
-  color: var(--text-light);
-}
+.task-item.p0 { border-left-color: #ddd; } .task-item.p1 { border-left-color: var(--important-blue); } .task-item.p2 { border-left-color: #F39C12; } .task-item.p3 { border-left-color: var(--urgent-red); }
+.task-checkbox { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
+.task-checkbox:checked { background: var(--mint); border-color: var(--mint); }
+.task-checkbox:checked::after { content: '✓'; position: absolute; top: -1px; left: 3px; color: #fff; font-size: 12px; font-weight: 700; }
+.task-text { flex: 1; font-size: 0.9rem; word-break: break-word; }
+.task-item.done .task-text { text-decoration: line-through; color: var(--text-light); text-decoration-color: var(--mint); text-decoration-thickness: 2px; }
+.task-priority-badge { font-size: 0.65rem; padding: 1px 5px; border-radius: 8px; flex-shrink: 0; }
+.task-countdown { font-size: 0.7rem; color: var(--urgent-red); font-weight: 600; flex-shrink: 0; }
+.task-delete { background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0; transition: opacity 0.15s,transform 0.1s; padding: 2px; color: var(--text-light); }
 .task-item:hover .task-delete { opacity: 1; }
 .task-delete:hover { color: var(--dogwood); transform: scale(1.2); }
 
+/* 纪念日区域 */
+.memorial-section { border-top: 1px solid var(--border); padding-top: 8px; }
+.memorial-section h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
+.memorial-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; padding: 3px 0; }
+.memorial-item .memo-icon { font-size: 1rem; }
+.memorial-countdown { font-size: 0.75rem; color: var(--urgent-red); margin-left: auto; }
+.btn-del-memorial { background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-light); padding: 0 4px; transition: color 0.15s; line-height: 1; }
+.btn-del-memorial:hover { color: #E74C3C; }
+.btn-add-memorial { padding: 6px 14px; border: 2px dashed var(--border); border-radius: 16px; background: none; cursor: pointer; font-family: inherit; font-size: 0.8rem; color: var(--text-muted); transition: all 0.2s; }
+.btn-add-memorial:hover { border-color: var(--mint); color: var(--mint); }
+.memorial-clickable { cursor: pointer; border-radius: 8px; padding: 4px 8px; transition: background 0.15s; }
+.memorial-clickable:hover { background: #f0f8f4; }
+
+/* 纪念日表单弹窗 */
+.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 300; justify-content: center; align-items: center; }
+.modal-overlay.show { display: flex; }
+.modal-box { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); max-width: 360px; width: 90%; }
+.modal-box h3 { text-align: center; margin-bottom: 12px; }
+.modal-box label { font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
+.modal-box input, .modal-box select { width: 100%; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; margin-bottom: 10px; }
+.modal-box .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
+.modal-box .btn-row button { padding: 8px 20px; border: none; border-radius: 20px; cursor: pointer; font-family: inherit; }
+.btn-save { background: var(--mint); color: #fff; }
+.btn-cancel { background: #eee; }
+.btn-delete-memorial { background: var(--urgent-red); color: #fff; padding: 4px 10px; border: none; border-radius: 10px; cursor: pointer; font-size: 0.7rem; font-family: inherit; margin-left: auto; }
+
 /* 进度条 */
-.progress-section {
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
-}
-.progress-text {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-align: center;
-  margin-bottom: 8px;
-}
-.progress-bar {
-  height: 8px;
-  background: #eee;
-  border-radius: 4px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--mint), var(--purple));
-  border-radius: 4px;
-  transition: width 0.4s ease;
-}
+.progress-section { border-top: 1px solid var(--border); padding-top: 10px; }
+.progress-text { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; }
+.progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--mint), var(--purple)); border-radius: 3px; transition: width 0.4s ease; }
+.sync-section { border-top: 1px solid var(--border); padding-top: 10px; display: flex; gap: 6px; }
+.sync-btn { flex: 1; padding: 6px 10px; border: 2px solid var(--border); border-radius: 16px; background: #fff; cursor: pointer; font-size: 0.78rem; font-family: inherit; color: var(--text-muted); transition: all 0.2s; }
+.sync-btn:hover { border-color: var(--mint); color: var(--mint); background: #f5fdf8; }
+.sync-hint { font-size: 0.68rem; color: var(--text-light); text-align: center; margin-top: 6px; }
 
-/* 同步按钮 */
-.sync-section {
-  border-top: 1px solid var(--border);
-  padding-top: 12px;
-  display: flex;
-  gap: 8px;
-}
-.sync-btn {
-  flex: 1;
-  padding: 8px 12px;
-  border: 2px solid var(--border);
-  border-radius: 20px;
-  background: #fff;
-  cursor: pointer;
-  font-size: 0.82rem;
-  font-family: inherit;
-  color: var(--text-muted);
-  transition: all 0.2s;
-}
-.sync-btn:hover {
-  border-color: var(--mint);
-  color: var(--mint);
-  background: #f5fdf8;
-}
-.sync-hint {
-  font-size: 0.72rem;
-  color: var(--text-light);
-  text-align: center;
-  margin-top: 8px;
-}
+/* 心情 & 总结 */
+.mood-section { border-top: 1px solid var(--border); padding-top: 10px; }
+.mood-section h4 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
+.mood-grid { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
+.mood-btn { font-size: 1.3rem; cursor: pointer; padding: 3px; border-radius: 8px; border: 2px solid transparent; background: none; transition: all 0.15s; line-height: 1; }
+.mood-btn:hover { background: #f0f8f4; transform: scale(1.2); }
+.mood-btn.selected { border-color: var(--mint); background: #e8f5ee; transform: scale(1.25); }
+.journal-section { border-top: 1px solid var(--border); padding-top: 10px; }
+.journal-section h4 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
+.journal-textarea { width: 100%; min-height: 60px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.85rem; resize: vertical; outline: none; transition: border-color 0.2s; background: #fafafa; }
+.journal-textarea:focus { border-color: var(--mint); }
+.journal-save-hint { font-size: 0.68rem; color: var(--text-light); text-align: right; margin-top: 3px; }
 
-/* ============ 撒花粒子 ============ */
-.celebration-particle {
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999;
-  animation: celebrate-burst 1.2s ease-out forwards;
-}
+/* 撒花 */
+.celebration-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: celebrate-burst 1.2s ease-out forwards; }
 @keyframes celebrate-burst {
-  0%   { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; }
-  60%  { opacity: 1; }
-  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--rot)) scale(0.2); opacity: 0; }
+  0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
+  60% { opacity: 1; }
+  100% { transform: translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.2); opacity: 0; }
 }
 
-/* ============ 响应式 ============ */
+/* 响应式 */
 @media (max-width: 768px) {
   .main-content { flex-direction: column; }
-  .calendar-panel { flex: none; padding: 12px 10px; }
-  .calendar-cell { min-height: 38px; padding: 3px 2px; border-radius: 8px; }
-  .day-num { font-size: 0.8rem; }
-  .task-dot { width: 5px; height: 5px; }
+  .calendar-panel { flex: none; padding: 8px 6px; }
+  .calendar-cell { min-height: 40px; padding: 2px 1px; border-radius: 6px; }
+  .day-num { font-size: 0.75rem; }
+  .lunar-text { font-size: 0.55rem; }
   .side-panel { flex: none; border-left: none; border-top: 1px solid var(--border); min-width: auto; }
-  .header { padding: 10px 14px; gap: 10px; }
-  .header-title { font-size: 1.2rem; min-width: 120px; }
-  .calendar-cell.today .day-num { width: 22px; height: 22px; font-size: 0.75rem; }
+  .header { padding: 8px 10px; gap: 6px; }
+  .year-text, .month-text { font-size: 1.1rem; }
 }
 </style>
 </head>
@@ -403,7 +230,8 @@ body {
 <div class="app-container" id="app">
   <header class="header">
     <button class="nav-btn" data-action="prev" title="上一月">◀</button>
-    <span class="header-title" id="header-title">2026年 6月</span>
+    <span class="year-text" id="year-text">2026</span><span class="header-sep">年</span>
+    <span class="month-text" id="month-text">6月</span>
     <button class="nav-btn" data-action="next" title="下一月">▶</button>
     <button class="today-btn" data-action="today">✨ 今天</button>
   </header>
@@ -412,44 +240,56 @@ body {
     <aside class="side-panel" id="side-panel"></aside>
   </div>
 </div>
+<div class="picker-overlay" id="year-picker-overlay"><div class="picker-popup" id="year-picker-popup"></div></div>
+<div class="picker-overlay" id="month-picker-overlay"><div class="picker-popup" id="month-picker-popup"></div></div>
+<div class="modal-overlay" id="memorial-modal"><div class="modal-box" id="memorial-modal-box"></div></div>
 
 <script>
 // ==================== 常量 ====================
-const STORAGE_KEY = 'dopamineCal';
+const STORAGE_KEY = 'dopamineCalV3';
 const DOT_COLORS = ['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
-const WEEKDAY_LABELS = ['日','一','二','三','四','五','六'];
+const WEEKDAY_LABELS = ['一','二','三','四','五','六','日'];
+const MEMORIAL_TYPES = { birthday:'🎂 生日', anniversary:'💍 纪念日', holiday:'🎉 节日', memorial:'🕯 忌日', custom:'📌 自定义', countup:'📆 正数日', countdown:'⏳ 倒数日' };
+const MEMORIAL_ICONS = { birthday:'🎂', anniversary:'💍', holiday:'🎉', memorial:'🕯', custom:'📌', countup:'📆', countdown:'⏳' };
+const PRIORITY_LABELS = { 0:'', 1:'⭐', 2:'🔥', 3:'🚨' };
+const PRIORITY_COLORS = { 0:'#ddd', 1:'#3498DB', 2:'#F39C12', 3:'#E74C3C' };
 
-// ==================== DOM 引用 ====================
+// ==================== DOM ====================
 const appEl = document.getElementById('app');
-const headerTitle = document.getElementById('header-title');
 const calendarPanel = document.getElementById('calendar-panel');
 const sidePanel = document.getElementById('side-panel');
+const yearText = document.getElementById('year-text');
+const monthText = document.getElementById('month-text');
+const yearPickerOverlay = document.getElementById('year-picker-overlay');
+const yearPickerPopup = document.getElementById('year-picker-popup');
+const monthPickerOverlay = document.getElementById('month-picker-overlay');
+const monthPickerPopup = document.getElementById('month-picker-popup');
+const memorialModal = document.getElementById('memorial-modal');
+const memorialModalBox = document.getElementById('memorial-modal-box');
 
-// ==================== 状态管理 ====================
+// ==================== 状态 ====================
+const MOOD_EMOJIS = ['😊','😄','😍','🤩','😌','😐','😢','😡','😴','🤒','🎉','💪','❤️','🌟','💡','🔥'];
 let state = {
   currentYear: new Date().getFullYear(),
-  currentMonth: new Date().getMonth(), // 0-11
-  selectedDate: null,  // "YYYY-MM-DD" | null
-  tasksByDate: {}       // { "YYYY-MM-DD": Task[] }
+  currentMonth: new Date().getMonth(),
+  selectedDate: null,
+  tasksByDate: {},
+  memorials: [],
+  priorityFilter: null,
+  moods: {},            // { "YYYY-MM-DD": "😊" }
+  journals: {}          // { "YYYY-MM-DD": "今天..." }
 };
 
 function getTodayKey() {
   const d = new Date();
   return dateKey(d.getFullYear(), d.getMonth(), d.getDate());
 }
-
-function dateKey(y, m, d) {
-  return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-}
-
+function dateKey(y, m, d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
 function generateId() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,10);
 }
-
-function sanitize(text) {
-  return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').trim();
-}
+function sanitize(text) { return text.replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
 
 // ==================== 持久化 ====================
 function loadState() {
@@ -458,111 +298,351 @@ function loadState() {
     if (raw) {
       const data = JSON.parse(raw);
       if (data.tasks) state.tasksByDate = data.tasks;
-      // 恢复到当月
-      const now = new Date();
-      state.currentYear = now.getFullYear();
-      state.currentMonth = now.getMonth();
-      state.selectedDate = getTodayKey();
+      if (data.memorials) state.memorials = data.memorials;
+      if (data.moods) state.moods = data.moods;
+      if (data.journals) state.journals = data.journals;
     }
-  } catch (e) {
-    console.warn('localStorage 加载失败，使用默认状态', e);
-    state.selectedDate = getTodayKey();
-  }
+  } catch(e) { console.warn('loadState failed', e); }
+  const now = new Date();
+  state.currentYear = now.getFullYear();
+  state.currentMonth = now.getMonth();
+  state.selectedDate = getTodayKey();
 }
-
 function saveState() {
   try {
-    const data = { version: 1, tasks: state.tasksByDate };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch (e) {
-    console.warn('localStorage 保存失败', e);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      version: 3, tasks: state.tasksByDate, memorials: state.memorials,
+      moods: state.moods, journals: state.journals
+    }));
+  } catch(e) { console.warn('saveState failed', e); }
+}
+
+// ==================== 农历算法 ====================
+const LUNAR_INFO = [
+  0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
+  0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
+  0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
+  0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
+  0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
+  0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
+  0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
+  0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
+  0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
+  0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
+  0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
+  0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
+  0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
+  0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
+  0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
+  0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06aa0,0x1a6c4,0x0aae0,
+  0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,
+  0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
+  0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,
+  0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,
+  0x0d520
+];
+const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
+const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+const LUNAR_MONTHS = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+const LUNAR_DAYS = ['','初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+
+function lunarYearDays(y) {
+  let sum = 348;
+  for (let i = 0x8000; i > 0x8; i >>= 1) sum += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
+  return sum + lunarLeapDays(y);
+}
+function lunarLeapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
+function lunarLeapDays(y) {
+  if (lunarLeapMonth(y)) return (LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29;
+  return 0;
+}
+function lunarMonthDays(y, m) {
+  return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29;
+}
+function solarToLunar(y, m, d) {
+  // m: 0-11, d: 1-31
+  if (y < 1900 || y > 2100) return { lunarYear: y, lunarMonth: m, lunarDay: d, isLeap: false };
+  const baseDate = new Date(1900, 0, 31);
+  const targetDate = new Date(y, m, d);
+  let offset = Math.round((targetDate - baseDate) / 86400000);
+  let ly, lm, ld, isLeap = false;
+  for (ly = 1900; ly < 2101 && offset > 0; ly++) {
+    const days = lunarYearDays(ly);
+    if (offset < days) break;
+    offset -= days;
   }
+  const leap = lunarLeapMonth(ly);
+  let isLeapMonth = false;
+  for (lm = 1; lm < 13 && offset > 0; lm++) {
+    if (leap > 0 && lm === leap + 1 && !isLeapMonth) {
+      --lm; isLeapMonth = true;
+      const ld2 = lunarLeapDays(ly);
+      if (offset < ld2) break;
+      offset -= ld2;
+    } else {
+      const md = lunarMonthDays(ly, lm);
+      if (offset < md) break;
+      offset -= md;
+      if (isLeapMonth && lm === leap) { isLeapMonth = false; }
+    }
+  }
+  ld = offset + 1;
+  if (isLeapMonth) { isLeap = true; }
+  return {
+    lunarYear: ly, lunarMonth: lm === 0 ? 1 : lm, lunarDay: ld,
+    isLeap: isLeap,
+    monthName: (isLeap ? '闰' : '') + LUNAR_MONTHS[(lm - 1 + 12) % 12],
+    dayName: LUNAR_DAYS[ld] || ld
+  };
+}
+function lunarToSolar(year, lunarMonth, lunarDay, isLeap) {
+  // 计算农历日期对应的公历日期
+  const baseDate = new Date(1900, 0, 31);
+  let offset = 0;
+  for (let y = 1900; y < year; y++) offset += lunarYearDays(y);
+  const leap = lunarLeapMonth(year);
+  for (let m = 1; m < lunarMonth; m++) {
+    if (m === leap + 1 && isLeap) offset += lunarLeapDays(year);
+    offset += lunarMonthDays(year, m);
+  }
+  if (isLeap && lunarMonth === leap) offset += lunarMonthDays(year, lunarMonth);
+  offset += lunarDay - 1;
+  const d = new Date(baseDate.getTime() + offset * 86400000);
+  return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
+}
+
+// ==================== 节气 ====================
+const SOLAR_TERMS = ['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+function getTerm(y, n) {
+  // 简化天文算法，n: 0=小寒, 1=大寒...23=冬至
+  const D = 0.2422;
+  const C = [
+    5.4055,20.12,3.87,18.73,5.63,20.646,4.81,20.1,5.52,21.04,5.678,21.37,
+    7.108,22.83,7.5,23.13,7.646,23.042,8.318,23.438,7.438,22.36,7.18,21.94
+  ];
+  const y21 = Math.floor(y / 100) * 100 === 2000 ? y - 2000 : 0; // 仅支持 2000 年后近似
+  let d = Math.floor(y * D + C[n]) - Math.floor((y - 1) / 4);
+  if (y >= 2000) d -= Math.floor((y - 2000) / 100) - Math.floor((y - 2000) / 400);
+  if (d < 1 || d > 31) { /* 边界处理 */ d = Math.min(31, Math.max(1, d)); }
+  const m = Math.floor(n / 2) + 1;
+  return { month: m, day: Math.floor(d) };
+}
+function getTermName(y, m, d) {
+  for (let i = 0; i < 24; i++) {
+    const t = getTerm(y, i);
+    if (t.month === m + 1 && t.day === d) return SOLAR_TERMS[i];
+  }
+  return null;
+}
+
+// ==================== 法定节假日放假调休数据 ====================
+// 格式: "YYYY-M-D": { type: 'rest'(放假) | 'work'(调休上班), name: '节日名' }
+// 数据来源: 国务院办公厅放假安排通知
+const HOLIDAY_SCHEDULE = {
+  // === 2026年 ===
+  // 元旦: 1月1日-3日放假, 仅1月1日是元旦
+  '2026-1-1':{t:'rest',n:'元旦'},'2026-1-2':{t:'rest',n:''},'2026-1-3':{t:'rest',n:''},
+  '2026-1-4':{t:'work',n:'补元旦'},
+  // 春节: 1月29日(正月初一)-2月4日放假, 仅正月初一是"春节"
+  '2026-1-29':{t:'rest',n:'春节'},'2026-1-30':{t:'rest',n:''},'2026-1-31':{t:'rest',n:''},
+  '2026-2-1':{t:'rest',n:''},'2026-2-2':{t:'rest',n:''},'2026-2-3':{t:'rest',n:''},
+  '2026-2-4':{t:'rest',n:''},
+  '2026-1-25':{t:'work',n:'补春节'},'2026-2-7':{t:'work',n:'补春节'},
+  // 清明节: 4月5日-7日放假, 仅4月5日是清明节气
+  '2026-4-5':{t:'rest',n:'清明'},'2026-4-6':{t:'rest',n:''},'2026-4-7':{t:'rest',n:''},
+  '2026-4-4':{t:'work',n:'补清明'},
+  // 劳动节: 5月1日-5日放假, 仅5月1日是劳动节
+  '2026-5-1':{t:'rest',n:'劳动节'},'2026-5-2':{t:'rest',n:''},'2026-5-3':{t:'rest',n:''},
+  '2026-5-4':{t:'rest',n:''},'2026-5-5':{t:'rest',n:''},
+  '2026-4-26':{t:'work',n:'补劳动节'},'2026-5-9':{t:'work',n:'补劳动节'},
+  // 端午节: 6月19日(五月初五)-21日放假, 仅6月19日是端午
+  '2026-6-19':{t:'rest',n:'端午'},'2026-6-20':{t:'rest',n:''},'2026-6-21':{t:'rest',n:''},
+  // 中秋节: 9月27日(农历八月十五)是中秋, 9月28-30是国庆连休的普通假日
+  '2026-9-27':{t:'rest',n:'中秋'},
+  // 国庆节/中秋节连休: 9月28日-10月8日, 其中10月1-3日是国庆, 其余是连休假日
+  '2026-9-28':{t:'rest',n:''},'2026-9-29':{t:'rest',n:''},'2026-9-30':{t:'rest',n:''},
+  '2026-10-1':{t:'rest',n:'国庆'},'2026-10-2':{t:'rest',n:'国庆'},'2026-10-3':{t:'rest',n:'国庆'},
+  '2026-10-4':{t:'rest',n:''},'2026-10-5':{t:'rest',n:''},'2026-10-6':{t:'rest',n:''},
+  '2026-10-7':{t:'rest',n:''},'2026-10-8':{t:'rest',n:''},
+  '2026-9-20':{t:'work',n:'补国庆'},'2026-10-10':{t:'work',n:'补国庆'},
+  // === 2027年 (预排) ===
+  '2027-1-1':{t:'rest',n:'元旦'},'2027-1-2':{t:'rest',n:'元旦'},'2027-1-3':{t:'rest',n:'元旦'},
+  '2027-5-1':{t:'rest',n:'劳动节'},'2027-5-2':{t:'rest',n:'劳动节'},'2027-5-3':{t:'rest',n:'劳动节'},
+  '2027-5-4':{t:'rest',n:'劳动节'},'2027-5-5':{t:'rest',n:'劳动节'},
+  '2027-10-1':{t:'rest',n:'国庆'},'2027-10-2':{t:'rest',n:'国庆'},'2027-10-3':{t:'rest',n:'国庆'},
+  '2027-10-4':{t:'rest',n:'国庆'},'2027-10-5':{t:'rest',n:'国庆'},'2027-10-6':{t:'rest',n:'国庆'},
+  '2027-10-7':{t:'rest',n:'国庆'},
+};
+
+function getHolidaySchedule(y, m, d) {
+  return HOLIDAY_SCHEDULE[`${y}-${m+1}-${d}`] || null;
+}
+
+function getLegalHoliday(y, m, d) {
+  // 先查放假调休表
+  const sched = getHolidaySchedule(y, m, d);
+  if (sched) return { name: sched.n, isRest: sched.t==='rest', isWork: sched.t==='work' };
+
+  // 农历节日（传统节日，不在法定放假表里的）
+  const lunar = solarToLunar(y, m, d);
+  if (!lunar.isLeap) {
+    if (lunar.lunarMonth === 1 && lunar.lunarDay === 1) return { name: '春节', isRest: false };
+    if (lunar.lunarMonth === 1 && lunar.lunarDay === 15) return { name: '元宵节', isRest: false };
+    if (lunar.lunarMonth === 5 && lunar.lunarDay === 5) return { name: '端午', isRest: false };
+    if (lunar.lunarMonth === 7 && lunar.lunarDay === 7) return { name: '七夕', isRest: false };
+    if (lunar.lunarMonth === 7 && lunar.lunarDay === 15) return { name: '中元节', isRest: false };
+    if (lunar.lunarMonth === 8 && lunar.lunarDay === 15) return { name: '中秋', isRest: false };
+    if (lunar.lunarMonth === 9 && lunar.lunarDay === 9) return { name: '重阳', isRest: false };
+  }
+  // 清明节
+  if (m === 3 && (d === 4 || d === 5 || d === 6)) {
+    const term = getTerm(y, 6);
+    if (term.month === 4 && term.day === d) return { name: '清明', isRest: false };
+  }
+  return null;
+}
+
+// ==================== 国际/重要节日 ====================
+function getNthDayOfMonth(y, m, dow, n) {
+  // 返回 y年m月 第n个 星期dow 的日期 (dow: 0=Sun)
+  let count = 0;
+  const days = daysInMonth(y, m);
+  for (let d = 1; d <= days; d++) {
+    if (new Date(y, m, d).getDay() === dow) {
+      count++;
+      if (count === n) return d;
+    }
+  }
+  return 0;
+}
+function getObservance(y, m, d) {
+  // 返回节日名称，或null
+  const md = `${m+1}-${d}`;
+  const fixed = {
+    '1-1': '元旦', '2-14': '情人节💕', '3-8': '妇女节', '3-12': '植树节',
+    '4-1': '愚人节', '5-4': '青年节', '6-1': '儿童节🧒',
+    '7-1': '建党节', '8-1': '建军节', '9-10': '教师节📚',
+    '10-31': '万圣节🎃', '12-24': '平安夜🎄', '12-25': '圣诞节🎄', '12-31': '跨年夜🎆'
+  };
+  if (fixed[md]) return fixed[md];
+  // 母亲节: 5月第2个周日
+  if (m === 4 && d === getNthDayOfMonth(y, 4, 0, 2)) return '母亲节🌸';
+  // 父亲节: 6月第3个周日
+  if (m === 5 && d === getNthDayOfMonth(y, 5, 0, 3)) return '父亲节👔';
+  // 感恩节: 11月第4个周四
+  if (m === 10 && d === getNthDayOfMonth(y, 10, 4, 4)) return '感恩节🦃';
+  return null;
 }
 
 // ==================== 日历计算 ====================
-function daysInMonth(y, m) {
-  return new Date(y, m + 1, 0).getDate();
-}
-
+function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 function getMonthGridData(y, m) {
   const firstDay = new Date(y, m, 1);
-  const startDow = firstDay.getDay(); // 0=Sun
+  const realDow = firstDay.getDay();           // 0=Sun JS
+  const startIdx = (realDow + 6) % 7;          // 周一=0, 周日=6
   const totalDays = daysInMonth(y, m);
-  const prevTotal = daysInMonth(y, m - 1 < 0 ? 11 : m - 1);
-
+  const prevTotal = daysInMonth(m === 0 ? y - 1 : y, m === 0 ? 11 : m - 1);
   const cells = [];
-  // 前导日期（上月末尾）
-  for (let i = startDow - 1; i >= 0; i--) {
-    const day = prevTotal - i;
-    cells.push({ year: m === 0 ? y - 1 : y, month: m === 0 ? 11 : m - 1, day, currentMonth: false });
+  for (let i = startIdx - 1; i >= 0; i--) {
+    cells.push({ year: m===0 ? y-1 : y, month: m===0 ? 11 : m-1, day: prevTotal - i, currentMonth: false });
   }
-  // 当月日期
-  for (let d = 1; d <= totalDays; d++) {
-    cells.push({ year: y, month: m, day: d, currentMonth: true });
-  }
-  // 尾部日期（下月开头）
-  const remaining = (7 - (cells.length % 7)) % 7;
-  for (let d = 1; d <= remaining; d++) {
-    cells.push({ year: m === 11 ? y + 1 : y, month: m === 11 ? 0 : m + 1, day: d, currentMonth: false });
-  }
+  for (let d = 1; d <= totalDays; d++) cells.push({ year: y, month: m, day: d, currentMonth: true });
+  const rem = (7 - cells.length % 7) % 7;
+  for (let d = 1; d <= rem; d++) cells.push({ year: m===11 ? y+1 : y, month: m===11 ? 0 : m+1, day: d, currentMonth: false });
   return cells;
 }
-
-function getChineseWeekday(dateKeyStr) {
-  const d = new Date(dateKeyStr + 'T00:00:00');
-  const names = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
-  return names[d.getDay()];
+function getChineseWeekday(dk) {
+  const d = new Date(dk + 'T00:00:00');
+  return ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
+}
+function formatDateChinese(dk) {
+  const [y, mm, d] = dk.split('-').map(Number);
+  return `${y}年${mm}月${d}日`;
 }
 
-function formatDateChinese(dateKeyStr) {
-  const [y, m, d] = dateKeyStr.split('-').map(Number);
-  return `${y}年${m}月${d}日`;
+// ==================== 纪念日 ====================
+function getMemorialSolarDate(mem, year) {
+  if (mem.calendar === 'solar') {
+    return { year, month: mem.month, day: mem.day };
+  }
+  return lunarToSolar(year, mem.lunarMonth, mem.lunarDay, mem.lunarIsLeap || false);
+}
+function getMemorialsForDate(dateKeyStr) {
+  const [y, mm, d] = dateKeyStr.split('-').map(Number);
+  const checkDate = new Date(y, mm, d);
+  const results = [];
+  for (const mem of state.memorials) {
+    if (mem.repeat === 'yearly') {
+      const sd = getMemorialSolarDate(mem, y);
+      if (sd.month === mm && sd.day === d) results.push(mem);
+    } else if (mem.repeat === 'monthly') {
+      // 每月同一天（处理月末边界：31日→该月最后一天）
+      const origDay = mem.day || mem.lunarDay || 1;
+      const maxDay = daysInMonth(y, mm);
+      const targetDay = Math.min(origDay, maxDay);
+      if (d === targetDay) results.push(mem);
+    } else if (mem.repeat === 'weekly') {
+      // 每周同星期几
+      const origDate = new Date(mem.originalYear || y, (mem.month||1)-1, mem.day||1);
+      const origDow = origDate.getDay();
+      if (checkDate.getDay() === origDow) results.push(mem);
+    } else {
+      // once
+      const sd = getMemorialSolarDate(mem, mem.originalYear || y);
+      if (sd.month === mm && sd.day === d && mem.originalYear === y) results.push(mem);
+    }
+  }
+  return results;
+}
+function getUpcomingMemorials(limit) {
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const upcoming = [];
+  const seen = new Set();
+  for (let offset = 0; offset < 365; offset++) {
+    const d = new Date(today.getTime() + offset * 86400000);
+    const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
+    const mems = getMemorialsForDate(key);
+    for (const mem of mems) {
+      if (!seen.has(mem.id)) {
+        seen.add(mem.id);
+        upcoming.push({ ...mem, dateKey: key, daysUntil: offset });
+      }
+    }
+    if (upcoming.length >= limit) break;
+  }
+  return upcoming.slice(0, limit);
 }
 
 // ==================== 任务操作 ====================
-function getTasks(dateKeyStr) {
-  return state.tasksByDate[dateKeyStr] || [];
-}
-
-function addTask(dateKeyStr, text) {
+function getTasks(dk) { return state.tasksByDate[dk] || []; }
+function addTask(dk, text, priority) {
   text = sanitize(text);
   if (!text) return false;
-  if (!state.tasksByDate[dateKeyStr]) state.tasksByDate[dateKeyStr] = [];
-  state.tasksByDate[dateKeyStr].push({
-    id: generateId(),
-    text,
-    done: false,
-    createdAt: new Date().toISOString(),
-    completedAt: null
+  if (!state.tasksByDate[dk]) state.tasksByDate[dk] = [];
+  state.tasksByDate[dk].push({
+    id: generateId(), text, done: false, priority: priority || 0,
+    createdAt: new Date().toISOString(), completedAt: null
   });
-  saveState();
-  return true;
+  saveState(); return true;
 }
-
-function toggleTask(dateKeyStr, taskId) {
-  const tasks = state.tasksByDate[dateKeyStr];
-  if (!tasks) return;
-  const task = tasks.find(t => t.id === taskId);
-  if (!task) return;
+function toggleTask(dk, taskId) {
+  const tasks = state.tasksByDate[dk]; if (!tasks) return;
+  const task = tasks.find(t => t.id === taskId); if (!task) return;
   task.done = !task.done;
   task.completedAt = task.done ? new Date().toISOString() : null;
   saveState();
   if (task.done) showCelebration();
 }
-
-function deleteTask(dateKeyStr, taskId) {
-  const tasks = state.tasksByDate[dateKeyStr];
-  if (!tasks) return;
-  state.tasksByDate[dateKeyStr] = tasks.filter(t => t.id !== taskId);
-  if (state.tasksByDate[dateKeyStr].length === 0) delete state.tasksByDate[dateKeyStr];
+function deleteTask(dk, taskId) {
+  const tasks = state.tasksByDate[dk]; if (!tasks) return;
+  state.tasksByDate[dk] = tasks.filter(t => t.id !== taskId);
+  if (state.tasksByDate[dk].length === 0) delete state.tasksByDate[dk];
   saveState();
 }
-
-function getTaskStats(dateKeyStr) {
-  const tasks = getTasks(dateKeyStr);
-  const total = tasks.length;
-  const done = tasks.filter(t => t.done).length;
-  return { total, done };
+function getTaskStats(dk) {
+  const tasks = getTasks(dk);
+  return { total: tasks.length, done: tasks.filter(t => t.done).length };
 }
 
 // ==================== 渲染 ====================
@@ -570,247 +650,588 @@ function renderApp() {
   renderHeader();
   renderCalendar();
   renderSidePanel();
+  renderYearPicker();
+  renderMonthPicker();
 }
-
 function renderHeader() {
-  headerTitle.textContent = `${state.currentYear}年 ${state.currentMonth + 1}月`;
+  yearText.textContent = state.currentYear;
+  monthText.textContent = `${state.currentMonth + 1}月`;
 }
-
 function renderCalendar() {
   const today = getTodayKey();
   const cells = getMonthGridData(state.currentYear, state.currentMonth);
-
-  // 星期头
   let html = '<div class="weekday-row">';
   for (let i = 0; i < 7; i++) {
-    const weekend = (i === 0 || i === 6) ? ' weekend' : '';
-    html += `<div class="weekday-cell${weekend}">${WEEKDAY_LABELS[i]}</div>`;
+    html += `<div class="weekday-cell${i===5||i===6?' weekend':''}">${WEEKDAY_LABELS[i]}</div>`;
   }
   html += '</div><div class="calendar-grid">';
-
   for (const cell of cells) {
     const key = dateKey(cell.year, cell.month, cell.day);
     const isToday = key === today;
     const isSelected = key === state.selectedDate;
     const isOther = !cell.currentMonth;
+    const lunar = solarToLunar(cell.year, cell.month, cell.day);
+    const holiday = getLegalHoliday(cell.year, cell.month, cell.day);
+    const termName = getTermName(cell.year, cell.month, cell.day);
+    const observance = getObservance(cell.year, cell.month, cell.day);
+    const memorials = getMemorialsForDate(key);
 
     let cls = 'calendar-cell';
     if (isToday) cls += ' today';
     if (isSelected) cls += ' selected';
     if (isOther) cls += ' other-month';
+    if (holiday && holiday.isRest) cls += ' holiday';
+    if (holiday && holiday.isWork) cls += ' rest-day';
 
     html += `<div class="${cls}" data-date="${key}">`;
     html += `<span class="day-num">${cell.day}</span>`;
+
+    // 纪念日图标
+    if (memorials.length > 0) {
+      for (const mem of memorials.slice(0,2)) {
+        const icon = MEMORIAL_ICONS[mem.type] || '📌';
+        html += `<span class="memorial-icon" title="${mem.name}">${icon}</span>`;
+      }
+    }
+    // 显示优先级：法定节日名 > 重要节日 > 节气 > 农历
+    if (holiday && holiday.isRest) {
+      const label = holiday.name || observance || '';
+      if (label) html += `<span class="lunar-text observance">${label}</span>`;
+      html += `<span class="lunar-text" style="color:#388E5C;font-weight:700;">休</span>`;
+    } else if (holiday && holiday.isWork) {
+      html += `<span class="lunar-text" style="color:#999;font-weight:700;">${holiday.name}</span>`;
+      html += `<span class="lunar-text" style="color:#999;font-weight:700;">班</span>`;
+    } else if (observance) {
+      html += `<span class="lunar-text observance">${observance}</span>`;
+    } else if (termName) {
+      html += `<span class="lunar-text term">${termName}</span>`;
+    } else {
+      const lunarDisplay = lunar.lunarDay === 1 ? lunar.monthName : (lunar.dayName || lunar.lunarDay);
+      const isFestival = lunar.isLeap ? false : (
+        (lunar.lunarMonth === 1 && lunar.lunarDay === 1) ||
+        (lunar.lunarMonth === 5 && lunar.lunarDay === 5) ||
+        (lunar.lunarMonth === 8 && lunar.lunarDay === 15)
+      );
+      html += `<span class="lunar-text${isFestival?' festival':''}">${lunarDisplay}</span>`;
+    }
+    // 任务圆点
     html += renderTaskDots(key);
     html += '</div>';
   }
-
   html += '</div>';
   calendarPanel.innerHTML = html;
 }
-
-function renderTaskDots(dateKeyStr) {
-  const tasks = getTasks(dateKeyStr);
+function renderTaskDots(dk) {
+  const tasks = getTasks(dk);
   if (tasks.length === 0) return '';
   const maxDots = 5;
   let html = '<div class="task-dots">';
-  for (let i = 0; i < Math.min(tasks.length, maxDots); i++) {
-    // 优先显示未完成的任务
-    const color = DOT_COLORS[i % DOT_COLORS.length];
+  // 优先显示高优先级未完成任务
+  const sorted = [...tasks].sort((a,b) => (b.priority||0) - (a.priority||0));
+  for (let i = 0; i < Math.min(sorted.length, maxDots); i++) {
+    const color = PRIORITY_COLORS[sorted[i].priority || 0] || DOT_COLORS[i % DOT_COLORS.length];
     html += `<span class="task-dot" style="background:${color}"></span>`;
   }
-  if (tasks.length > maxDots) {
-    html += `<span class="task-dot more">+${tasks.length - maxDots}</span>`;
-  }
+  if (tasks.length > maxDots) html += `<span class="task-dot more">+${tasks.length - maxDots}</span>`;
   html += '</div>';
   return html;
 }
-
 function renderSidePanel() {
-  const dateKeyStr = state.selectedDate;
-  if (!dateKeyStr) {
-    sidePanel.innerHTML = `
-      <div class="panel-empty">
-        <span class="emoji">👆</span>
-        点击日历上的日期<br>查看和添加任务
-      </div>`;
+  const dk = state.selectedDate;
+  if (!dk) {
+    sidePanel.innerHTML = `<div class="panel-empty"><span class="emoji">👆</span>点击日历上的日期查看和添加任务</div>`;
     return;
   }
+  const tasks = getTasks(dk);
+  const stats = getTaskStats(dk);
+  const weekday = getChineseWeekday(dk);
+  const dateDisplay = formatDateChinese(dk);
+  const lunar = solarToLunar(
+    parseInt(dk.slice(0,4)), parseInt(dk.slice(5,7))-1, parseInt(dk.slice(8,10))
+  );
+  const memorials = getMemorialsForDate(dk);
 
-  const tasks = getTasks(dateKeyStr);
-  const stats = getTaskStats(dateKeyStr);
-  const weekday = getChineseWeekday(dateKeyStr);
-  const dateDisplay = formatDateChinese(dateKeyStr);
+  let html = `<div class="panel-date">
+    📅 ${dateDisplay} <small>${weekday} · 农历${lunar.monthName}${lunar.dayName || lunar.lunarDay}</small>
+  </div>`;
 
-  let html = `
-    <div class="panel-date">
-      📅 ${dateDisplay}
-      <small>${weekday}</small>
+  // 当天纪念日（点击弹出管理窗口）
+  if (memorials.length > 0) {
+    html += '<div class="memorial-section"><h4>📌 今日纪念日</h4>';
+    for (const mem of memorials) {
+      const icon = MEMORIAL_ICONS[mem.type] || '📌';
+      let countLabel = '';
+      if (mem.type === 'countup' || mem.type === 'countdown') {
+        const origDate = new Date((mem.originalYear||2024)+'-'+
+          String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00');
+        const todayDate = new Date(getTodayKey()+'T00:00:00');
+        const diff = Math.floor((todayDate - origDate) / 86400000);
+        if (mem.type === 'countup') {
+          countLabel = diff >= 0 ? ` 至今 ${diff+1} 天` : ` 还有 ${Math.abs(diff)} 天`;
+        } else {
+          countLabel = diff >= 0 ? ` 已过 ${diff} 天` : ` 还有 ${Math.abs(diff)} 天`;
+        }
+      }
+      html += `<div class="memorial-item memorial-clickable" data-memorial-id="${mem.id}" title="点击管理纪念日">
+        <span class="memo-icon">${icon}</span> ${mem.name}<span class="memorial-countdown">${countLabel}</span>
+      </div>`;
+    }
+    html += '</div>';
+  }
+
+  // 添加任务
+  html += `<div class="add-task-row">
+    <input type="text" class="add-task-input" id="task-input" placeholder="📝 添加任务..." maxlength="120" autocomplete="off">
+    <div class="priority-select" id="priority-select">
+      <span class="priority-dot p0 selected" data-p="0" title="普通">○</span>
+      <span class="priority-dot p1" data-p="1" title="重要">⭐</span>
+      <span class="priority-dot p2" data-p="2" title="紧急">🔥</span>
+      <span class="priority-dot p3" data-p="3" title="重要且紧急">🚨</span>
     </div>
-    <form class="add-task-form" id="add-task-form">
-      <input type="text" class="add-task-input" id="task-input"
-             placeholder="📝 添加新任务..." maxlength="120" autocomplete="off">
-      <button type="submit" class="add-task-btn">添加</button>
-    </form>`;
+    <button class="add-task-btn" id="btn-add-task">添加</button>
+  </div>`;
 
+  // 任务列表
   if (tasks.length === 0) {
-    const isToday = dateKeyStr === getTodayKey();
-    html += `<div class="panel-empty">
-      <span class="emoji">${isToday ? '🎉' : '📋'}</span>
-      ${isToday ? '今天没有安排，享受自由时光~' : '这一天还没有任务，点击添加一个吧~'}
-    </div>`;
+    html += `<div class="panel-empty"><span class="emoji">${dk===getTodayKey()?'🎉':'📋'}</span>${dk===getTodayKey()?'今天没有安排，享受自由时光~':'还没有任务，添加一个吧~'}</div>`;
   } else {
     html += '<div class="task-list">';
-    // 未完成的在前
-    const sorted = [...tasks].sort((a, b) => {
+    const sorted = [...tasks].sort((a,b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
-      return b.createdAt.localeCompare(a.createdAt);
+      return (b.priority||0) - (a.priority||0) || b.createdAt.localeCompare(a.createdAt);
     });
     for (const task of sorted) {
+      const prio = task.priority || 0;
+      const todayDk = getTodayKey();
+      const daysLeft = (prio >= 3 && dk >= todayDk)
+        ? Math.ceil((new Date(dk+'T00:00:00') - new Date(todayDk+'T00:00:00')) / 86400000)
+        : null;
       const doneCls = task.done ? ' done' : '';
-      html += `
-        <div class="task-item${doneCls}" data-task-id="${task.id}">
-          <input type="checkbox" class="task-checkbox" ${task.done ? 'checked' : ''}>
-          <span class="task-text">${task.text}</span>
-          <button class="task-delete" title="删除">🗑</button>
-        </div>`;
+      html += `<div class="task-item p${prio}${doneCls}" data-task-id="${task.id}">
+        <input type="checkbox" class="task-checkbox" ${task.done?'checked':''}>
+        <span class="task-text">${task.text}</span>
+        ${prio > 0 ? `<span class="task-priority-badge" style="background:${PRIORITY_COLORS[prio]}20;color:${PRIORITY_COLORS[prio]}">${PRIORITY_LABELS[prio]}</span>` : ''}
+        ${daysLeft !== null && daysLeft >= 0 ? `<span class="task-countdown">⚠️${daysLeft}天</span>` : ''}
+        <button class="task-delete" title="删除">🗑</button>
+      </div>`;
     }
     html += '</div>';
   }
 
   // 进度条
   if (tasks.length > 0) {
-    const pct = stats.total > 0 ? Math.round((stats.done / stats.total) * 100) : 0;
-    html += `
-      <div class="progress-section">
-        <div class="progress-text">
-          ${stats.done === stats.total ? '🎊 全部完成！' : `已完成 ${stats.done}/${stats.total}`}
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:${pct}%"></div>
-        </div>
+    const pct = stats.total > 0 ? Math.round(stats.done / stats.total * 100) : 0;
+    html += `<div class="progress-section">
+      <div class="progress-text">${stats.done===stats.total?'🎊 全部完成！':`已完成 ${stats.done}/${stats.total}`}</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>`;
+  }
+
+  // 心情（可点击弹出选择）
+  const todayMood = state.moods[dk] || '';
+  html += `<div class="mood-section">
+    <h4>😊 今天心情</h4>
+    <div class="memorial-clickable" id="mood-label" style="text-align:center;font-size:2rem;padding:6px;">${todayMood || '⋯'}</div>
+  </div>`;
+
+  // 每日总结
+  const todayJournal = state.journals[dk] || '';
+  html += '<div class="journal-section"><h4>📝 今日总结</h4>';
+  html += `<textarea class="journal-textarea" id="journal-textarea" placeholder="今天发生了什么？有什么感悟...">${todayJournal}</textarea>`;
+  html += '<div class="journal-save-hint">输入后自动保存</div>';
+  html += '</div>';
+
+  // 添加纪念日
+  html += '<div class="memorial-section">';
+  html += '<button class="btn-add-memorial" id="btn-add-memorial" style="width:100%;">＋ 添加纪念日</button>';
+  html += '</div>';
+
+  // 即将到来的纪念日
+  const upcoming = getUpcomingMemorials(5);
+  if (upcoming.length > 0) {
+    html += '<div class="memorial-section"><h4>⏳ 即将到来</h4>';
+    for (const u of upcoming) {
+      const icon = MEMORIAL_ICONS[u.type] || '📌';
+      html += `<div class="memorial-item">
+        <span class="memo-icon">${icon}</span> ${u.name}
+        <span class="memorial-countdown">${u.daysUntil === 0 ? '🎉今天!' : `还有${u.daysUntil}天`}</span>
       </div>`;
+    }
+    html += '</div>';
+  }
+
+  // 紧急重要任务倒计时
+  const urgentTasks = [];
+  const todayDk = getTodayKey();
+  for (let d = 0; d <= 7; d++) {
+    const checkD = new Date(new Date(todayDk+'T00:00:00').getTime() + d * 86400000);
+    const ck = dateKey(checkD.getFullYear(), checkD.getMonth(), checkD.getDate());
+    const tks = (state.tasksByDate[ck] || []).filter(t => !t.done && (t.priority||0) >= 3);
+    for (const t of tks) urgentTasks.push({ ...t, dateKey: ck, daysLeft: d });
+  }
+  if (urgentTasks.length > 0) {
+    html += '<div class="memorial-section"><h4>🚨 紧急重要</h4>';
+    for (const ut of urgentTasks.slice(0,5)) {
+      html += `<div class="memorial-item">
+        <span>🚨</span> ${ut.text}
+        <span class="memorial-countdown">${ut.daysLeft===0?'⚠️今天!':`还有${ut.daysLeft}天`}</span>
+      </div>`;
+    }
+    html += '</div>';
   }
 
   // 同步按钮
-  html += `
-    <div class="sync-section">
-      <button class="sync-btn" id="btn-export" title="导出备份文件">📤 导出备份</button>
-      <button class="sync-btn" id="btn-import" title="从备份文件导入">📥 导入备份</button>
-    </div>
-    <div class="sync-hint">导出后发到另一台设备导入即可同步</div>`;
+  html += `<div class="sync-section">
+    <button class="sync-btn" id="btn-export">📤 导出备份</button>
+    <button class="sync-btn" id="btn-import">📥 导入备份</button>
+  </div>
+  <div class="sync-hint">导出后发到另一台设备导入即可同步</div>`;
 
   sidePanel.innerHTML = html;
 
-  // 聚焦输入框
+  // 绑定事件
   const input = document.getElementById('task-input');
   if (input) {
     input.focus();
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAddTask(e); });
   }
-  // 绑定导入导出事件
+  const addBtn = document.getElementById('btn-add-task');
+  if (addBtn) addBtn.addEventListener('click', handleAddTask);
   const btnExport = document.getElementById('btn-export');
   const btnImport = document.getElementById('btn-import');
   if (btnExport) btnExport.addEventListener('click', handleExport);
   if (btnImport) btnImport.addEventListener('click', handleImport);
-}
-
-// ==================== 撒花动画 ====================
-function showCelebration() {
-  const count = 30;
-  const fragment = document.createDocumentFragment();
-  for (let i = 0; i < count; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'celebration-particle';
-    const size = Math.random() * 10 + 6;
-    const color = DOT_COLORS[Math.floor(Math.random() * DOT_COLORS.length)];
-    const angle = Math.random() * Math.PI * 2;
-    const distance = Math.random() * 200 + 100;
-    const dx = Math.cos(angle) * distance;
-    const dy = Math.sin(angle) * distance - 100; // 偏上
-    const rot = (Math.random() - 0.5) * 720;
-    const delay = Math.random() * 0.3;
-
-    particle.style.cssText = `
-      width: ${size}px; height: ${size}px;
-      background: ${color};
-      top: 50%; left: 50%;
-      --dx: ${dx}px; --dy: ${dy}px; --rot: ${rot}deg;
-      animation-delay: ${delay}s;
-      animation-duration: ${0.9 + Math.random() * 0.6}s;
-    `;
-    fragment.appendChild(particle);
+  const btnMemorial = document.getElementById('btn-add-memorial');
+  if (btnMemorial) btnMemorial.addEventListener('click', () => showMemorialForm(dk));
+  // 优先级选择
+  document.querySelectorAll('.priority-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      document.querySelectorAll('.priority-dot').forEach(d => d.classList.remove('selected'));
+      dot.classList.add('selected');
+      state.priorityFilter = parseInt(dot.dataset.p);
+    });
+  });
+  // 心情标签点击 → 弹出选择窗口
+  const moodLabel = document.getElementById('mood-label');
+  if (moodLabel) {
+    moodLabel.addEventListener('click', () => showMoodPopup(dk));
   }
-  document.body.appendChild(fragment);
-
-  // 动画结束后清理
-  setTimeout(() => {
-    const particles = document.querySelectorAll('.celebration-particle');
-    particles.forEach(p => p.remove());
-  }, 1600);
+  // 每日总结（自动保存）
+  const journalTA = document.getElementById('journal-textarea');
+  if (journalTA) {
+    let journalTimer;
+    journalTA.addEventListener('input', () => {
+      clearTimeout(journalTimer);
+      journalTimer = setTimeout(() => {
+        const val = journalTA.value.trim();
+        if (val) {
+          state.journals[dk] = val;
+        } else {
+          delete state.journals[dk];
+        }
+        saveState();
+      }, 600); // 600ms 防抖
+    });
+  }
 }
 
-// ==================== 导入 / 导出 ====================
+// ==================== 年月选择器 ====================
+function renderYearPicker() {
+  const startY = state.currentYear - 6;
+  let html = '<h3>选择年份</h3><div class="picker-year-row">';
+  html += `<button id="year-decade-down">«</button>`;
+  html += `<input type="number" id="year-input" value="${state.currentYear}" min="1900" max="2100">`;
+  html += `<button id="year-decade-up">»</button>`;
+  html += '</div><button class="picker-close" id="year-picker-close">关闭</button>';
+  yearPickerPopup.innerHTML = html;
+  document.getElementById('year-input').addEventListener('change', (e) => {
+    jumpToYearMonth(parseInt(e.target.value), state.currentMonth);
+    yearPickerOverlay.classList.remove('show');
+  });
+  document.getElementById('year-decade-down').addEventListener('click', () => {
+    document.getElementById('year-input').value = Math.max(1900, state.currentYear - 10);
+  });
+  document.getElementById('year-decade-up').addEventListener('click', () => {
+    document.getElementById('year-input').value = Math.min(2100, state.currentYear + 10);
+  });
+  document.getElementById('year-picker-close').addEventListener('click', () => {
+    yearPickerOverlay.classList.remove('show');
+  });
+}
+function renderMonthPicker() {
+  let html = '<h3>选择月份</h3><div class="picker-grid">';
+  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  for (let i = 0; i < 12; i++) {
+    const active = i === state.currentMonth ? ' active' : '';
+    html += `<div class="picker-item${active}" data-month="${i}">${monthNames[i]}</div>`;
+  }
+  html += '</div><button class="picker-close" id="month-picker-close">关闭</button>';
+  monthPickerPopup.innerHTML = html;
+  monthPickerPopup.querySelectorAll('.picker-item').forEach(item => {
+    item.addEventListener('click', () => {
+      jumpToYearMonth(state.currentYear, parseInt(item.dataset.month));
+      monthPickerOverlay.classList.remove('show');
+    });
+  });
+  document.getElementById('month-picker-close').addEventListener('click', () => {
+    monthPickerOverlay.classList.remove('show');
+  });
+}
+function jumpToYearMonth(y, m) {
+  state.currentYear = y;
+  state.currentMonth = m;
+  // 保持选中日期在同一天（如果该月有此日期）
+  if (state.selectedDate) {
+    const [_, sm, sd] = state.selectedDate.split('-').map(Number);
+    const maxDay = daysInMonth(y, m);
+    const day = Math.min(sd, maxDay);
+    state.selectedDate = dateKey(y, m, day);
+  }
+  renderApp();
+}
+
+// ==================== 纪念日详情弹窗 ====================
+function showMemorialDetailPopup(mem) {
+  const icon = MEMORIAL_ICONS[mem.type] || '📌';
+  const calLabel = mem.calendar === 'lunar' ? '农历' : '阳历';
+  const repeatLabels = { yearly:'每年', once:'仅一次', weekly:'每周', monthly:'每月' };
+  let html = '<h3>📌 纪念日详情</h3>';
+  html += `<div style="text-align:center;font-size:2rem;margin:8px 0;">${icon}</div>`;
+  html += `<div style="text-align:center;font-size:1.2rem;font-weight:700;">${mem.name}</div>`;
+  html += `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">${MEMORIAL_TYPES[mem.type]} · ${calLabel} · ${repeatLabels[mem.repeat]||mem.repeat}</div>`;
+  // 正数/倒数日详细信息
+  if (mem.type === 'countup' || mem.type === 'countdown') {
+    const origDate = new Date((mem.originalYear||2024)+'-'+
+      String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00');
+    const todayDate = new Date(getTodayKey()+'T00:00:00');
+    const diff = Math.floor((todayDate - origDate) / 86400000);
+    const origStr = `${mem.originalYear||2024}年${mem.month||1}月${mem.day||1}日`;
+    if (mem.type === 'countup') {
+      html += `<div style="text-align:center;font-size:1.1rem;color:var(--mint);margin:8px 0;">自 ${origStr} 起<br>至今已 <b>${diff >= 0 ? diff + 1 : Math.abs(diff)}</b> 天</div>`;
+    } else {
+      html += `<div style="text-align:center;font-size:1.1rem;color:#E74C3C;margin:8px 0;">距离 ${origStr}<br>还有 <b>${diff >= 0 ? diff : Math.abs(diff)}</b> 天</div>`;
+    }
+  }
+  html += '<div class="btn-row" style="justify-content:center;margin-top:12px;">';
+  html += '<button class="btn-save" id="popup-edit-mem">✎ 编辑</button>';
+  html += '<button class="btn-delete-memorial" id="popup-del-mem">🗑 删除</button>';
+  html += '<button class="btn-cancel" id="popup-close-mem">关闭</button>';
+  html += '</div>';
+  memorialModalBox.innerHTML = html;
+  memorialModal.classList.add('show');
+  document.getElementById('popup-close-mem').addEventListener('click', () => memorialModal.classList.remove('show'));
+  document.getElementById('popup-edit-mem').addEventListener('click', () => {
+    memorialModal.classList.remove('show');
+    const dk = dateKey(state.currentYear, state.currentMonth, 1);
+    showMemorialForm(dk, mem);
+  });
+  document.getElementById('popup-del-mem').addEventListener('click', () => {
+    if (confirm(`确定删除纪念日「${mem.name}」？`)) {
+      state.memorials = state.memorials.filter(m => m.id !== mem.id);
+      saveState();
+      memorialModal.classList.remove('show');
+      renderApp();
+    }
+  });
+}
+
+// ==================== 心情弹窗 ====================
+function showMoodPopup(dk) {
+  const todayMood = state.moods[dk] || '';
+  let html = '<h3>😊 选择今天心情</h3>';
+  html += '<div class="mood-grid" style="justify-content:center;">';
+  for (const emoji of MOOD_EMOJIS) {
+    html += `<button class="mood-btn${todayMood===emoji?' selected':''}" data-mood="${emoji}" title="${emoji}">${emoji}</button>`;
+  }
+  html += '</div>';
+  html += '<div style="text-align:center;margin-top:10px;">';
+  html += '<button class="btn-cancel" id="mood-clear">清除</button>';
+  html += '<button class="btn-cancel" id="mood-close" style="margin-left:6px;">关闭</button>';
+  html += '</div>';
+  memorialModalBox.innerHTML = html;
+  memorialModal.classList.add('show');
+
+  document.querySelectorAll('#memorial-modal-box .mood-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mood = btn.dataset.mood;
+      if (state.moods[dk] === mood) {
+        delete state.moods[dk];
+      } else {
+        state.moods[dk] = mood;
+      }
+      saveState();
+      memorialModal.classList.remove('show');
+      renderApp();
+    });
+  });
+  document.getElementById('mood-clear').addEventListener('click', () => {
+    delete state.moods[dk];
+    saveState();
+    memorialModal.classList.remove('show');
+    renderApp();
+  });
+  document.getElementById('mood-close').addEventListener('click', () => {
+    memorialModal.classList.remove('show');
+  });
+}
+
+// ==================== 纪念日表单 ====================
+let editingMemorialId = null;
+function showMemorialForm(dk, editMemorial) {
+  editingMemorialId = editMemorial ? editMemorial.id : null;
+  const [y, mm, d] = dk.split('-').map(Number);
+  const lunar = solarToLunar(y, mm - 1, d);
+  let html = `<h3>${editMemorial ? '编辑纪念日' : '添加纪念日'}</h3>`;
+  html += '<label>类型</label><select id="mem-type">';
+  for (const [k, v] of Object.entries(MEMORIAL_TYPES)) {
+    html += `<option value="${k}" ${editMemorial && editMemorial.type===k?'selected':''}>${v}</option>`;
+  }
+  html += '</select>';
+  html += `<label>名称</label><input type="text" id="mem-name" value="${editMemorial?editMemorial.name:''}" placeholder="如：妈妈生日">`;
+  html += '<label>日历</label><select id="mem-calendar">';
+  html += `<option value="solar" ${editMemorial && editMemorial.calendar==='solar'?'selected':''}>阳历（公历）</option>`;
+  html += `<option value="lunar" ${editMemorial && editMemorial.calendar==='lunar'?'selected':''}>阴历（农历）</option>`;
+  html += '</select>';
+  html += '<div id="mem-solar-fields">';
+  html += `<label>日期</label><input type="date" id="mem-solar-date" value="${dk}">`;
+  html += '</div>';
+  html += '<div id="mem-lunar-fields" style="display:none">';
+  html += `<label>农历月</label><select id="mem-lunar-month">`;
+  for (let i = 0; i < 12; i++) {
+    html += `<option value="${i}" ${editMemorial && editMemorial.lunarMonth===i?'selected':''} ${lunar.lunarMonth-1===i?'selected':''}>${LUNAR_MONTHS[i]}月</option>`;
+  }
+  html += '</select>';
+  html += `<label>农历日</label><select id="mem-lunar-day">`;
+  for (let i = 1; i <= 30; i++) {
+    html += `<option value="${i}" ${editMemorial && editMemorial.lunarDay===i?'selected':''} ${lunar.lunarDay===i?'selected':''}>${LUNAR_DAYS[i]||i}</option>`;
+  }
+  html += '</select>';
+  html += `<label><input type="checkbox" id="mem-lunar-isleap" ${editMemorial && editMemorial.lunarIsLeap?'checked':''}> 闰月</label>`;
+  html += '</div>';
+  html += '<label>重复</label><select id="mem-repeat">';
+  html += `<option value="yearly" ${editMemorial && editMemorial.repeat==='yearly'?'selected':''}>每年</option>`;
+  html += `<option value="monthly" ${editMemorial && editMemorial.repeat==='monthly'?'selected':''}>每月</option>`;
+  html += `<option value="weekly" ${editMemorial && editMemorial.repeat==='weekly'?'selected':''}>每周</option>`;
+  html += `<option value="once" ${editMemorial && editMemorial.repeat==='once'?'selected':''}>仅一次</option>`;
+  html += '</select>';
+  html += '<div class="btn-row">';
+  if (editMemorial) html += '<button class="btn-delete-memorial" id="btn-delete-memorial">删除</button>';
+  html += '<button class="btn-cancel" id="btn-memorial-cancel">取消</button>';
+  html += '<button class="btn-save" id="btn-memorial-save">保存</button>';
+  html += '</div>';
+  memorialModalBox.innerHTML = html;
+  memorialModal.classList.add('show');
+
+  // 切换阳历/阴历
+  document.getElementById('mem-calendar').addEventListener('change', (e) => {
+    document.getElementById('mem-solar-fields').style.display = e.target.value === 'solar' ? 'block' : 'none';
+    document.getElementById('mem-lunar-fields').style.display = e.target.value === 'lunar' ? 'block' : 'none';
+  });
+  document.getElementById('btn-memorial-cancel').addEventListener('click', () => {
+    memorialModal.classList.remove('show');
+  });
+  document.getElementById('btn-memorial-save').addEventListener('click', () => {
+    const calendar = document.getElementById('mem-calendar').value;
+    const name = sanitize(document.getElementById('mem-name').value);
+    if (!name) { alert('请输入纪念日名称'); return; }
+    const mem = {
+      id: editingMemorialId || generateId(),
+      type: document.getElementById('mem-type').value,
+      name,
+      calendar,
+      repeat: document.getElementById('mem-repeat').value,
+      originalYear: parseInt(dk.slice(0,4))
+    };
+    if (calendar === 'solar') {
+      const sd = document.getElementById('mem-solar-date').value;
+      const [sy, sm, sd2] = sd.split('-').map(Number);
+      mem.month = sm; mem.day = sd2;
+      mem.originalYear = sy;
+    } else {
+      mem.lunarMonth = parseInt(document.getElementById('mem-lunar-month').value);
+      mem.lunarDay = parseInt(document.getElementById('mem-lunar-day').value);
+      mem.lunarIsLeap = document.getElementById('mem-lunar-isleap').checked;
+    }
+    if (editingMemorialId) {
+      state.memorials = state.memorials.filter(m => m.id !== editingMemorialId);
+    }
+    state.memorials.push(mem);
+    saveState();
+    memorialModal.classList.remove('show');
+    renderApp();
+  });
+  if (editMemorial) {
+    document.getElementById('btn-delete-memorial').addEventListener('click', () => {
+      if (confirm(`确定删除纪念日「${editMemorial.name}」？`)) {
+        state.memorials = state.memorials.filter(m => m.id !== editingMemorialId);
+        saveState();
+        memorialModal.classList.remove('show');
+        renderApp();
+      }
+    });
+  }
+}
+
+// ==================== 导入/导出 ====================
 function handleExport() {
-  const data = { version: 1, tasks: state.tasksByDate, exportedAt: new Date().toISOString() };
+  const data = { version: 3, tasks: state.tasksByDate, memorials: state.memorials, moods: state.moods, journals: state.journals, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = `dopamine-backup-${getTodayKey()}.json`;
-  a.click();
+  a.href = url; a.download = `dopamine-backup-${getTodayKey()}.json`; a.click();
   URL.revokeObjectURL(url);
-  // 短暂反馈
   const btn = document.getElementById('btn-export');
-  if (btn) { const orig = btn.textContent; btn.textContent = '✅ 已导出'; setTimeout(() => { btn.textContent = orig; }, 1500); }
+  if (btn) { const o = btn.textContent; btn.textContent = '✅ 已导出'; setTimeout(() => { btn.textContent = o; }, 1500); }
 }
-
 function handleImport() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
   input.onchange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = (re) => {
       try {
         const data = JSON.parse(re.target.result);
-        if (!data.tasks || typeof data.tasks !== 'object') throw new Error('Invalid format');
-        // 合并：导入的任务覆盖同日期，保留其他日期
-        const merged = { ...state.tasksByDate };
-        for (const [date, tasks] of Object.entries(data.tasks)) {
-          if (Array.isArray(tasks)) merged[date] = tasks;
+        if (data.tasks) state.tasksByDate = { ...state.tasksByDate, ...data.tasks };
+        if (data.memorials) {
+          const existingIds = new Set(state.memorials.map(m => m.id));
+          for (const m of data.memorials) {
+            if (!existingIds.has(m.id)) state.memorials.push(m);
+          }
         }
-        state.tasksByDate = merged;
-        saveState();
-        renderApp();
+        if (data.moods) state.moods = { ...state.moods, ...data.moods };
+        if (data.journals) state.journals = { ...state.journals, ...data.journals };
+        saveState(); renderApp();
         const btn = document.getElementById('btn-import');
-        if (btn) { const orig = btn.textContent; btn.textContent = '✅ 已导入'; setTimeout(() => { btn.textContent = orig; }, 1500); }
-      } catch (err) {
-        alert('导入失败：文件格式不正确，请选择通过"导出备份"生成的 .json 文件');
-      }
+        if (btn) { const o = btn.textContent; btn.textContent = '✅ 已导入'; setTimeout(() => { btn.textContent = o; }, 1500); }
+      } catch(err) { alert('导入失败：文件格式不正确'); }
     };
     reader.readAsText(file);
   };
   input.click();
 }
 
+// ==================== 撒花 ====================
+function showCelebration() {
+  const count = 30; const f = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div'); p.className = 'celebration-particle';
+    const s = Math.random()*10+6; const c = DOT_COLORS[Math.floor(Math.random()*DOT_COLORS.length)];
+    const a = Math.random()*Math.PI*2; const d = Math.random()*200+100;
+    p.style.cssText = `width:${s}px;height:${s}px;background:${c};top:50%;left:50%;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-100}px;--rot:${(Math.random()-0.5)*720}deg;animation-delay:${Math.random()*0.3}s;animation-duration:${0.9+Math.random()*0.6}s;`;
+    f.appendChild(p);
+  }
+  document.body.appendChild(f);
+  setTimeout(() => document.querySelectorAll('.celebration-particle').forEach(p => p.remove()), 1600);
+}
+
 // ==================== 事件处理 ====================
 function handleHeaderClick(action) {
   if (action === 'prev') {
-    if (state.currentMonth === 0) {
-      state.currentYear--;
-      state.currentMonth = 11;
-    } else {
-      state.currentMonth--;
-    }
+    if (state.currentMonth === 0) { state.currentYear--; state.currentMonth = 11; }
+    else state.currentMonth--;
   } else if (action === 'next') {
-    if (state.currentMonth === 11) {
-      state.currentYear++;
-      state.currentMonth = 0;
-    } else {
-      state.currentMonth++;
-    }
+    if (state.currentMonth === 11) { state.currentYear++; state.currentMonth = 0; }
+    else state.currentMonth++;
   } else if (action === 'today') {
     const now = new Date();
     state.currentYear = now.getFullYear();
@@ -819,40 +1240,32 @@ function handleHeaderClick(action) {
   }
   renderApp();
 }
-
 function handleCalendarClick(dateKeyStr, cellEl) {
-  // 如果点击的是非当月日期，先跳转月份
   if (cellEl && cellEl.classList.contains('other-month')) {
-    const [y, m] = dateKeyStr.split('-').map(Number);
-    state.currentYear = y;
-    state.currentMonth = m - 1;
+    const [y,m] = dateKeyStr.split('-').map(Number);
+    state.currentYear = y; state.currentMonth = m - 1;
   }
   state.selectedDate = dateKeyStr;
+  state.priorityFilter = null;
   renderApp();
 }
-
 function handleAddTask(e) {
   e.preventDefault();
   const input = document.getElementById('task-input');
   if (!input) return;
   const text = input.value;
-  if (addTask(state.selectedDate, text)) {
-    input.value = '';
+  const priority = state.priorityFilter || 0;
+  if (addTask(state.selectedDate, text, priority)) {
+    input.value = ''; state.priorityFilter = null;
     renderApp();
-    // 重新聚焦
-    setTimeout(() => {
-      const newInput = document.getElementById('task-input');
-      if (newInput) newInput.focus();
-    }, 20);
+    setTimeout(() => { const ni = document.getElementById('task-input'); if (ni) ni.focus(); }, 20);
   }
 }
-
 function handleToggleTask(taskId) {
   if (!state.selectedDate) return;
   toggleTask(state.selectedDate, taskId);
   renderApp();
 }
-
 function handleDeleteTask(taskId) {
   if (!state.selectedDate) return;
   deleteTask(state.selectedDate, taskId);
@@ -861,64 +1274,121 @@ function handleDeleteTask(taskId) {
 
 // 事件委托
 appEl.addEventListener('click', (e) => {
-  // 头部按钮
   const actionBtn = e.target.closest('[data-action]');
-  if (actionBtn) {
-    handleHeaderClick(actionBtn.dataset.action);
-    return;
-  }
-  // 日历格子
+  if (actionBtn) { handleHeaderClick(actionBtn.dataset.action); return; }
   const cell = e.target.closest('.calendar-cell');
-  if (cell) {
-    handleCalendarClick(cell.dataset.date, cell);
+  if (cell) { handleCalendarClick(cell.dataset.date, cell); return; }
+  const memClickable = e.target.closest('.memorial-clickable');
+  if (memClickable) {
+    const memId = memClickable.dataset.memorialId;
+    const mem = state.memorials.find(m => m.id === memId);
+    if (mem) showMemorialDetailPopup(mem);
     return;
   }
-  // 任务删除按钮
   const deleteBtn = e.target.closest('.task-delete');
   if (deleteBtn) {
     const taskItem = deleteBtn.closest('.task-item');
     if (taskItem) handleDeleteTask(taskItem.dataset.taskId);
     return;
   }
+  // 年月选择器
+  if (e.target === yearText) { yearPickerOverlay.classList.add('show'); return; }
+  if (e.target === monthText) { monthPickerOverlay.classList.add('show'); return; }
+  if (e.target === yearPickerOverlay) { yearPickerOverlay.classList.remove('show'); return; }
+  if (e.target === monthPickerOverlay) { monthPickerOverlay.classList.remove('show'); return; }
+  if (e.target === memorialModal) { memorialModal.classList.remove('show'); return; }
 });
-
 appEl.addEventListener('change', (e) => {
-  const checkbox = e.target.closest('.task-checkbox');
-  if (checkbox) {
-    const taskItem = checkbox.closest('.task-item');
+  const cb = e.target.closest('.task-checkbox');
+  if (cb) {
+    const taskItem = cb.closest('.task-item');
     if (taskItem) handleToggleTask(taskItem.dataset.taskId);
   }
 });
-
-appEl.addEventListener('submit', (e) => {
-  const form = e.target.closest('#add-task-form');
-  if (form) handleAddTask(e);
-});
-
 // 键盘快捷键
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' && e.ctrlKey) {
-    e.preventDefault();
-    handleHeaderClick('prev');
-  } else if (e.key === 'ArrowRight' && e.ctrlKey) {
-    e.preventDefault();
-    handleHeaderClick('next');
-  } else if (e.key === 't' && e.ctrlKey) {
-    e.preventDefault();
-    handleHeaderClick('today');
-  }
+  if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('prev'); }
+  else if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('next'); }
+  else if (e.key === 't' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('today'); }
 });
 
 // ==================== 初始化 ====================
+function showReminderPopup() {
+  const today = getTodayKey();
+
+  // 检查是否今日已关闭
+  if (localStorage.getItem('dopaminePopupDismissed') === today) return;
+
+  // 收集纪念日提醒（7天内）
+  const upcoming = getUpcomingMemorials(30);
+  const memAlerts = upcoming.filter(u => u.daysUntil > 0 && u.daysUntil <= 7);
+
+  // 收集紧急重要任务提醒（5天内）
+  const taskAlerts = [];
+  for (let d = 0; d <= 5; d++) {
+    const checkD = new Date(new Date(today+'T00:00:00').getTime() + d * 86400000);
+    const ck = dateKey(checkD.getFullYear(), checkD.getMonth(), checkD.getDate());
+    const tks = (state.tasksByDate[ck] || []).filter(t => !t.done && (t.priority||0) >= 3);
+    for (const t of tks) taskAlerts.push({ text: t.text, dateKey: ck, daysLeft: d });
+  }
+
+  if (memAlerts.length === 0 && taskAlerts.length === 0) return;
+
+  let msg = '<h3>⏰ 今日提醒</h3><div style="text-align:left;max-height:220px;overflow-y:auto;">';
+
+  if (memAlerts.length > 0) {
+    msg += '<div style="font-weight:600;color:var(--mint);margin:4px 0;">📌 纪念日</div>';
+    for (const a of memAlerts) {
+      const icon = MEMORIAL_ICONS[a.type] || '📌';
+      const cls = a.daysUntil <= 3 ? 'color:#E74C3C;' : '';
+      msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;${cls}">
+        ${icon} <b>${a.name}</b> — ${a.daysUntil}天后
+        ${a.daysUntil <= 3 ? '🔔' : ''}
+      </div>`;
+    }
+  }
+
+  if (taskAlerts.length > 0) {
+    msg += '<div style="font-weight:600;color:#E74C3C;margin:8px 0 4px;">🚨 紧急重要任务</div>';
+    for (const t of taskAlerts) {
+      msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;color:#E74C3C;">
+        🚨 <b>${t.text}</b> — ${t.daysLeft === 0 ? '今天!' : t.daysLeft + '天后'}
+      </div>`;
+    }
+  }
+
+  msg += '</div>';
+  msg += '<div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;">';
+  msg += '<label style="font-size:0.8rem;color:var(--text-muted);cursor:pointer;">';
+  msg += '<input type="checkbox" id="popup-dismiss-today" style="margin-right:4px;">今日不再提醒</label>';
+  msg += '<button class="picker-close" id="popup-close" style="margin:0;">关闭</button>';
+  msg += '</div>';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'picker-overlay show';
+  overlay.id = 'reminder-popup-overlay';
+  overlay.innerHTML = `<div class="picker-popup" style="max-width:400px;">${msg}</div>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay || e.target.id === 'popup-close') {
+      if (document.getElementById('popup-dismiss-today')?.checked) {
+        localStorage.setItem('dopaminePopupDismissed', today);
+      }
+      overlay.remove();
+    }
+  });
+}
+
 function init() {
   loadState();
   renderApp();
-  // 注册 Service Worker (PWA 离线支持)
+  // 倒计时弹窗（延迟显示，等页面渲染完）
+  setTimeout(showReminderPopup, 500);
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }
-
 init();
 </script>
 </body>
