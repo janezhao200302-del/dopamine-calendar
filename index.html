@@ -30,9 +30,9 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
-  background: var(--bg-page); color: var(--text-primary); min-height: 100vh; overflow-x: hidden;
+  background: var(--bg-page); color: var(--text-primary); min-height: 100dvh; overflow-x: hidden;
 }
-.app-container { display: flex; flex-direction: column; height: 100vh; max-width: 1200px; margin: 0 auto; }
+.app-container { display: flex; flex-direction: column; min-height: 100dvh; max-width: 1200px; margin: 0 auto; }
 .main-content { display: flex; flex: 1; overflow: hidden; }
 
 /* ============ 头部 ============ */
@@ -215,12 +215,12 @@ body {
 
 /* 响应式 */
 @media (max-width: 768px) {
-  .main-content { flex-direction: column; }
-  .calendar-panel { flex: none; padding: 8px 6px; }
+  .main-content { flex-direction: column; overflow: visible; }
+  .calendar-panel { flex: none; padding: 8px 6px; overflow: visible; }
   .calendar-cell { min-height: 40px; padding: 2px 1px; border-radius: 6px; }
   .day-num { font-size: 0.75rem; }
   .lunar-text { font-size: 0.55rem; }
-  .side-panel { flex: none; border-left: none; border-top: 1px solid var(--border); min-width: auto; }
+  .side-panel { flex: none; border-left: none; border-top: 1px solid var(--border); min-width: auto; overflow: visible; }
   .header { padding: 8px 10px; gap: 6px; }
   .year-text, .month-text { font-size: 1.1rem; }
 }
@@ -234,6 +234,7 @@ body {
     <span class="month-text" id="month-text">6月</span>
     <button class="nav-btn" data-action="next" title="下一月">▶</button>
     <button class="today-btn" data-action="today">✨ 今天</button>
+    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);">👤</button>
   </header>
   <div class="main-content">
     <section class="calendar-panel" id="calendar-panel"></section>
@@ -243,8 +244,87 @@ body {
 <div class="picker-overlay" id="year-picker-overlay"><div class="picker-popup" id="year-picker-popup"></div></div>
 <div class="picker-overlay" id="month-picker-overlay"><div class="picker-popup" id="month-picker-popup"></div></div>
 <div class="modal-overlay" id="memorial-modal"><div class="modal-box" id="memorial-modal-box"></div></div>
+<div class="modal-overlay" id="login-modal"><div class="modal-box" id="login-modal-box"></div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ==================== Supabase 云同步 ====================
+const SUPABASE_URL = 'https://futrwpbrnuxwhqvxsnxb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_C4jFxMZExcjBEOtIbV2nTg_Hoyrsa1U';
+let supabase = null;
+let currentUser = null;
+let syncChannel = null;
+
+function initSupabase() {
+  if (typeof supabase !== 'undefined' && window.supabase) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  }
+}
+
+async function loadCloudData() {
+  if (!supabase || !currentUser) return null;
+  const { data, error } = await supabase
+    .from('user_data').select('data').eq('user_id', currentUser.id).maybeSingle();
+  if (error) { console.warn('loadCloud:', error.message); return null; }
+  return data ? data.data : null;
+}
+
+async function saveCloudData(mergedData) {
+  if (!supabase || !currentUser) return;
+  const { error } = await supabase
+    .from('user_data')
+    .upsert({ user_id: currentUser.id, data: mergedData, updated_at: new Date() });
+  if (error) console.warn('saveCloud:', error.message);
+}
+
+function startRealtimeSync() {
+  if (!supabase || !currentUser) return;
+  if (syncChannel) syncChannel.unsubscribe();
+  syncChannel = supabase
+    .channel('data-sync')
+    .on('postgres_changes',
+      { event: '*', schema: 'public', table: 'user_data', filter: `user_id=eq.${currentUser.id}` },
+      async (payload) => {
+        const newData = payload.new?.data;
+        if (newData) {
+          const local = dumpState();
+          const merged = deepMerge(local, newData);
+          applyState(merged);
+          saveLocalState(merged);
+          renderApp();
+        }
+      }
+    )
+    .subscribe();
+}
+
+function deepMerge(local, remote) {
+  if (!remote) return local;
+  const result = { ...local };
+  for (const key of ['tasks','moods','journals']) {
+    if (remote[key]) result[key] = { ...local[key], ...remote[key] };
+  }
+  if (remote.memorials) {
+    const localIds = new Set((result.memorials||[]).map(m=>m.id));
+    result.memorials = [...(result.memorials||[])];
+    for (const m of remote.memorials) {
+      if (!localIds.has(m.id)) result.memorials.push(m);
+    }
+  }
+  return result;
+}
+
+function dumpState() {
+  return { tasks: state.tasksByDate, memorials: state.memorials, moods: state.moods, journals: state.journals };
+}
+
+function applyState(data) {
+  if (data.tasks) state.tasksByDate = data.tasks;
+  if (data.memorials) state.memorials = data.memorials;
+  if (data.moods) state.moods = data.moods;
+  if (data.journals) state.journals = data.journals;
+}
+
 // ==================== 常量 ====================
 const STORAGE_KEY = 'dopamineCalV3';
 const DOT_COLORS = ['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
@@ -291,30 +371,57 @@ function generateId() {
 }
 function sanitize(text) { return text.replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
 
-// ==================== 持久化 ====================
-function loadState() {
+// ==================== 持久化 (本地 + 云端) ====================
+function loadLocalState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const data = JSON.parse(raw);
-      if (data.tasks) state.tasksByDate = data.tasks;
-      if (data.memorials) state.memorials = data.memorials;
-      if (data.moods) state.moods = data.moods;
-      if (data.journals) state.journals = data.journals;
+      applyState(data);
     }
-  } catch(e) { console.warn('loadState failed', e); }
+  } catch(e) {}
+}
+
+function saveLocalState(data) {
+  try {
+    const d = data || dumpState();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, ...d }));
+  } catch(e) {}
+}
+
+async function loadState() {
   const now = new Date();
   state.currentYear = now.getFullYear();
   state.currentMonth = now.getMonth();
   state.selectedDate = getTodayKey();
+
+  if (currentUser) {
+    const cloudData = await loadCloudData();
+    if (cloudData) {
+      // 云端有数据 → 合并到本地
+      const local = dumpState();
+      const merged = deepMerge(local, cloudData);
+      applyState(merged);
+      saveLocalState(merged);
+      // 如果本地有云端没有的数据，上传
+      if (JSON.stringify(local) !== JSON.stringify(cloudData)) {
+        saveCloudData(merged);
+      }
+    } else {
+      // 云端空 → 上传本地数据
+      const local = dumpState();
+      saveCloudData(local);
+    }
+    startRealtimeSync();
+  } else {
+    loadLocalState();
+  }
 }
-function saveState() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      version: 3, tasks: state.tasksByDate, memorials: state.memorials,
-      moods: state.moods, journals: state.journals
-    }));
-  } catch(e) { console.warn('saveState failed', e); }
+
+async function saveState() {
+  const data = dumpState();
+  saveLocalState(data);
+  if (currentUser) await saveCloudData(data);
 }
 
 // ==================== 农历算法 ====================
@@ -1297,6 +1404,9 @@ appEl.addEventListener('click', (e) => {
   if (e.target === yearPickerOverlay) { yearPickerOverlay.classList.remove('show'); return; }
   if (e.target === monthPickerOverlay) { monthPickerOverlay.classList.remove('show'); return; }
   if (e.target === memorialModal) { memorialModal.classList.remove('show'); return; }
+  const loginModal = document.getElementById('login-modal');
+  if (loginModal && e.target === loginModal) { loginModal.classList.remove('show'); return; }
+  if (e.target.id === 'btn-login') { showLoginModal(); return; }
 });
 appEl.addEventListener('change', (e) => {
   const cb = e.target.closest('.task-checkbox');
@@ -1380,14 +1490,87 @@ function showReminderPopup() {
   });
 }
 
-function init() {
-  loadState();
-  renderApp();
-  // 倒计时弹窗（延迟显示，等页面渲染完）
-  setTimeout(showReminderPopup, 500);
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+// ==================== 登录 / 登出 ====================
+function showLoginModal() {
+  const box = document.getElementById('login-modal-box');
+  if (currentUser) {
+    box.innerHTML = `
+      <h3>👤 已登录</h3>
+      <div style="text-align:center;padding:8px;color:var(--text-muted);">${currentUser.email}</div>
+      <div style="text-align:center;margin-top:10px;">📱💻🖥 数据已开启云端同步</div>
+      <div class="btn-row" style="justify-content:center;margin-top:12px;">
+        <button class="btn-delete-memorial" id="btn-logout">退出登录</button>
+        <button class="btn-cancel" id="btn-login-close">关闭</button>
+      </div>`;
+    document.getElementById('login-modal').classList.add('show');
+    document.getElementById('btn-logout').addEventListener('click', async ()=>{
+      await supabase.auth.signOut();
+      document.getElementById('login-modal').classList.remove('show');
+    });
+    document.getElementById('btn-login-close').addEventListener('click', ()=>{
+      document.getElementById('login-modal').classList.remove('show');
+    });
+  } else {
+    box.innerHTML = `
+      <h3>🔐 登录同步</h3>
+      <div style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:8px 0;">登录后电脑、手机、平板自动同步</div>
+      <input type="email" id="login-email" placeholder="输入邮箱" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem;margin-bottom:10px;">
+      <button class="btn-save" id="btn-send-magic" style="width:100%;">发送登录链接 →</button>
+      <div style="font-size:0.72rem;color:var(--text-light);text-align:center;margin-top:8px;">无需密码，邮箱收链接即登入</div>
+      <button class="btn-cancel" id="btn-login-close2" style="display:block;margin:10px auto 0;">关闭</button>`;
+    document.getElementById('login-modal').classList.add('show');
+    document.getElementById('btn-send-magic').addEventListener('click', async ()=>{
+      const email = document.getElementById('login-email').value.trim();
+      if (!email) { alert('请输入邮箱'); return; }
+      const redirectTo = window.location.href.split('?')[0].split('#')[0];
+      const { error } = await supabase.auth.signInWithOtp({ email, options:{ emailRedirectTo: redirectTo } });
+      if (error) {
+        alert('发送失败: '+error.message);
+      } else {
+        box.innerHTML = '<h3>📧 已发送!</h3><div style="text-align:center;padding:12px;color:var(--text-muted);">登录链接已发送到 <b>'+email+'</b><br><br>请查收邮件点击链接<br><span style="font-size:0.8rem;">（检查垃圾邮件箱）</span></div><button class="btn-cancel" id="btn-login-close3" style="display:block;margin:10px auto 0;">关闭</button>';
+        document.getElementById('btn-login-close3').addEventListener('click', ()=>{
+          document.getElementById('login-modal').classList.remove('show');
+        });
+      }
+    });
+    document.getElementById('btn-login-close2').addEventListener('click', ()=>{
+      document.getElementById('login-modal').classList.remove('show');
+    });
   }
+}
+
+async function handleAuthChanged(event, session) {
+  const prevUser = currentUser;
+  currentUser = session?.user || null;
+  updateLoginButton();
+  if (currentUser && !prevUser) {
+    await loadState(); renderApp(); setTimeout(showReminderPopup, 500);
+  } else if (!currentUser && prevUser) {
+    loadLocalState(); renderApp();
+  }
+}
+
+function updateLoginButton() {
+  const btn = document.getElementById('btn-login');
+  if (btn) { btn.textContent = currentUser ? '☁️' : '👤'; btn.title = currentUser ? '已登录: '+currentUser.email : '登录同步'; }
+}
+
+function init() {
+  initSupabase();
+  loadLocalState();
+  renderApp();
+  if (supabase) {
+    supabase.auth.onAuthStateChange(handleAuthChanged);
+    supabase.auth.getSession().then(({ data })=>{
+      if (data.session) {
+        currentUser = data.session.user;
+        updateLoginButton();
+        loadState().then(()=>renderApp());
+      }
+    });
+  }
+  setTimeout(showReminderPopup, 500);
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 init();
 </script>
