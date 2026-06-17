@@ -335,7 +335,7 @@ function renderApp(){renderHeader();renderCalendar();renderSidePanel();renderYea
 function renderHeader(){yearTxt.textContent=state.currentYear;monthTxt.textContent=(state.currentMonth+1)+'月';}
 function renderCalendar(){
   var today=getTodayKey(),cells=getMonthGridData(state.currentYear,state.currentMonth);
-  var h='<div style="position:relative"><button id="btn-add-mem-cal" style="position:absolute;top:-4px;left:-4px;width:30px;height:30px;border-radius:50%;border:2px dashed var(--border);background:var(--bg-card);cursor:pointer;font-size:1.2rem;color:var(--text-muted);z-index:10;line-height:1;padding:0">+</button>';
+  var h='<div style="position:relative"><button id="btn-add-mem-cal" style="position:absolute;top:-6px;left:-6px;width:44px;height:44px;border-radius:50%;border:3px solid var(--mint);background:var(--mint);cursor:pointer;font-size:1.8rem;color:#fff;z-index:10;line-height:1;padding:0;box-shadow:0 2px 8px rgba(126,200,160,0.5);font-weight:700">+</button>';
   h+='<div class="weekday-row">';for(var i=0;i<7;i++)h+='<div class="weekday-cell">'+WEEKDAY_LABELS[i]+'</div>';h+='</div></div><div class="calendar-grid">';
   for(var j=0;j<cells.length;j++){
     var c=cells[j],key=dateKey(c.year,c.month,c.day),isToday=key===today,isSel=key===state.selectedDate,isOth=!c.curMonth;
@@ -366,7 +366,7 @@ function renderSidePanel(){
   if(total){var pct=done?Math.round(done/total*100):0;h+='<div class="progress-section"><div class="progress-text">'+(done===total?'🎊 全部完成！':'已完成 '+done+'/'+total)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';}
   var mood=state.moods[dk]||'';h+='<div class="mood-section" style="text-align:center"><div style="display:inline-block;cursor:pointer;padding:12px 20px" id="mood-label"><div style="font-size:3rem;line-height:1.2">'+(mood||'⋯')+'</div><div style="font-size:0.75rem;color:var(--text-muted)">'+(mood?'点击换心情':'点此记录心情')+'</div></div></div>';
   var jnl=state.journals[dk]||'';h+='<div class="journal-section"><h4>今日总结</h4><textarea class="journal-textarea" id="journal-textarea" placeholder="今天发生了什么？">'+jnl+'</textarea><div style="font-size:0.65rem;color:#999;text-align:right">自动保存</div></div>';
-  h+='<div class="memorial-section"><button class="btn-add-memorial" id="btn-add-memorial" style="width:38px;height:38px;border-radius:50%;font-size:1.4rem;line-height:1;padding:0;border:2px dashed var(--border);background:var(--bg-card);cursor:pointer;color:var(--text-muted);">+</button></div>';
+  h+='</div>';
   var upc=getUpcomingMemorials(5);if(upc.length){h+='<div class="memorial-section"><h4>即将到来</h4>';for(var u=0;u<upc.length;u++){var um=upc[u];h+='<div class="memorial-item"><span>'+(MEM_ICONS[um.mem.type]||'📌')+'</span> '+um.mem.name+'<span class="memorial-countdown">'+(um.daysUntil===0?'今天!':'还有'+um.daysUntil+'天')+'</span></div>';}h+='</div>';}
   var urg=[];for(var d2=0;d2<=7;d2++){var cd=new Date(new Date(getTodayKey()+'T00:00:00').getTime()+d2*86400000),ck=dateKey(cd.getFullYear(),cd.getMonth(),cd.getDate()),tks=(state.tasksByDate[ck]||[]).filter(function(t){return!t.done&&(t.priority||0)>=3});for(var t2=0;t2<tks.length;t2++)urg.push({text:tks[t2].text,daysLeft:d2});}
   if(urg.length){h+='<div class="memorial-section"><h4>紧急重要</h4>';for(var u2=0;u2<Math.min(urg.length,5);u2++)h+='<div class="memorial-item"><span>🚨</span> '+urg[u2].text+'<span class="memorial-countdown">'+(urg[u2].daysLeft===0?'今天!':'还有'+urg[u2].daysLeft+'天')+'</span></div>';h+='</div>';}
