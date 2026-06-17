@@ -190,7 +190,7 @@ window.openLogin=function(){
 
 // ==================== Supabase ====================
 async function signUp(email,password){
-  var r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});
+  var r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password,data:{email_confirm:true}})});
   if(!r.ok){var e=await r.json();throw new Error(e.msg||e.message||'注册失败');}
   var data=await r.json();
   return{id:data.user.id,email:data.user.email,token:data.session.access_token};
@@ -521,7 +521,7 @@ document.addEventListener('keydown',function(e){
 function showHelp(){
   var steps=[
     {t:'日历',d:'点击任意日期查看和添加任务。◀ ▶ 切换月份，点击年份/月份快速跳转。'},
-    {t:'任务',d:'输入任务后点添加。可设优先级：○普通 ⭐重要 🔥紧急 🚨重要且紧急。勾选完成会撒花！'},
+    {t:'任务',d:'输入任务后点添加。<br>可设优先级：<br>○ 普通<br>⭐ 重要<br>🔥 紧急<br>🚨 重要且紧急<br>勾选完成会撒花！'},
     {t:'纪念日',d:'点 ＋ 添加纪念日，支持生日/节日/正数日/倒数日。可设阳历或阴历循环。'},
     {t:'心情',d:'点 😊 方块选择今日心情，下方写每日总结。数据自动保存。'},
     {t:'同步',d:'点 登录 注册账号后，电脑/手机/平板数据自动同步。同一账号登录即可。'},
