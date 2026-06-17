@@ -132,7 +132,7 @@ console.log('日历脚本开始加载...');
 // Supabase 配置
 var SUPABASE_URL='https://futrwpbrnuxwhqvxsnxb.supabase.co';
 var SUPABASE_KEY='sb_publishable_C4jFxMZExcjBEOtIbV2nTg_Hoyrsa1U';
-var currentUser=null;
+var syncCode=null;
 var syncTimer=null;
 
 // 常量
@@ -157,31 +157,27 @@ function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 window.openLogin=function(){
   var box=document.getElementById('login-modal-box');
   var modal=document.getElementById('login-modal');
-  if(currentUser){
-    box.innerHTML='<h3 style="text-align:center">已登录</h3><p style="text-align:center;color:#636E72">'+currentUser.email+'</p><p style="text-align:center">云端同步中</p><div class="btn-row" style="justify-content:center;margin-top:12px"><button class="btn-delete" id="btn-logout">退出</button><button class="btn-cancel" id="btn-login-close">关闭</button></div>';
+  if(syncCode){
+    box.innerHTML='<h3 style="text-align:center">已同步</h3><p style="text-align:center;color:#636E72">同步码: <b>'+syncCode+'</b></p><p style="text-align:center;font-size:0.85rem">多设备输入相同同步码即可共享数据</p><div class="btn-row" style="justify-content:center;margin-top:12px"><button class="btn-delete" id="btn-logout">断开</button><button class="btn-cancel" id="btn-login-close">关闭</button></div>';
     modal.style.display='flex';
     setTimeout(function(){
       var b1=document.getElementById('btn-logout'),b2=document.getElementById('btn-login-close');
-      if(b1)b1.onclick=function(){currentUser=null;updateLoginBtn();loadLocalState();renderApp();modal.style.display='none';};
+      if(b1)b1.onclick=function(){syncCode=null;if(syncTimer)clearInterval(syncTimer);syncTimer=null;updateLoginBtn();loadLocalState();renderApp();modal.style.display='none';};
       if(b2)b2.onclick=function(){modal.style.display='none';};
     },50);
   } else {
-    box.innerHTML='<h3 style="text-align:center">登录同步</h3><p style="font-size:0.85rem;color:#636E72;text-align:center">登录后多设备自动同步数据</p><input type="email" id="login-email" placeholder="邮箱" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><input type="password" id="login-password" placeholder="密码" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn-save" id="btn-login-go" style="flex:1">登录</button><button class="btn-cancel" id="btn-signup-go" style="flex:1">注册</button></div><p style="font-size:0.65rem;color:#999;text-align:center">密码需6位以上，首次请点注册</p><button class="btn-cancel" id="btn-login-close2" style="display:block;margin:8px auto 0">关闭</button>';
+    box.innerHTML='<h3 style="text-align:center">多设备同步</h3><p style="font-size:0.85rem;color:#636E72;text-align:center">设一个同步码，其他设备输入相同的码<br>即可自动同步数据</p><input id="sync-code-input" placeholder="输入同步码（如：mycalendar2026）" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:8px"><button class="btn-save" id="btn-sync-go" style="width:100%">连接同步</button><p style="font-size:0.65rem;color:#999;text-align:center;margin-top:6px">4-20个字符，无邮件无密码</p><button class="btn-cancel" id="btn-login-close2" style="display:block;margin:8px auto 0">关闭</button>';
     modal.style.display='flex';
     setTimeout(function(){
-      var bLogin=document.getElementById('btn-login-go'),bSignup=document.getElementById('btn-signup-go'),bClose=document.getElementById('btn-login-close2');
-      if(bLogin)bLogin.onclick=async function(){
-        var email=document.getElementById('login-email').value.trim(),pw=document.getElementById('login-password').value;
-        if(!email||!pw){alert('请输入邮箱和密码');return;}
-        try{var user=await signIn(email,pw);if(!user){alert('登录失败，请检查邮箱密码');return;}currentUser=user;updateLoginBtn();saveLocalState(dumpState());await loadState();renderApp();modal.style.display='none';}
-        catch(e){alert(e.message);}
-      };
-      if(bSignup)bSignup.onclick=async function(){
-        var email=document.getElementById('login-email').value.trim(),pw=document.getElementById('login-password').value;
-        if(!email||!pw){alert('请输入邮箱和密码');return;}
-        if(pw.length<6){alert('密码至少6位');return;}
-        try{var user=await signUp(email,pw);if(!user){alert('注册失败，请稍后重试');return;}currentUser=user;updateLoginBtn();saveLocalState(dumpState());await loadState();renderApp();modal.style.display='none';}
-        catch(e){alert(e.message);}
+      var bGo=document.getElementById('btn-sync-go'),bClose=document.getElementById('btn-login-close2');
+      if(bGo)bGo.onclick=async function(){
+        var code=document.getElementById('sync-code-input').value.trim();
+        if(!code||code.length<4||code.length>20){alert('同步码需4-20个字符');return;}
+        syncCode=code;updateLoginBtn();
+        var cloud=await loadCloudData();
+        if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);applyState(merged);saveLocalState(merged);}
+        else{await saveCloudData(dumpState());}
+        startSync();renderApp();modal.style.display='none';
       };
       if(bClose)bClose.onclick=function(){modal.style.display='none';};
     },50);
@@ -189,37 +185,29 @@ window.openLogin=function(){
 };
 
 // ==================== Supabase ====================
-async function signUp(email,password){
-  var r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password,email_confirm:true})});
-  var data=await r.json();
-  if(!r.ok)throw new Error(data.msg||data.message||JSON.stringify(data).slice(0,100));
-  return data.user?{id:data.user.id,email:data.user.email,token:(data.session||{}).access_token}:null;
-}
-async function signIn(email,password){
-  var r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password})});
-  var data=await r.json();
-  if(!r.ok)throw new Error(data.error_description||data.msg||JSON.stringify(data).slice(0,100));
-  return data.user?{id:data.user.id,email:data.user.email,token:data.access_token}:null;
-}
+function hashSyncCode(code){var h=0;for(var i=0;i<code.length;i++){h=((h<<5)-h)+code.charCodeAt(i);h|=0;}return'sync_'+Math.abs(h).toString(36);}
 async function loadCloudData(){
-  if(!currentUser)return null;
+  if(!syncCode)return null;
   try{
-    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?select=data&user_id=eq.'+currentUser.id,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+currentUser.token}});
+    var key=hashSyncCode(syncCode);
+    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?select=data&id=eq.'+key,{headers:{'apikey':SUPABASE_KEY}});
     if(!r.ok)return null;
     var rows=await r.json();
     return rows.length?rows[0].data:null;
   }catch(e){return null;}
 }
 async function saveCloudData(data){
-  if(!currentUser)return;
+  if(!syncCode)return;
   try{
-    var h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+currentUser.token,'Content-Type':'application/json','Prefer':'return=minimal'};
-    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?user_id=eq.'+currentUser.id,{method:'PATCH',headers:h,body:JSON.stringify({data:data,updated_at:new Date().toISOString()})});
-    if(r.status===404)await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:JSON.stringify({user_id:currentUser.id,data:data,updated_at:new Date().toISOString()})});
+    var key=hashSyncCode(syncCode);
+    var h={'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var body=JSON.stringify({id:key,data:data,updated_at:new Date().toISOString()});
+    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?id=eq.'+key,{method:'PATCH',headers:h,body:body});
+    if(r.status===404){r=await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:body});}
   }catch(e){}
 }
 function startSync(){
-  if(!currentUser||syncTimer)return;
+  if(!syncCode||syncTimer)return;
   syncTimer=setInterval(async function(){
     var cloud=await loadCloudData();
     if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);if(JSON.stringify(merged)!==JSON.stringify(local)){applyState(merged);saveLocalState(merged);renderApp();}}
@@ -236,17 +224,17 @@ function deepMerge(local,remote){
 }
 function dumpState(){return{tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals};}
 function applyState(data){if(data.tasks)state.tasksByDate=data.tasks;if(data.memorials)state.memorials=data.memorials;if(data.moods)state.moods=data.moods;if(data.journals)state.journals=data.journals;}
-function updateLoginBtn(){var b=document.getElementById('btn-login');if(b)b.textContent=currentUser?'已登录':'登录';}
+function updateLoginBtn(){var b=document.getElementById('btn-login');if(b)b.textContent=syncCode?'已同步':'登录';}
 
 // ==================== 持久化 ====================
 function loadLocalState(){try{var r=localStorage.getItem(STORAGE_KEY);if(r)applyState(JSON.parse(r));}catch(e){}}
 function saveLocalState(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:4,tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals}));}catch(e){}}
 async function loadState(){
   var now=new Date();state.currentYear=now.getFullYear();state.currentMonth=now.getMonth();state.selectedDate=getTodayKey();
-  if(currentUser){var cloud=await loadCloudData();if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);applyState(merged);saveLocalState(merged);}else{saveCloudData(dumpState());}startSync();}
+  if(syncCode){var cloud=await loadCloudData();if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);applyState(merged);saveLocalState(merged);}else{saveCloudData(dumpState());}startSync();}
   else{loadLocalState();}
 }
-async function saveState(){var d=dumpState();saveLocalState(d);if(currentUser)await saveCloudData(d);}
+async function saveState(){var d=dumpState();saveLocalState(d);if(syncCode)await saveCloudData(d);}
 
 // ==================== 农历 ====================
 var LUNAR_INFO=[0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06aa0,0x1a6c4,0x0aae0,0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,0x0d520];
@@ -524,7 +512,7 @@ function showHelp(){
     {t:'任务',d:'输入任务后点添加。<br>可设优先级：<br>○ 普通<br>⭐ 重要<br>🔥 紧急<br>🚨 重要且紧急<br>勾选完成会撒花！'},
     {t:'纪念日',d:'点 ＋ 添加纪念日，支持生日/节日/正数日/倒数日。可设阳历或阴历循环。'},
     {t:'心情',d:'点 😊 方块选择今日心情，下方写每日总结。数据自动保存。'},
-    {t:'同步',d:'点 登录 注册账号后，电脑/手机/平板数据自动同步。同一账号登录即可。'},
+    {t:'同步',d:'点 登录 设置同步码。其他设备输入相同同步码，数据自动同步。无需邮箱密码。'},
   ];
   var idx=0,box=document.getElementById('login-modal-box'),modal=document.getElementById('login-modal');
   function show(i){
