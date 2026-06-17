@@ -234,7 +234,7 @@ body {
     <span class="month-text" id="month-text">6月</span>
     <button class="nav-btn" data-action="next" title="下一月">▶</button>
     <button class="today-btn" data-action="today">✨ 今天</button>
-    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);">👤</button>
+    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="showLoginModal()">👤</button>
   </header>
   <div class="main-content">
     <section class="calendar-panel" id="calendar-panel"></section>
@@ -1504,7 +1504,9 @@ function showReminderPopup() {
 
 // ==================== 登录 / 登出 ====================
 function showLoginModal() {
+  try {
   const box = document.getElementById('login-modal-box');
+  if (!box) { alert('页面加载中，请刷新重试'); return; }
   if (currentUser) {
     box.innerHTML = `
       <h3>👤 已登录</h3>
@@ -1552,6 +1554,8 @@ function showLoginModal() {
   }
 }
 
+  } catch(e) { alert('操作失败: '+e.message); }
+}
 async function handleAuthChanged(event, session) {
   const prevUser = currentUser;
   currentUser = session?.user || null;
@@ -1572,6 +1576,9 @@ function init() {
   initSupabase();
   loadLocalState();
   renderApp();
+  // 登录按钮直接绑定（避免事件委托的 emoji 穿透问题）
+  const loginBtn = document.getElementById('btn-login');
+  if (loginBtn) loginBtn.addEventListener('click', showLoginModal);
   // SDK 可能还没加载完，延迟初始化 auth
   setTimeout(() => {
     initSupabase(); // 重试
