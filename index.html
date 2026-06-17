@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>多巴胺日历 - Dopamine Planner</title>
+<title>澶氬反鑳烘棩鍘?- Dopamine Planner</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7EC8A0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="多巴胺日历">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237EC8A0'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>📅</text></svg>">
+<meta name="apple-mobile-web-app-title" content="澶氬反鑳烘棩鍘?>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237EC8A0'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>馃搮</text></svg>">
 <style>
-/* ============ CSS 变量 ============ */
+/* ============ CSS 鍙橀噺 ============ */
 :root {
   --mint: #7EC8A0; --lime: #C7E990; --purple: #B5A0D8; --blue: #8EC8E8;
   --dogwood: #EDCFD0; --green: #8ED8B8;
@@ -26,7 +26,7 @@
   --shadow: 0 4px 20px rgba(0,0,0,0.06); --radius: 14px;
 }
 
-/* ============ 全局 ============ */
+/* ============ 鍏ㄥ眬 ============ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
@@ -35,7 +35,7 @@ body {
 .app-container { display: flex; flex-direction: column; min-height: 100dvh; max-width: 1200px; margin: 0 auto; }
 .main-content { display: flex; flex: 1; overflow: hidden; }
 
-/* ============ 头部 ============ */
+/* ============ 澶撮儴 ============ */
 .header {
   background: var(--bg-header); color: #fff; padding: 12px 20px;
   display: flex; align-items: center; justify-content: center; gap: 12px;
@@ -56,7 +56,7 @@ body {
 .year-text:hover, .month-text:hover { background: rgba(255,255,255,0.25); }
 .header-sep { font-size: 1.2rem; opacity: 0.8; }
 
-/* 年月选择器弹窗 */
+/* 骞存湀閫夋嫨鍣ㄥ脊绐?*/
 .picker-overlay {
   display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center;
@@ -90,7 +90,7 @@ body {
   background: #eee; border-radius: 20px; cursor: pointer; font-family: inherit;
 }
 
-/* ============ 日历面板 ============ */
+/* ============ 鏃ュ巻闈㈡澘 ============ */
 .calendar-panel { flex: 2; padding: 16px 20px; display: flex; flex-direction: column; overflow-y: auto; }
 .weekday-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 4px; }
 .weekday-cell { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 2px 0; }
@@ -122,14 +122,14 @@ body {
 .task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
 .task-dot.more { font-size: 0.55rem; color: var(--text-muted); line-height: 6px; }
 
-/* ============ 侧面板 ============ */
+/* ============ 渚ч潰鏉?============ */
 .side-panel { flex: 1; padding: 16px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-card); border-left: 1px solid var(--border); overflow-y: auto; min-width: 280px; }
 .panel-date { font-size: 1.1rem; font-weight: 700; text-align: center; }
 .panel-date small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--text-muted); margin-top: 1px; }
 .panel-empty { text-align: center; color: var(--text-light); padding: 30px 16px; font-size: 0.9rem; line-height: 1.8; }
 .panel-empty .emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
 
-/* 添加任务 */
+/* 娣诲姞浠诲姟 */
 .add-task-row { display: flex; gap: 6px; align-items: center; }
 .add-task-input { flex: 1; padding: 8px 12px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; font-family: inherit; outline: none; transition: border-color 0.2s; background: #fafafa; }
 .add-task-input:focus { border-color: var(--purple); }
@@ -140,14 +140,14 @@ body {
 .add-task-btn { padding: 8px 16px; background: var(--purple); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
 .add-task-btn:hover { background: #9B8AD0; }
 
-/* 任务列表 */
+/* 浠诲姟鍒楄〃 */
 .task-list { display: flex; flex-direction: column; gap: 4px; }
 .task-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; transition: background 0.15s; border-left: 3px solid transparent; }
 .task-item:hover { background: #fafafa; }
 .task-item.p0 { border-left-color: #ddd; } .task-item.p1 { border-left-color: var(--important-blue); } .task-item.p2 { border-left-color: #F39C12; } .task-item.p3 { border-left-color: var(--urgent-red); }
 .task-checkbox { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
 .task-checkbox:checked { background: var(--mint); border-color: var(--mint); }
-.task-checkbox:checked::after { content: '✓'; position: absolute; top: -1px; left: 3px; color: #fff; font-size: 12px; font-weight: 700; }
+.task-checkbox:checked::after { content: '鉁?; position: absolute; top: -1px; left: 3px; color: #fff; font-size: 12px; font-weight: 700; }
 .task-text { flex: 1; font-size: 0.9rem; word-break: break-word; }
 .task-item.done .task-text { text-decoration: line-through; color: var(--text-light); text-decoration-color: var(--mint); text-decoration-thickness: 2px; }
 .task-priority-badge { font-size: 0.65rem; padding: 1px 5px; border-radius: 8px; flex-shrink: 0; }
@@ -156,7 +156,7 @@ body {
 .task-item:hover .task-delete { opacity: 1; }
 .task-delete:hover { color: var(--dogwood); transform: scale(1.2); }
 
-/* 纪念日区域 */
+/* 绾康鏃ュ尯鍩?*/
 .memorial-section { border-top: 1px solid var(--border); padding-top: 8px; }
 .memorial-section h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
 .memorial-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; padding: 3px 0; }
@@ -169,7 +169,7 @@ body {
 .memorial-clickable { cursor: pointer; border-radius: 8px; padding: 4px 8px; transition: background 0.15s; }
 .memorial-clickable:hover { background: #f0f8f4; }
 
-/* 纪念日表单弹窗 */
+/* 绾康鏃ヨ〃鍗曞脊绐?*/
 .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 300; justify-content: center; align-items: center; }
 .modal-overlay.show { display: flex; }
 .modal-box { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); max-width: 360px; width: 90%; }
@@ -182,7 +182,7 @@ body {
 .btn-cancel { background: #eee; }
 .btn-delete-memorial { background: var(--urgent-red); color: #fff; padding: 4px 10px; border: none; border-radius: 10px; cursor: pointer; font-size: 0.7rem; font-family: inherit; margin-left: auto; }
 
-/* 进度条 */
+/* 杩涘害鏉?*/
 .progress-section { border-top: 1px solid var(--border); padding-top: 10px; }
 .progress-text { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; }
 .progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
@@ -192,7 +192,7 @@ body {
 .sync-btn:hover { border-color: var(--mint); color: var(--mint); background: #f5fdf8; }
 .sync-hint { font-size: 0.68rem; color: var(--text-light); text-align: center; margin-top: 6px; }
 
-/* 心情 & 总结 */
+/* 蹇冩儏 & 鎬荤粨 */
 .mood-section { border-top: 1px solid var(--border); padding-top: 10px; }
 .mood-section h4 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
 .mood-grid { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
@@ -205,7 +205,7 @@ body {
 .journal-textarea:focus { border-color: var(--mint); }
 .journal-save-hint { font-size: 0.68rem; color: var(--text-light); text-align: right; margin-top: 3px; }
 
-/* 撒花 */
+/* 鎾掕姳 */
 .celebration-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: celebrate-burst 1.2s ease-out forwards; }
 @keyframes celebrate-burst {
   0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
@@ -213,7 +213,7 @@ body {
   100% { transform: translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.2); opacity: 0; }
 }
 
-/* 响应式 */
+/* 鍝嶅簲寮?*/
 @media (max-width: 768px) {
   .main-content { flex-direction: column; overflow: visible; }
   .calendar-panel { flex: none; padding: 8px 6px; overflow: visible; }
@@ -229,12 +229,12 @@ body {
 <body>
 <div class="app-container" id="app">
   <header class="header">
-    <button class="nav-btn" data-action="prev" title="上一月">◀</button>
-    <span class="year-text" id="year-text">2026</span><span class="header-sep">年</span>
-    <span class="month-text" id="month-text">6月</span>
-    <button class="nav-btn" data-action="next" title="下一月">▶</button>
-    <button class="today-btn" data-action="today">✨ 今天</button>
-    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="showLoginModal()">👤</button>
+    <button class="nav-btn" data-action="prev" title="涓婁竴鏈?>鈼€</button>
+    <span class="year-text" id="year-text">2026</span><span class="header-sep">骞?/span>
+    <span class="month-text" id="month-text">6鏈?/span>
+    <button class="nav-btn" data-action="next" title="涓嬩竴鏈?>鈻?/button>
+    <button class="today-btn" data-action="today">鉁?浠婂ぉ</button>
+    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="showLoginModal()">馃懁</button>
   </header>
   <div class="main-content">
     <section class="calendar-panel" id="calendar-panel"></section>
@@ -247,7 +247,11 @@ body {
 <div class="modal-overlay" id="login-modal"><div class="modal-box" id="login-modal-box"></div></div>
 
 <script>
-// ==================== Supabase 云同步 (纯 fetch，零依赖) ====================
+// 璇婃柇鍑芥暟 - 楠岃瘉鑴氭湰鏄惁姝ｅ父鍔犺浇
+window.calTest = function() { alert('鉁?鏃ュ巻鑴氭湰鍔犺浇姝ｅ父锛佺増鏈? V4-cloud'); };
+console.log('馃搮 澶氬反鑳烘棩鍘嗚剼鏈紑濮嬪姞杞?..');
+
+// ==================== Supabase 浜戝悓姝?(绾?fetch锛岄浂渚濊禆) ====================
 const SUPABASE_URL = 'https://futrwpbrnuxwhqvxsnxb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_C4jFxMZExcjBEOtIbV2nTg_Hoyrsa1U';
 let currentUser = null;
@@ -304,8 +308,7 @@ function startRealtimeSync() {
         renderApp();
       }
     }
-  }, 5000); // 每5秒检查一次云端更新
-}
+  }, 5000); // 姣?绉掓鏌ヤ竴娆′簯绔洿鏂?}
 
 async function signIn(email) {
   const r = await fetch(SUPABASE_URL + '/auth/v1/otp', {
@@ -313,7 +316,7 @@ async function signIn(email) {
     headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, create_user: true })
   });
-  if (!r.ok) { const e = await r.text(); throw new Error('发送失败: ' + e); }
+  if (!r.ok) { const e = await r.text(); throw new Error('鍙戦€佸け璐? ' + e); }
 }
 
 async function verifyOtp(email, token) {
@@ -322,26 +325,26 @@ async function verifyOtp(email, token) {
     headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, token, type: 'magiclink' })
   });
-  if (!r.ok) throw new Error('验证失败');
+  if (!r.ok) throw new Error('楠岃瘉澶辫触');
   const data = await r.json();
   return { id: data.user.id, email: data.user.email, token: data.access_token };
 }
 
 async function getSession() {
-  // 从 URL hash 中获取 token
+  // 浠?URL hash 涓幏鍙?token
   const hash = window.location.hash;
   if (!hash) return null;
   const params = new URLSearchParams(hash.replace('#', ''));
   const accessToken = params.get('access_token');
   const refreshToken = params.get('refresh_token');
   if (!accessToken) return null;
-  // 用 token 获取用户信息
+  // 鐢?token 鑾峰彇鐢ㄦ埛淇℃伅
   const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
     headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
   });
   if (!r.ok) return null;
   const data = await r.json();
-  // 清除 URL hash
+  // 娓呴櫎 URL hash
   window.location.hash = '';
   return { id: data.id, email: data.email, token: accessToken };
 }
@@ -373,13 +376,13 @@ function applyState(data) {
   if (data.journals) state.journals = data.journals;
 }
 
-// ==================== 常量 ====================
+// ==================== 甯搁噺 ====================
 const STORAGE_KEY = 'dopamineCalV3';
 const DOT_COLORS = ['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
-const WEEKDAY_LABELS = ['一','二','三','四','五','六','日'];
-const MEMORIAL_TYPES = { birthday:'🎂 生日', anniversary:'💍 纪念日', holiday:'🎉 节日', memorial:'🕯 忌日', custom:'📌 自定义', countup:'📆 正数日', countdown:'⏳ 倒数日' };
-const MEMORIAL_ICONS = { birthday:'🎂', anniversary:'💍', holiday:'🎉', memorial:'🕯', custom:'📌', countup:'📆', countdown:'⏳' };
-const PRIORITY_LABELS = { 0:'', 1:'⭐', 2:'🔥', 3:'🚨' };
+const WEEKDAY_LABELS = ['涓€','浜?,'涓?,'鍥?,'浜?,'鍏?,'鏃?];
+const MEMORIAL_TYPES = { birthday:'馃巶 鐢熸棩', anniversary:'馃拲 绾康鏃?, holiday:'馃帀 鑺傛棩', memorial:'馃暞 蹇屾棩', custom:'馃搶 鑷畾涔?, countup:'馃搯 姝ｆ暟鏃?, countdown:'鈴?鍊掓暟鏃? };
+const MEMORIAL_ICONS = { birthday:'馃巶', anniversary:'馃拲', holiday:'馃帀', memorial:'馃暞', custom:'馃搶', countup:'馃搯', countdown:'鈴? };
+const PRIORITY_LABELS = { 0:'', 1:'猸?, 2:'馃敟', 3:'馃毃' };
 const PRIORITY_COLORS = { 0:'#ddd', 1:'#3498DB', 2:'#F39C12', 3:'#E74C3C' };
 
 // ==================== DOM ====================
@@ -395,8 +398,8 @@ const monthPickerPopup = document.getElementById('month-picker-popup');
 const memorialModal = document.getElementById('memorial-modal');
 const memorialModalBox = document.getElementById('memorial-modal-box');
 
-// ==================== 状态 ====================
-const MOOD_EMOJIS = ['😊','😄','😍','🤩','😌','😐','😢','😡','😴','🤒','🎉','💪','❤️','🌟','💡','🔥'];
+// ==================== 鐘舵€?====================
+const MOOD_EMOJIS = ['馃槉','馃槃','馃槏','馃ぉ','馃槍','馃槓','馃槩','馃槨','馃槾','馃','馃帀','馃挭','鉂わ笍','馃専','馃挕','馃敟'];
 let state = {
   currentYear: new Date().getFullYear(),
   currentMonth: new Date().getMonth(),
@@ -404,8 +407,8 @@ let state = {
   tasksByDate: {},
   memorials: [],
   priorityFilter: null,
-  moods: {},            // { "YYYY-MM-DD": "😊" }
-  journals: {}          // { "YYYY-MM-DD": "今天..." }
+  moods: {},            // { "YYYY-MM-DD": "馃槉" }
+  journals: {}          // { "YYYY-MM-DD": "浠婂ぉ..." }
 };
 
 function getTodayKey() {
@@ -419,7 +422,7 @@ function generateId() {
 }
 function sanitize(text) { return text.replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
 
-// ==================== 持久化 (本地 + 云端) ====================
+// ==================== 鎸佷箙鍖?(鏈湴 + 浜戠) ====================
 function loadLocalState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -446,17 +449,15 @@ async function loadState() {
   if (currentUser) {
     const cloudData = await loadCloudData();
     if (cloudData) {
-      // 云端有数据 → 合并到本地
-      const local = dumpState();
+      // 浜戠鏈夋暟鎹?鈫?鍚堝苟鍒版湰鍦?      const local = dumpState();
       const merged = deepMerge(local, cloudData);
       applyState(merged);
       saveLocalState(merged);
-      // 如果本地有云端没有的数据，上传
-      if (JSON.stringify(local) !== JSON.stringify(cloudData)) {
+      // 濡傛灉鏈湴鏈変簯绔病鏈夌殑鏁版嵁锛屼笂浼?      if (JSON.stringify(local) !== JSON.stringify(cloudData)) {
         saveCloudData(merged);
       }
     } else {
-      // 云端空 → 上传本地数据
+      // 浜戠绌?鈫?涓婁紶鏈湴鏁版嵁
       const local = dumpState();
       saveCloudData(local);
     }
@@ -472,7 +473,7 @@ async function saveState() {
   if (currentUser) await saveCloudData(data);
 }
 
-// ==================== 农历算法 ====================
+// ==================== 鍐滃巻绠楁硶 ====================
 const LUNAR_INFO = [
   0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
   0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
@@ -496,10 +497,10 @@ const LUNAR_INFO = [
   0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,
   0x0d520
 ];
-const STEMS = ['甲','乙','丙','丁','戊','己','庚','辛','壬','癸'];
-const BRANCHES = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-const LUNAR_MONTHS = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
-const LUNAR_DAYS = ['','初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+const STEMS = ['鐢?,'涔?,'涓?,'涓?,'鎴?,'宸?,'搴?,'杈?,'澹?,'鐧?];
+const BRANCHES = ['瀛?,'涓?,'瀵?,'鍗?,'杈?,'宸?,'鍗?,'鏈?,'鐢?,'閰?,'鎴?,'浜?];
+const LUNAR_MONTHS = ['姝?,'浜?,'涓?,'鍥?,'浜?,'鍏?,'涓?,'鍏?,'涔?,'鍗?,'鍐?,'鑵?];
+const LUNAR_DAYS = ['','鍒濅竴','鍒濅簩','鍒濅笁','鍒濆洓','鍒濅簲','鍒濆叚','鍒濅竷','鍒濆叓','鍒濅節','鍒濆崄','鍗佷竴','鍗佷簩','鍗佷笁','鍗佸洓','鍗佷簲','鍗佸叚','鍗佷竷','鍗佸叓','鍗佷節','浜屽崄','寤夸竴','寤夸簩','寤夸笁','寤垮洓','寤夸簲','寤垮叚','寤夸竷','寤垮叓','寤夸節','涓夊崄'];
 
 function lunarYearDays(y) {
   let sum = 348;
@@ -546,13 +547,12 @@ function solarToLunar(y, m, d) {
   return {
     lunarYear: ly, lunarMonth: lm === 0 ? 1 : lm, lunarDay: ld,
     isLeap: isLeap,
-    monthName: (isLeap ? '闰' : '') + LUNAR_MONTHS[(lm - 1 + 12) % 12],
+    monthName: (isLeap ? '闂? : '') + LUNAR_MONTHS[(lm - 1 + 12) % 12],
     dayName: LUNAR_DAYS[ld] || ld
   };
 }
 function lunarToSolar(year, lunarMonth, lunarDay, isLeap) {
-  // 计算农历日期对应的公历日期
-  const baseDate = new Date(1900, 0, 31);
+  // 璁＄畻鍐滃巻鏃ユ湡瀵瑰簲鐨勫叕鍘嗘棩鏈?  const baseDate = new Date(1900, 0, 31);
   let offset = 0;
   for (let y = 1900; y < year; y++) offset += lunarYearDays(y);
   const leap = lunarLeapMonth(year);
@@ -566,19 +566,19 @@ function lunarToSolar(year, lunarMonth, lunarDay, isLeap) {
   return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
 }
 
-// ==================== 节气 ====================
-const SOLAR_TERMS = ['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+// ==================== 鑺傛皵 ====================
+const SOLAR_TERMS = ['灏忓瘨','澶у瘨','绔嬫槬','闆ㄦ按','鎯婅洶','鏄ュ垎','娓呮槑','璋烽洦','绔嬪','灏忔弧','鑺掔','澶忚嚦','灏忔殤','澶ф殤','绔嬬','澶勬殤','鐧介湶','绉嬪垎','瀵掗湶','闇滈檷','绔嬪啲','灏忛洩','澶ч洩','鍐嚦'];
 function getTerm(y, n) {
-  // 简化天文算法，n: 0=小寒, 1=大寒...23=冬至
+  // 绠€鍖栧ぉ鏂囩畻娉曪紝n: 0=灏忓瘨, 1=澶у瘨...23=鍐嚦
   const D = 0.2422;
   const C = [
     5.4055,20.12,3.87,18.73,5.63,20.646,4.81,20.1,5.52,21.04,5.678,21.37,
     7.108,22.83,7.5,23.13,7.646,23.042,8.318,23.438,7.438,22.36,7.18,21.94
   ];
-  const y21 = Math.floor(y / 100) * 100 === 2000 ? y - 2000 : 0; // 仅支持 2000 年后近似
+  const y21 = Math.floor(y / 100) * 100 === 2000 ? y - 2000 : 0; // 浠呮敮鎸?2000 骞村悗杩戜技
   let d = Math.floor(y * D + C[n]) - Math.floor((y - 1) / 4);
   if (y >= 2000) d -= Math.floor((y - 2000) / 100) - Math.floor((y - 2000) / 400);
-  if (d < 1 || d > 31) { /* 边界处理 */ d = Math.min(31, Math.max(1, d)); }
+  if (d < 1 || d > 31) { /* 杈圭晫澶勭悊 */ d = Math.min(31, Math.max(1, d)); }
   const m = Math.floor(n / 2) + 1;
   return { month: m, day: Math.floor(d) };
 }
@@ -590,43 +590,40 @@ function getTermName(y, m, d) {
   return null;
 }
 
-// ==================== 法定节假日放假调休数据 ====================
-// 格式: "YYYY-M-D": { type: 'rest'(放假) | 'work'(调休上班), name: '节日名' }
-// 数据来源: 国务院办公厅放假安排通知
+// ==================== 娉曞畾鑺傚亣鏃ユ斁鍋囪皟浼戞暟鎹?====================
+// 鏍煎紡: "YYYY-M-D": { type: 'rest'(鏀惧亣) | 'work'(璋冧紤涓婄彮), name: '鑺傛棩鍚? }
+// 鏁版嵁鏉ユ簮: 鍥藉姟闄㈠姙鍏巺鏀惧亣瀹夋帓閫氱煡
 const HOLIDAY_SCHEDULE = {
-  // === 2026年 ===
-  // 元旦: 1月1日-3日放假, 仅1月1日是元旦
-  '2026-1-1':{t:'rest',n:'元旦'},'2026-1-2':{t:'rest',n:''},'2026-1-3':{t:'rest',n:''},
-  '2026-1-4':{t:'work',n:'补元旦'},
-  // 春节: 1月29日(正月初一)-2月4日放假, 仅正月初一是"春节"
-  '2026-1-29':{t:'rest',n:'春节'},'2026-1-30':{t:'rest',n:''},'2026-1-31':{t:'rest',n:''},
+  // === 2026骞?===
+  // 鍏冩棪: 1鏈?鏃?3鏃ユ斁鍋? 浠?鏈?鏃ユ槸鍏冩棪
+  '2026-1-1':{t:'rest',n:'鍏冩棪'},'2026-1-2':{t:'rest',n:''},'2026-1-3':{t:'rest',n:''},
+  '2026-1-4':{t:'work',n:'琛ュ厓鏃?},
+  // 鏄ヨ妭: 1鏈?9鏃?姝ｆ湀鍒濅竴)-2鏈?鏃ユ斁鍋? 浠呮鏈堝垵涓€鏄?鏄ヨ妭"
+  '2026-1-29':{t:'rest',n:'鏄ヨ妭'},'2026-1-30':{t:'rest',n:''},'2026-1-31':{t:'rest',n:''},
   '2026-2-1':{t:'rest',n:''},'2026-2-2':{t:'rest',n:''},'2026-2-3':{t:'rest',n:''},
   '2026-2-4':{t:'rest',n:''},
-  '2026-1-25':{t:'work',n:'补春节'},'2026-2-7':{t:'work',n:'补春节'},
-  // 清明节: 4月5日-7日放假, 仅4月5日是清明节气
-  '2026-4-5':{t:'rest',n:'清明'},'2026-4-6':{t:'rest',n:''},'2026-4-7':{t:'rest',n:''},
-  '2026-4-4':{t:'work',n:'补清明'},
-  // 劳动节: 5月1日-5日放假, 仅5月1日是劳动节
-  '2026-5-1':{t:'rest',n:'劳动节'},'2026-5-2':{t:'rest',n:''},'2026-5-3':{t:'rest',n:''},
+  '2026-1-25':{t:'work',n:'琛ユ槬鑺?},'2026-2-7':{t:'work',n:'琛ユ槬鑺?},
+  // 娓呮槑鑺? 4鏈?鏃?7鏃ユ斁鍋? 浠?鏈?鏃ユ槸娓呮槑鑺傛皵
+  '2026-4-5':{t:'rest',n:'娓呮槑'},'2026-4-6':{t:'rest',n:''},'2026-4-7':{t:'rest',n:''},
+  '2026-4-4':{t:'work',n:'琛ユ竻鏄?},
+  // 鍔冲姩鑺? 5鏈?鏃?5鏃ユ斁鍋? 浠?鏈?鏃ユ槸鍔冲姩鑺?  '2026-5-1':{t:'rest',n:'鍔冲姩鑺?},'2026-5-2':{t:'rest',n:''},'2026-5-3':{t:'rest',n:''},
   '2026-5-4':{t:'rest',n:''},'2026-5-5':{t:'rest',n:''},
-  '2026-4-26':{t:'work',n:'补劳动节'},'2026-5-9':{t:'work',n:'补劳动节'},
-  // 端午节: 6月19日(五月初五)-21日放假, 仅6月19日是端午
-  '2026-6-19':{t:'rest',n:'端午'},'2026-6-20':{t:'rest',n:''},'2026-6-21':{t:'rest',n:''},
-  // 中秋节: 9月27日(农历八月十五)是中秋, 9月28-30是国庆连休的普通假日
-  '2026-9-27':{t:'rest',n:'中秋'},
-  // 国庆节/中秋节连休: 9月28日-10月8日, 其中10月1-3日是国庆, 其余是连休假日
-  '2026-9-28':{t:'rest',n:''},'2026-9-29':{t:'rest',n:''},'2026-9-30':{t:'rest',n:''},
-  '2026-10-1':{t:'rest',n:'国庆'},'2026-10-2':{t:'rest',n:'国庆'},'2026-10-3':{t:'rest',n:'国庆'},
+  '2026-4-26':{t:'work',n:'琛ュ姵鍔ㄨ妭'},'2026-5-9':{t:'work',n:'琛ュ姵鍔ㄨ妭'},
+  // 绔崍鑺? 6鏈?9鏃?浜旀湀鍒濅簲)-21鏃ユ斁鍋? 浠?鏈?9鏃ユ槸绔崍
+  '2026-6-19':{t:'rest',n:'绔崍'},'2026-6-20':{t:'rest',n:''},'2026-6-21':{t:'rest',n:''},
+  // 涓鑺? 9鏈?7鏃?鍐滃巻鍏湀鍗佷簲)鏄腑绉? 9鏈?8-30鏄浗搴嗚繛浼戠殑鏅€氬亣鏃?  '2026-9-27':{t:'rest',n:'涓'},
+  // 鍥藉簡鑺?涓鑺傝繛浼? 9鏈?8鏃?10鏈?鏃? 鍏朵腑10鏈?-3鏃ユ槸鍥藉簡, 鍏朵綑鏄繛浼戝亣鏃?  '2026-9-28':{t:'rest',n:''},'2026-9-29':{t:'rest',n:''},'2026-9-30':{t:'rest',n:''},
+  '2026-10-1':{t:'rest',n:'鍥藉簡'},'2026-10-2':{t:'rest',n:'鍥藉簡'},'2026-10-3':{t:'rest',n:'鍥藉簡'},
   '2026-10-4':{t:'rest',n:''},'2026-10-5':{t:'rest',n:''},'2026-10-6':{t:'rest',n:''},
   '2026-10-7':{t:'rest',n:''},'2026-10-8':{t:'rest',n:''},
-  '2026-9-20':{t:'work',n:'补国庆'},'2026-10-10':{t:'work',n:'补国庆'},
-  // === 2027年 (预排) ===
-  '2027-1-1':{t:'rest',n:'元旦'},'2027-1-2':{t:'rest',n:'元旦'},'2027-1-3':{t:'rest',n:'元旦'},
-  '2027-5-1':{t:'rest',n:'劳动节'},'2027-5-2':{t:'rest',n:'劳动节'},'2027-5-3':{t:'rest',n:'劳动节'},
-  '2027-5-4':{t:'rest',n:'劳动节'},'2027-5-5':{t:'rest',n:'劳动节'},
-  '2027-10-1':{t:'rest',n:'国庆'},'2027-10-2':{t:'rest',n:'国庆'},'2027-10-3':{t:'rest',n:'国庆'},
-  '2027-10-4':{t:'rest',n:'国庆'},'2027-10-5':{t:'rest',n:'国庆'},'2027-10-6':{t:'rest',n:'国庆'},
-  '2027-10-7':{t:'rest',n:'国庆'},
+  '2026-9-20':{t:'work',n:'琛ュ浗搴?},'2026-10-10':{t:'work',n:'琛ュ浗搴?},
+  // === 2027骞?(棰勬帓) ===
+  '2027-1-1':{t:'rest',n:'鍏冩棪'},'2027-1-2':{t:'rest',n:'鍏冩棪'},'2027-1-3':{t:'rest',n:'鍏冩棪'},
+  '2027-5-1':{t:'rest',n:'鍔冲姩鑺?},'2027-5-2':{t:'rest',n:'鍔冲姩鑺?},'2027-5-3':{t:'rest',n:'鍔冲姩鑺?},
+  '2027-5-4':{t:'rest',n:'鍔冲姩鑺?},'2027-5-5':{t:'rest',n:'鍔冲姩鑺?},
+  '2027-10-1':{t:'rest',n:'鍥藉簡'},'2027-10-2':{t:'rest',n:'鍥藉簡'},'2027-10-3':{t:'rest',n:'鍥藉簡'},
+  '2027-10-4':{t:'rest',n:'鍥藉簡'},'2027-10-5':{t:'rest',n:'鍥藉簡'},'2027-10-6':{t:'rest',n:'鍥藉簡'},
+  '2027-10-7':{t:'rest',n:'鍥藉簡'},
 };
 
 function getHolidaySchedule(y, m, d) {
@@ -634,32 +631,30 @@ function getHolidaySchedule(y, m, d) {
 }
 
 function getLegalHoliday(y, m, d) {
-  // 先查放假调休表
-  const sched = getHolidaySchedule(y, m, d);
+  // 鍏堟煡鏀惧亣璋冧紤琛?  const sched = getHolidaySchedule(y, m, d);
   if (sched) return { name: sched.n, isRest: sched.t==='rest', isWork: sched.t==='work' };
 
-  // 农历节日（传统节日，不在法定放假表里的）
+  // 鍐滃巻鑺傛棩锛堜紶缁熻妭鏃ワ紝涓嶅湪娉曞畾鏀惧亣琛ㄩ噷鐨勶級
   const lunar = solarToLunar(y, m, d);
   if (!lunar.isLeap) {
-    if (lunar.lunarMonth === 1 && lunar.lunarDay === 1) return { name: '春节', isRest: false };
-    if (lunar.lunarMonth === 1 && lunar.lunarDay === 15) return { name: '元宵节', isRest: false };
-    if (lunar.lunarMonth === 5 && lunar.lunarDay === 5) return { name: '端午', isRest: false };
-    if (lunar.lunarMonth === 7 && lunar.lunarDay === 7) return { name: '七夕', isRest: false };
-    if (lunar.lunarMonth === 7 && lunar.lunarDay === 15) return { name: '中元节', isRest: false };
-    if (lunar.lunarMonth === 8 && lunar.lunarDay === 15) return { name: '中秋', isRest: false };
-    if (lunar.lunarMonth === 9 && lunar.lunarDay === 9) return { name: '重阳', isRest: false };
+    if (lunar.lunarMonth === 1 && lunar.lunarDay === 1) return { name: '鏄ヨ妭', isRest: false };
+    if (lunar.lunarMonth === 1 && lunar.lunarDay === 15) return { name: '鍏冨鑺?, isRest: false };
+    if (lunar.lunarMonth === 5 && lunar.lunarDay === 5) return { name: '绔崍', isRest: false };
+    if (lunar.lunarMonth === 7 && lunar.lunarDay === 7) return { name: '涓冨', isRest: false };
+    if (lunar.lunarMonth === 7 && lunar.lunarDay === 15) return { name: '涓厓鑺?, isRest: false };
+    if (lunar.lunarMonth === 8 && lunar.lunarDay === 15) return { name: '涓', isRest: false };
+    if (lunar.lunarMonth === 9 && lunar.lunarDay === 9) return { name: '閲嶉槼', isRest: false };
   }
-  // 清明节
-  if (m === 3 && (d === 4 || d === 5 || d === 6)) {
+  // 娓呮槑鑺?  if (m === 3 && (d === 4 || d === 5 || d === 6)) {
     const term = getTerm(y, 6);
-    if (term.month === 4 && term.day === d) return { name: '清明', isRest: false };
+    if (term.month === 4 && term.day === d) return { name: '娓呮槑', isRest: false };
   }
   return null;
 }
 
-// ==================== 国际/重要节日 ====================
+// ==================== 鍥介檯/閲嶈鑺傛棩 ====================
 function getNthDayOfMonth(y, m, dow, n) {
-  // 返回 y年m月 第n个 星期dow 的日期 (dow: 0=Sun)
+  // 杩斿洖 y骞磎鏈?绗琻涓?鏄熸湡dow 鐨勬棩鏈?(dow: 0=Sun)
   let count = 0;
   const days = daysInMonth(y, m);
   for (let d = 1; d <= days; d++) {
@@ -671,30 +666,27 @@ function getNthDayOfMonth(y, m, dow, n) {
   return 0;
 }
 function getObservance(y, m, d) {
-  // 返回节日名称，或null
+  // 杩斿洖鑺傛棩鍚嶇О锛屾垨null
   const md = `${m+1}-${d}`;
   const fixed = {
-    '1-1': '元旦', '2-14': '情人节💕', '3-8': '妇女节', '3-12': '植树节',
-    '4-1': '愚人节', '5-4': '青年节', '6-1': '儿童节🧒',
-    '7-1': '建党节', '8-1': '建军节', '9-10': '教师节📚',
-    '10-31': '万圣节🎃', '12-24': '平安夜🎄', '12-25': '圣诞节🎄', '12-31': '跨年夜🎆'
+    '1-1': '鍏冩棪', '2-14': '鎯呬汉鑺傪煉?, '3-8': '濡囧コ鑺?, '3-12': '妞嶆爲鑺?,
+    '4-1': '鎰氫汉鑺?, '5-4': '闈掑勾鑺?, '6-1': '鍎跨鑺傪煣?,
+    '7-1': '寤哄厷鑺?, '8-1': '寤哄啗鑺?, '9-10': '鏁欏笀鑺傪煋?,
+    '10-31': '涓囧湥鑺傪煄?, '12-24': '骞冲畨澶滒煄?, '12-25': '鍦ｈ癁鑺傪煄?, '12-31': '璺ㄥ勾澶滒煄?
   };
   if (fixed[md]) return fixed[md];
-  // 母亲节: 5月第2个周日
-  if (m === 4 && d === getNthDayOfMonth(y, 4, 0, 2)) return '母亲节🌸';
-  // 父亲节: 6月第3个周日
-  if (m === 5 && d === getNthDayOfMonth(y, 5, 0, 3)) return '父亲节👔';
-  // 感恩节: 11月第4个周四
-  if (m === 10 && d === getNthDayOfMonth(y, 10, 4, 4)) return '感恩节🦃';
+  // 姣嶄翰鑺? 5鏈堢2涓懆鏃?  if (m === 4 && d === getNthDayOfMonth(y, 4, 0, 2)) return '姣嶄翰鑺傪煂?;
+  // 鐖朵翰鑺? 6鏈堢3涓懆鏃?  if (m === 5 && d === getNthDayOfMonth(y, 5, 0, 3)) return '鐖朵翰鑺傪煈?;
+  // 鎰熸仼鑺? 11鏈堢4涓懆鍥?  if (m === 10 && d === getNthDayOfMonth(y, 10, 4, 4)) return '鎰熸仼鑺傪煢?;
   return null;
 }
 
-// ==================== 日历计算 ====================
+// ==================== 鏃ュ巻璁＄畻 ====================
 function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 function getMonthGridData(y, m) {
   const firstDay = new Date(y, m, 1);
   const realDow = firstDay.getDay();           // 0=Sun JS
-  const startIdx = (realDow + 6) % 7;          // 周一=0, 周日=6
+  const startIdx = (realDow + 6) % 7;          // 鍛ㄤ竴=0, 鍛ㄦ棩=6
   const totalDays = daysInMonth(y, m);
   const prevTotal = daysInMonth(m === 0 ? y - 1 : y, m === 0 ? 11 : m - 1);
   const cells = [];
@@ -708,14 +700,14 @@ function getMonthGridData(y, m) {
 }
 function getChineseWeekday(dk) {
   const d = new Date(dk + 'T00:00:00');
-  return ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][d.getDay()];
+  return ['鏄熸湡鏃?,'鏄熸湡涓€','鏄熸湡浜?,'鏄熸湡涓?,'鏄熸湡鍥?,'鏄熸湡浜?,'鏄熸湡鍏?][d.getDay()];
 }
 function formatDateChinese(dk) {
   const [y, mm, d] = dk.split('-').map(Number);
-  return `${y}年${mm}月${d}日`;
+  return `${y}骞?{mm}鏈?{d}鏃;
 }
 
-// ==================== 纪念日 ====================
+// ==================== 绾康鏃?====================
 function getMemorialSolarDate(mem, year) {
   if (mem.calendar === 'solar') {
     return { year, month: mem.month, day: mem.day };
@@ -731,13 +723,13 @@ function getMemorialsForDate(dateKeyStr) {
       const sd = getMemorialSolarDate(mem, y);
       if (sd.month === mm && sd.day === d) results.push(mem);
     } else if (mem.repeat === 'monthly') {
-      // 每月同一天（处理月末边界：31日→该月最后一天）
+      // 姣忔湀鍚屼竴澶╋紙澶勭悊鏈堟湯杈圭晫锛?1鏃モ啋璇ユ湀鏈€鍚庝竴澶╋級
       const origDay = mem.day || mem.lunarDay || 1;
       const maxDay = daysInMonth(y, mm);
       const targetDay = Math.min(origDay, maxDay);
       if (d === targetDay) results.push(mem);
     } else if (mem.repeat === 'weekly') {
-      // 每周同星期几
+      // 姣忓懆鍚屾槦鏈熷嚑
       const origDate = new Date(mem.originalYear || y, (mem.month||1)-1, mem.day||1);
       const origDow = origDate.getDay();
       if (checkDate.getDay() === origDow) results.push(mem);
@@ -769,7 +761,7 @@ function getUpcomingMemorials(limit) {
   return upcoming.slice(0, limit);
 }
 
-// ==================== 任务操作 ====================
+// ==================== 浠诲姟鎿嶄綔 ====================
 function getTasks(dk) { return state.tasksByDate[dk] || []; }
 function addTask(dk, text, priority) {
   text = sanitize(text);
@@ -800,7 +792,7 @@ function getTaskStats(dk) {
   return { total: tasks.length, done: tasks.filter(t => t.done).length };
 }
 
-// ==================== 渲染 ====================
+// ==================== 娓叉煋 ====================
 function renderApp() {
   renderHeader();
   renderCalendar();
@@ -810,7 +802,7 @@ function renderApp() {
 }
 function renderHeader() {
   yearText.textContent = state.currentYear;
-  monthText.textContent = `${state.currentMonth + 1}月`;
+  monthText.textContent = `${state.currentMonth + 1}鏈坄;
 }
 function renderCalendar() {
   const today = getTodayKey();
@@ -841,21 +833,20 @@ function renderCalendar() {
     html += `<div class="${cls}" data-date="${key}">`;
     html += `<span class="day-num">${cell.day}</span>`;
 
-    // 纪念日图标
-    if (memorials.length > 0) {
+    // 绾康鏃ュ浘鏍?    if (memorials.length > 0) {
       for (const mem of memorials.slice(0,2)) {
-        const icon = MEMORIAL_ICONS[mem.type] || '📌';
+        const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
         html += `<span class="memorial-icon" title="${mem.name}">${icon}</span>`;
       }
     }
-    // 显示优先级：法定节日名 > 重要节日 > 节气 > 农历
+    // 鏄剧ず浼樺厛绾э細娉曞畾鑺傛棩鍚?> 閲嶈鑺傛棩 > 鑺傛皵 > 鍐滃巻
     if (holiday && holiday.isRest) {
       const label = holiday.name || observance || '';
       if (label) html += `<span class="lunar-text observance">${label}</span>`;
-      html += `<span class="lunar-text" style="color:#388E5C;font-weight:700;">休</span>`;
+      html += `<span class="lunar-text" style="color:#388E5C;font-weight:700;">浼?/span>`;
     } else if (holiday && holiday.isWork) {
       html += `<span class="lunar-text" style="color:#999;font-weight:700;">${holiday.name}</span>`;
-      html += `<span class="lunar-text" style="color:#999;font-weight:700;">班</span>`;
+      html += `<span class="lunar-text" style="color:#999;font-weight:700;">鐝?/span>`;
     } else if (observance) {
       html += `<span class="lunar-text observance">${observance}</span>`;
     } else if (termName) {
@@ -869,7 +860,7 @@ function renderCalendar() {
       );
       html += `<span class="lunar-text${isFestival?' festival':''}">${lunarDisplay}</span>`;
     }
-    // 任务圆点
+    // 浠诲姟鍦嗙偣
     html += renderTaskDots(key);
     html += '</div>';
   }
@@ -881,8 +872,7 @@ function renderTaskDots(dk) {
   if (tasks.length === 0) return '';
   const maxDots = 5;
   let html = '<div class="task-dots">';
-  // 优先显示高优先级未完成任务
-  const sorted = [...tasks].sort((a,b) => (b.priority||0) - (a.priority||0));
+  // 浼樺厛鏄剧ず楂樹紭鍏堢骇鏈畬鎴愪换鍔?  const sorted = [...tasks].sort((a,b) => (b.priority||0) - (a.priority||0));
   for (let i = 0; i < Math.min(sorted.length, maxDots); i++) {
     const color = PRIORITY_COLORS[sorted[i].priority || 0] || DOT_COLORS[i % DOT_COLORS.length];
     html += `<span class="task-dot" style="background:${color}"></span>`;
@@ -894,7 +884,7 @@ function renderTaskDots(dk) {
 function renderSidePanel() {
   const dk = state.selectedDate;
   if (!dk) {
-    sidePanel.innerHTML = `<div class="panel-empty"><span class="emoji">👆</span>点击日历上的日期查看和添加任务</div>`;
+    sidePanel.innerHTML = `<div class="panel-empty"><span class="emoji">馃憜</span>鐐瑰嚮鏃ュ巻涓婄殑鏃ユ湡鏌ョ湅鍜屾坊鍔犱换鍔?/div>`;
     return;
   }
   const tasks = getTasks(dk);
@@ -907,14 +897,13 @@ function renderSidePanel() {
   const memorials = getMemorialsForDate(dk);
 
   let html = `<div class="panel-date">
-    📅 ${dateDisplay} <small>${weekday} · 农历${lunar.monthName}${lunar.dayName || lunar.lunarDay}</small>
+    馃搮 ${dateDisplay} <small>${weekday} 路 鍐滃巻${lunar.monthName}${lunar.dayName || lunar.lunarDay}</small>
   </div>`;
 
-  // 当天纪念日（点击弹出管理窗口）
-  if (memorials.length > 0) {
-    html += '<div class="memorial-section"><h4>📌 今日纪念日</h4>';
+  // 褰撳ぉ绾康鏃ワ紙鐐瑰嚮寮瑰嚭绠＄悊绐楀彛锛?  if (memorials.length > 0) {
+    html += '<div class="memorial-section"><h4>馃搶 浠婃棩绾康鏃?/h4>';
     for (const mem of memorials) {
-      const icon = MEMORIAL_ICONS[mem.type] || '📌';
+      const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
       let countLabel = '';
       if (mem.type === 'countup' || mem.type === 'countdown') {
         const origDate = new Date((mem.originalYear||2024)+'-'+
@@ -922,33 +911,33 @@ function renderSidePanel() {
         const todayDate = new Date(getTodayKey()+'T00:00:00');
         const diff = Math.floor((todayDate - origDate) / 86400000);
         if (mem.type === 'countup') {
-          countLabel = diff >= 0 ? ` 至今 ${diff+1} 天` : ` 还有 ${Math.abs(diff)} 天`;
+          countLabel = diff >= 0 ? ` 鑷充粖 ${diff+1} 澶ー : ` 杩樻湁 ${Math.abs(diff)} 澶ー;
         } else {
-          countLabel = diff >= 0 ? ` 已过 ${diff} 天` : ` 还有 ${Math.abs(diff)} 天`;
+          countLabel = diff >= 0 ? ` 宸茶繃 ${diff} 澶ー : ` 杩樻湁 ${Math.abs(diff)} 澶ー;
         }
       }
-      html += `<div class="memorial-item memorial-clickable" data-memorial-id="${mem.id}" title="点击管理纪念日">
+      html += `<div class="memorial-item memorial-clickable" data-memorial-id="${mem.id}" title="鐐瑰嚮绠＄悊绾康鏃?>
         <span class="memo-icon">${icon}</span> ${mem.name}<span class="memorial-countdown">${countLabel}</span>
       </div>`;
     }
     html += '</div>';
   }
 
-  // 添加任务
+  // 娣诲姞浠诲姟
   html += `<div class="add-task-row">
-    <input type="text" class="add-task-input" id="task-input" placeholder="📝 添加任务..." maxlength="120" autocomplete="off">
+    <input type="text" class="add-task-input" id="task-input" placeholder="馃摑 娣诲姞浠诲姟..." maxlength="120" autocomplete="off">
     <div class="priority-select" id="priority-select">
-      <span class="priority-dot p0 selected" data-p="0" title="普通">○</span>
-      <span class="priority-dot p1" data-p="1" title="重要">⭐</span>
-      <span class="priority-dot p2" data-p="2" title="紧急">🔥</span>
-      <span class="priority-dot p3" data-p="3" title="重要且紧急">🚨</span>
+      <span class="priority-dot p0 selected" data-p="0" title="鏅€?>鈼?/span>
+      <span class="priority-dot p1" data-p="1" title="閲嶈">猸?/span>
+      <span class="priority-dot p2" data-p="2" title="绱ф€?>馃敟</span>
+      <span class="priority-dot p3" data-p="3" title="閲嶈涓旂揣鎬?>馃毃</span>
     </div>
-    <button class="add-task-btn" id="btn-add-task">添加</button>
+    <button class="add-task-btn" id="btn-add-task">娣诲姞</button>
   </div>`;
 
-  // 任务列表
+  // 浠诲姟鍒楄〃
   if (tasks.length === 0) {
-    html += `<div class="panel-empty"><span class="emoji">${dk===getTodayKey()?'🎉':'📋'}</span>${dk===getTodayKey()?'今天没有安排，享受自由时光~':'还没有任务，添加一个吧~'}</div>`;
+    html += `<div class="panel-empty"><span class="emoji">${dk===getTodayKey()?'馃帀':'馃搵'}</span>${dk===getTodayKey()?'浠婂ぉ娌℃湁瀹夋帓锛屼韩鍙楄嚜鐢辨椂鍏墌':'杩樻病鏈変换鍔★紝娣诲姞涓€涓惂~'}</div>`;
   } else {
     html += '<div class="task-list">';
     const sorted = [...tasks].sort((a,b) => {
@@ -966,57 +955,53 @@ function renderSidePanel() {
         <input type="checkbox" class="task-checkbox" ${task.done?'checked':''}>
         <span class="task-text">${task.text}</span>
         ${prio > 0 ? `<span class="task-priority-badge" style="background:${PRIORITY_COLORS[prio]}20;color:${PRIORITY_COLORS[prio]}">${PRIORITY_LABELS[prio]}</span>` : ''}
-        ${daysLeft !== null && daysLeft >= 0 ? `<span class="task-countdown">⚠️${daysLeft}天</span>` : ''}
-        <button class="task-delete" title="删除">🗑</button>
+        ${daysLeft !== null && daysLeft >= 0 ? `<span class="task-countdown">鈿狅笍${daysLeft}澶?/span>` : ''}
+        <button class="task-delete" title="鍒犻櫎">馃棏</button>
       </div>`;
     }
     html += '</div>';
   }
 
-  // 进度条
-  if (tasks.length > 0) {
+  // 杩涘害鏉?  if (tasks.length > 0) {
     const pct = stats.total > 0 ? Math.round(stats.done / stats.total * 100) : 0;
     html += `<div class="progress-section">
-      <div class="progress-text">${stats.done===stats.total?'🎊 全部完成！':`已完成 ${stats.done}/${stats.total}`}</div>
+      <div class="progress-text">${stats.done===stats.total?'馃帄 鍏ㄩ儴瀹屾垚锛?:`宸插畬鎴?${stats.done}/${stats.total}`}</div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
     </div>`;
   }
 
-  // 心情（可点击弹出选择）
-  const todayMood = state.moods[dk] || '';
+  // 蹇冩儏锛堝彲鐐瑰嚮寮瑰嚭閫夋嫨锛?  const todayMood = state.moods[dk] || '';
   html += `<div class="mood-section">
-    <h4>😊 今天心情</h4>
-    <div class="memorial-clickable" id="mood-label" style="text-align:center;font-size:2rem;padding:6px;">${todayMood || '⋯'}</div>
+    <h4>馃槉 浠婂ぉ蹇冩儏</h4>
+    <div class="memorial-clickable" id="mood-label" style="text-align:center;font-size:2rem;padding:6px;">${todayMood || '鈰?}</div>
   </div>`;
 
-  // 每日总结
+  // 姣忔棩鎬荤粨
   const todayJournal = state.journals[dk] || '';
-  html += '<div class="journal-section"><h4>📝 今日总结</h4>';
-  html += `<textarea class="journal-textarea" id="journal-textarea" placeholder="今天发生了什么？有什么感悟...">${todayJournal}</textarea>`;
-  html += '<div class="journal-save-hint">输入后自动保存</div>';
+  html += '<div class="journal-section"><h4>馃摑 浠婃棩鎬荤粨</h4>';
+  html += `<textarea class="journal-textarea" id="journal-textarea" placeholder="浠婂ぉ鍙戠敓浜嗕粈涔堬紵鏈変粈涔堟劅鎮?..">${todayJournal}</textarea>`;
+  html += '<div class="journal-save-hint">杈撳叆鍚庤嚜鍔ㄤ繚瀛?/div>';
   html += '</div>';
 
-  // 添加纪念日
-  html += '<div class="memorial-section">';
-  html += '<button class="btn-add-memorial" id="btn-add-memorial" style="width:100%;">＋ 添加纪念日</button>';
+  // 娣诲姞绾康鏃?  html += '<div class="memorial-section">';
+  html += '<button class="btn-add-memorial" id="btn-add-memorial" style="width:100%;">锛?娣诲姞绾康鏃?/button>';
   html += '</div>';
 
-  // 即将到来的纪念日
+  // 鍗冲皢鍒版潵鐨勭邯蹇垫棩
   const upcoming = getUpcomingMemorials(5);
   if (upcoming.length > 0) {
-    html += '<div class="memorial-section"><h4>⏳ 即将到来</h4>';
+    html += '<div class="memorial-section"><h4>鈴?鍗冲皢鍒版潵</h4>';
     for (const u of upcoming) {
-      const icon = MEMORIAL_ICONS[u.type] || '📌';
+      const icon = MEMORIAL_ICONS[u.type] || '馃搶';
       html += `<div class="memorial-item">
         <span class="memo-icon">${icon}</span> ${u.name}
-        <span class="memorial-countdown">${u.daysUntil === 0 ? '🎉今天!' : `还有${u.daysUntil}天`}</span>
+        <span class="memorial-countdown">${u.daysUntil === 0 ? '馃帀浠婂ぉ!' : `杩樻湁${u.daysUntil}澶ー}</span>
       </div>`;
     }
     html += '</div>';
   }
 
-  // 紧急重要任务倒计时
-  const urgentTasks = [];
+  // 绱ф€ラ噸瑕佷换鍔″€掕鏃?  const urgentTasks = [];
   const todayDk = getTodayKey();
   for (let d = 0; d <= 7; d++) {
     const checkD = new Date(new Date(todayDk+'T00:00:00').getTime() + d * 86400000);
@@ -1025,26 +1010,26 @@ function renderSidePanel() {
     for (const t of tks) urgentTasks.push({ ...t, dateKey: ck, daysLeft: d });
   }
   if (urgentTasks.length > 0) {
-    html += '<div class="memorial-section"><h4>🚨 紧急重要</h4>';
+    html += '<div class="memorial-section"><h4>馃毃 绱ф€ラ噸瑕?/h4>';
     for (const ut of urgentTasks.slice(0,5)) {
       html += `<div class="memorial-item">
-        <span>🚨</span> ${ut.text}
-        <span class="memorial-countdown">${ut.daysLeft===0?'⚠️今天!':`还有${ut.daysLeft}天`}</span>
+        <span>馃毃</span> ${ut.text}
+        <span class="memorial-countdown">${ut.daysLeft===0?'鈿狅笍浠婂ぉ!':`杩樻湁${ut.daysLeft}澶ー}</span>
       </div>`;
     }
     html += '</div>';
   }
 
-  // 同步按钮
+  // 鍚屾鎸夐挳
   html += `<div class="sync-section">
-    <button class="sync-btn" id="btn-export">📤 导出备份</button>
-    <button class="sync-btn" id="btn-import">📥 导入备份</button>
+    <button class="sync-btn" id="btn-export">馃摛 瀵煎嚭澶囦唤</button>
+    <button class="sync-btn" id="btn-import">馃摜 瀵煎叆澶囦唤</button>
   </div>
-  <div class="sync-hint">导出后发到另一台设备导入即可同步</div>`;
+  <div class="sync-hint">瀵煎嚭鍚庡彂鍒板彟涓€鍙拌澶囧鍏ュ嵆鍙悓姝?/div>`;
 
   sidePanel.innerHTML = html;
 
-  // 绑定事件
+  // 缁戝畾浜嬩欢
   const input = document.getElementById('task-input');
   if (input) {
     input.focus();
@@ -1058,7 +1043,7 @@ function renderSidePanel() {
   if (btnImport) btnImport.addEventListener('click', handleImport);
   const btnMemorial = document.getElementById('btn-add-memorial');
   if (btnMemorial) btnMemorial.addEventListener('click', () => showMemorialForm(dk));
-  // 优先级选择
+  // 浼樺厛绾ч€夋嫨
   document.querySelectorAll('.priority-dot').forEach(dot => {
     dot.addEventListener('click', () => {
       document.querySelectorAll('.priority-dot').forEach(d => d.classList.remove('selected'));
@@ -1066,12 +1051,12 @@ function renderSidePanel() {
       state.priorityFilter = parseInt(dot.dataset.p);
     });
   });
-  // 心情标签点击 → 弹出选择窗口
+  // 蹇冩儏鏍囩鐐瑰嚮 鈫?寮瑰嚭閫夋嫨绐楀彛
   const moodLabel = document.getElementById('mood-label');
   if (moodLabel) {
     moodLabel.addEventListener('click', () => showMoodPopup(dk));
   }
-  // 每日总结（自动保存）
+  // 姣忔棩鎬荤粨锛堣嚜鍔ㄤ繚瀛橈級
   const journalTA = document.getElementById('journal-textarea');
   if (journalTA) {
     let journalTimer;
@@ -1085,19 +1070,19 @@ function renderSidePanel() {
           delete state.journals[dk];
         }
         saveState();
-      }, 600); // 600ms 防抖
+      }, 600); // 600ms 闃叉姈
     });
   }
 }
 
-// ==================== 年月选择器 ====================
+// ==================== 骞存湀閫夋嫨鍣?====================
 function renderYearPicker() {
   const startY = state.currentYear - 6;
-  let html = '<h3>选择年份</h3><div class="picker-year-row">';
-  html += `<button id="year-decade-down">«</button>`;
+  let html = '<h3>閫夋嫨骞翠唤</h3><div class="picker-year-row">';
+  html += `<button id="year-decade-down">芦</button>`;
   html += `<input type="number" id="year-input" value="${state.currentYear}" min="1900" max="2100">`;
-  html += `<button id="year-decade-up">»</button>`;
-  html += '</div><button class="picker-close" id="year-picker-close">关闭</button>';
+  html += `<button id="year-decade-up">禄</button>`;
+  html += '</div><button class="picker-close" id="year-picker-close">鍏抽棴</button>';
   yearPickerPopup.innerHTML = html;
   document.getElementById('year-input').addEventListener('change', (e) => {
     jumpToYearMonth(parseInt(e.target.value), state.currentMonth);
@@ -1114,13 +1099,13 @@ function renderYearPicker() {
   });
 }
 function renderMonthPicker() {
-  let html = '<h3>选择月份</h3><div class="picker-grid">';
-  const monthNames = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  let html = '<h3>閫夋嫨鏈堜唤</h3><div class="picker-grid">';
+  const monthNames = ['1鏈?,'2鏈?,'3鏈?,'4鏈?,'5鏈?,'6鏈?,'7鏈?,'8鏈?,'9鏈?,'10鏈?,'11鏈?,'12鏈?];
   for (let i = 0; i < 12; i++) {
     const active = i === state.currentMonth ? ' active' : '';
     html += `<div class="picker-item${active}" data-month="${i}">${monthNames[i]}</div>`;
   }
-  html += '</div><button class="picker-close" id="month-picker-close">关闭</button>';
+  html += '</div><button class="picker-close" id="month-picker-close">鍏抽棴</button>';
   monthPickerPopup.innerHTML = html;
   monthPickerPopup.querySelectorAll('.picker-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -1135,8 +1120,7 @@ function renderMonthPicker() {
 function jumpToYearMonth(y, m) {
   state.currentYear = y;
   state.currentMonth = m;
-  // 保持选中日期在同一天（如果该月有此日期）
-  if (state.selectedDate) {
+  // 淇濇寔閫変腑鏃ユ湡鍦ㄥ悓涓€澶╋紙濡傛灉璇ユ湀鏈夋鏃ユ湡锛?  if (state.selectedDate) {
     const [_, sm, sd] = state.selectedDate.split('-').map(Number);
     const maxDay = daysInMonth(y, m);
     const day = Math.min(sd, maxDay);
@@ -1145,32 +1129,31 @@ function jumpToYearMonth(y, m) {
   renderApp();
 }
 
-// ==================== 纪念日详情弹窗 ====================
+// ==================== 绾康鏃ヨ鎯呭脊绐?====================
 function showMemorialDetailPopup(mem) {
-  const icon = MEMORIAL_ICONS[mem.type] || '📌';
-  const calLabel = mem.calendar === 'lunar' ? '农历' : '阳历';
-  const repeatLabels = { yearly:'每年', once:'仅一次', weekly:'每周', monthly:'每月' };
-  let html = '<h3>📌 纪念日详情</h3>';
+  const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
+  const calLabel = mem.calendar === 'lunar' ? '鍐滃巻' : '闃冲巻';
+  const repeatLabels = { yearly:'姣忓勾', once:'浠呬竴娆?, weekly:'姣忓懆', monthly:'姣忔湀' };
+  let html = '<h3>馃搶 绾康鏃ヨ鎯?/h3>';
   html += `<div style="text-align:center;font-size:2rem;margin:8px 0;">${icon}</div>`;
   html += `<div style="text-align:center;font-size:1.2rem;font-weight:700;">${mem.name}</div>`;
-  html += `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">${MEMORIAL_TYPES[mem.type]} · ${calLabel} · ${repeatLabels[mem.repeat]||mem.repeat}</div>`;
-  // 正数/倒数日详细信息
-  if (mem.type === 'countup' || mem.type === 'countdown') {
+  html += `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">${MEMORIAL_TYPES[mem.type]} 路 ${calLabel} 路 ${repeatLabels[mem.repeat]||mem.repeat}</div>`;
+  // 姝ｆ暟/鍊掓暟鏃ヨ缁嗕俊鎭?  if (mem.type === 'countup' || mem.type === 'countdown') {
     const origDate = new Date((mem.originalYear||2024)+'-'+
       String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00');
     const todayDate = new Date(getTodayKey()+'T00:00:00');
     const diff = Math.floor((todayDate - origDate) / 86400000);
-    const origStr = `${mem.originalYear||2024}年${mem.month||1}月${mem.day||1}日`;
+    const origStr = `${mem.originalYear||2024}骞?{mem.month||1}鏈?{mem.day||1}鏃;
     if (mem.type === 'countup') {
-      html += `<div style="text-align:center;font-size:1.1rem;color:var(--mint);margin:8px 0;">自 ${origStr} 起<br>至今已 <b>${diff >= 0 ? diff + 1 : Math.abs(diff)}</b> 天</div>`;
+      html += `<div style="text-align:center;font-size:1.1rem;color:var(--mint);margin:8px 0;">鑷?${origStr} 璧?br>鑷充粖宸?<b>${diff >= 0 ? diff + 1 : Math.abs(diff)}</b> 澶?/div>`;
     } else {
-      html += `<div style="text-align:center;font-size:1.1rem;color:#E74C3C;margin:8px 0;">距离 ${origStr}<br>还有 <b>${diff >= 0 ? diff : Math.abs(diff)}</b> 天</div>`;
+      html += `<div style="text-align:center;font-size:1.1rem;color:#E74C3C;margin:8px 0;">璺濈 ${origStr}<br>杩樻湁 <b>${diff >= 0 ? diff : Math.abs(diff)}</b> 澶?/div>`;
     }
   }
   html += '<div class="btn-row" style="justify-content:center;margin-top:12px;">';
-  html += '<button class="btn-save" id="popup-edit-mem">✎ 编辑</button>';
-  html += '<button class="btn-delete-memorial" id="popup-del-mem">🗑 删除</button>';
-  html += '<button class="btn-cancel" id="popup-close-mem">关闭</button>';
+  html += '<button class="btn-save" id="popup-edit-mem">鉁?缂栬緫</button>';
+  html += '<button class="btn-delete-memorial" id="popup-del-mem">馃棏 鍒犻櫎</button>';
+  html += '<button class="btn-cancel" id="popup-close-mem">鍏抽棴</button>';
   html += '</div>';
   memorialModalBox.innerHTML = html;
   memorialModal.classList.add('show');
@@ -1181,7 +1164,7 @@ function showMemorialDetailPopup(mem) {
     showMemorialForm(dk, mem);
   });
   document.getElementById('popup-del-mem').addEventListener('click', () => {
-    if (confirm(`确定删除纪念日「${mem.name}」？`)) {
+    if (confirm(`纭畾鍒犻櫎绾康鏃ャ€?{mem.name}銆嶏紵`)) {
       state.memorials = state.memorials.filter(m => m.id !== mem.id);
       saveState();
       memorialModal.classList.remove('show');
@@ -1190,18 +1173,18 @@ function showMemorialDetailPopup(mem) {
   });
 }
 
-// ==================== 心情弹窗 ====================
+// ==================== 蹇冩儏寮圭獥 ====================
 function showMoodPopup(dk) {
   const todayMood = state.moods[dk] || '';
-  let html = '<h3>😊 选择今天心情</h3>';
+  let html = '<h3>馃槉 閫夋嫨浠婂ぉ蹇冩儏</h3>';
   html += '<div class="mood-grid" style="justify-content:center;">';
   for (const emoji of MOOD_EMOJIS) {
     html += `<button class="mood-btn${todayMood===emoji?' selected':''}" data-mood="${emoji}" title="${emoji}">${emoji}</button>`;
   }
   html += '</div>';
   html += '<div style="text-align:center;margin-top:10px;">';
-  html += '<button class="btn-cancel" id="mood-clear">清除</button>';
-  html += '<button class="btn-cancel" id="mood-close" style="margin-left:6px;">关闭</button>';
+  html += '<button class="btn-cancel" id="mood-clear">娓呴櫎</button>';
+  html += '<button class="btn-cancel" id="mood-close" style="margin-left:6px;">鍏抽棴</button>';
   html += '</div>';
   memorialModalBox.innerHTML = html;
   memorialModal.classList.add('show');
@@ -1230,54 +1213,54 @@ function showMoodPopup(dk) {
   });
 }
 
-// ==================== 纪念日表单 ====================
+// ==================== 绾康鏃ヨ〃鍗?====================
 let editingMemorialId = null;
 function showMemorialForm(dk, editMemorial) {
   editingMemorialId = editMemorial ? editMemorial.id : null;
   const [y, mm, d] = dk.split('-').map(Number);
   const lunar = solarToLunar(y, mm - 1, d);
-  let html = `<h3>${editMemorial ? '编辑纪念日' : '添加纪念日'}</h3>`;
-  html += '<label>类型</label><select id="mem-type">';
+  let html = `<h3>${editMemorial ? '缂栬緫绾康鏃? : '娣诲姞绾康鏃?}</h3>`;
+  html += '<label>绫诲瀷</label><select id="mem-type">';
   for (const [k, v] of Object.entries(MEMORIAL_TYPES)) {
     html += `<option value="${k}" ${editMemorial && editMemorial.type===k?'selected':''}>${v}</option>`;
   }
   html += '</select>';
-  html += `<label>名称</label><input type="text" id="mem-name" value="${editMemorial?editMemorial.name:''}" placeholder="如：妈妈生日">`;
-  html += '<label>日历</label><select id="mem-calendar">';
-  html += `<option value="solar" ${editMemorial && editMemorial.calendar==='solar'?'selected':''}>阳历（公历）</option>`;
-  html += `<option value="lunar" ${editMemorial && editMemorial.calendar==='lunar'?'selected':''}>阴历（农历）</option>`;
+  html += `<label>鍚嶇О</label><input type="text" id="mem-name" value="${editMemorial?editMemorial.name:''}" placeholder="濡傦細濡堝鐢熸棩">`;
+  html += '<label>鏃ュ巻</label><select id="mem-calendar">';
+  html += `<option value="solar" ${editMemorial && editMemorial.calendar==='solar'?'selected':''}>闃冲巻锛堝叕鍘嗭級</option>`;
+  html += `<option value="lunar" ${editMemorial && editMemorial.calendar==='lunar'?'selected':''}>闃村巻锛堝啘鍘嗭級</option>`;
   html += '</select>';
   html += '<div id="mem-solar-fields">';
-  html += `<label>日期</label><input type="date" id="mem-solar-date" value="${dk}">`;
+  html += `<label>鏃ユ湡</label><input type="date" id="mem-solar-date" value="${dk}">`;
   html += '</div>';
   html += '<div id="mem-lunar-fields" style="display:none">';
-  html += `<label>农历月</label><select id="mem-lunar-month">`;
+  html += `<label>鍐滃巻鏈?/label><select id="mem-lunar-month">`;
   for (let i = 0; i < 12; i++) {
-    html += `<option value="${i}" ${editMemorial && editMemorial.lunarMonth===i?'selected':''} ${lunar.lunarMonth-1===i?'selected':''}>${LUNAR_MONTHS[i]}月</option>`;
+    html += `<option value="${i}" ${editMemorial && editMemorial.lunarMonth===i?'selected':''} ${lunar.lunarMonth-1===i?'selected':''}>${LUNAR_MONTHS[i]}鏈?/option>`;
   }
   html += '</select>';
-  html += `<label>农历日</label><select id="mem-lunar-day">`;
+  html += `<label>鍐滃巻鏃?/label><select id="mem-lunar-day">`;
   for (let i = 1; i <= 30; i++) {
     html += `<option value="${i}" ${editMemorial && editMemorial.lunarDay===i?'selected':''} ${lunar.lunarDay===i?'selected':''}>${LUNAR_DAYS[i]||i}</option>`;
   }
   html += '</select>';
-  html += `<label><input type="checkbox" id="mem-lunar-isleap" ${editMemorial && editMemorial.lunarIsLeap?'checked':''}> 闰月</label>`;
+  html += `<label><input type="checkbox" id="mem-lunar-isleap" ${editMemorial && editMemorial.lunarIsLeap?'checked':''}> 闂版湀</label>`;
   html += '</div>';
-  html += '<label>重复</label><select id="mem-repeat">';
-  html += `<option value="yearly" ${editMemorial && editMemorial.repeat==='yearly'?'selected':''}>每年</option>`;
-  html += `<option value="monthly" ${editMemorial && editMemorial.repeat==='monthly'?'selected':''}>每月</option>`;
-  html += `<option value="weekly" ${editMemorial && editMemorial.repeat==='weekly'?'selected':''}>每周</option>`;
-  html += `<option value="once" ${editMemorial && editMemorial.repeat==='once'?'selected':''}>仅一次</option>`;
+  html += '<label>閲嶅</label><select id="mem-repeat">';
+  html += `<option value="yearly" ${editMemorial && editMemorial.repeat==='yearly'?'selected':''}>姣忓勾</option>`;
+  html += `<option value="monthly" ${editMemorial && editMemorial.repeat==='monthly'?'selected':''}>姣忔湀</option>`;
+  html += `<option value="weekly" ${editMemorial && editMemorial.repeat==='weekly'?'selected':''}>姣忓懆</option>`;
+  html += `<option value="once" ${editMemorial && editMemorial.repeat==='once'?'selected':''}>浠呬竴娆?/option>`;
   html += '</select>';
   html += '<div class="btn-row">';
-  if (editMemorial) html += '<button class="btn-delete-memorial" id="btn-delete-memorial">删除</button>';
-  html += '<button class="btn-cancel" id="btn-memorial-cancel">取消</button>';
-  html += '<button class="btn-save" id="btn-memorial-save">保存</button>';
+  if (editMemorial) html += '<button class="btn-delete-memorial" id="btn-delete-memorial">鍒犻櫎</button>';
+  html += '<button class="btn-cancel" id="btn-memorial-cancel">鍙栨秷</button>';
+  html += '<button class="btn-save" id="btn-memorial-save">淇濆瓨</button>';
   html += '</div>';
   memorialModalBox.innerHTML = html;
   memorialModal.classList.add('show');
 
-  // 切换阳历/阴历
+  // 鍒囨崲闃冲巻/闃村巻
   document.getElementById('mem-calendar').addEventListener('change', (e) => {
     document.getElementById('mem-solar-fields').style.display = e.target.value === 'solar' ? 'block' : 'none';
     document.getElementById('mem-lunar-fields').style.display = e.target.value === 'lunar' ? 'block' : 'none';
@@ -1288,7 +1271,7 @@ function showMemorialForm(dk, editMemorial) {
   document.getElementById('btn-memorial-save').addEventListener('click', () => {
     const calendar = document.getElementById('mem-calendar').value;
     const name = sanitize(document.getElementById('mem-name').value);
-    if (!name) { alert('请输入纪念日名称'); return; }
+    if (!name) { alert('璇疯緭鍏ョ邯蹇垫棩鍚嶇О'); return; }
     const mem = {
       id: editingMemorialId || generateId(),
       type: document.getElementById('mem-type').value,
@@ -1317,7 +1300,7 @@ function showMemorialForm(dk, editMemorial) {
   });
   if (editMemorial) {
     document.getElementById('btn-delete-memorial').addEventListener('click', () => {
-      if (confirm(`确定删除纪念日「${editMemorial.name}」？`)) {
+      if (confirm(`纭畾鍒犻櫎绾康鏃ャ€?{editMemorial.name}銆嶏紵`)) {
         state.memorials = state.memorials.filter(m => m.id !== editingMemorialId);
         saveState();
         memorialModal.classList.remove('show');
@@ -1327,7 +1310,7 @@ function showMemorialForm(dk, editMemorial) {
   }
 }
 
-// ==================== 导入/导出 ====================
+// ==================== 瀵煎叆/瀵煎嚭 ====================
 function handleExport() {
   const data = { version: 3, tasks: state.tasksByDate, memorials: state.memorials, moods: state.moods, journals: state.journals, exportedAt: new Date().toISOString() };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1336,7 +1319,7 @@ function handleExport() {
   a.href = url; a.download = `dopamine-backup-${getTodayKey()}.json`; a.click();
   URL.revokeObjectURL(url);
   const btn = document.getElementById('btn-export');
-  if (btn) { const o = btn.textContent; btn.textContent = '✅ 已导出'; setTimeout(() => { btn.textContent = o; }, 1500); }
+  if (btn) { const o = btn.textContent; btn.textContent = '鉁?宸插鍑?; setTimeout(() => { btn.textContent = o; }, 1500); }
 }
 function handleImport() {
   const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
@@ -1357,15 +1340,15 @@ function handleImport() {
         if (data.journals) state.journals = { ...state.journals, ...data.journals };
         saveState(); renderApp();
         const btn = document.getElementById('btn-import');
-        if (btn) { const o = btn.textContent; btn.textContent = '✅ 已导入'; setTimeout(() => { btn.textContent = o; }, 1500); }
-      } catch(err) { alert('导入失败：文件格式不正确'); }
+        if (btn) { const o = btn.textContent; btn.textContent = '鉁?宸插鍏?; setTimeout(() => { btn.textContent = o; }, 1500); }
+      } catch(err) { alert('瀵煎叆澶辫触锛氭枃浠舵牸寮忎笉姝ｇ‘'); }
     };
     reader.readAsText(file);
   };
   input.click();
 }
 
-// ==================== 撒花 ====================
+// ==================== 鎾掕姳 ====================
 function showCelebration() {
   const count = 30; const f = document.createDocumentFragment();
   for (let i = 0; i < count; i++) {
@@ -1379,7 +1362,7 @@ function showCelebration() {
   setTimeout(() => document.querySelectorAll('.celebration-particle').forEach(p => p.remove()), 1600);
 }
 
-// ==================== 事件处理 ====================
+// ==================== 浜嬩欢澶勭悊 ====================
 function handleHeaderClick(action) {
   if (action === 'prev') {
     if (state.currentMonth === 0) { state.currentYear--; state.currentMonth = 11; }
@@ -1427,7 +1410,7 @@ function handleDeleteTask(taskId) {
   renderApp();
 }
 
-// 事件委托
+// 浜嬩欢濮旀墭
 appEl.addEventListener('click', (e) => {
   const actionBtn = e.target.closest('[data-action]');
   if (actionBtn) { handleHeaderClick(actionBtn.dataset.action); return; }
@@ -1446,8 +1429,7 @@ appEl.addEventListener('click', (e) => {
     if (taskItem) handleDeleteTask(taskItem.dataset.taskId);
     return;
   }
-  // 年月选择器
-  if (e.target === yearText) { yearPickerOverlay.classList.add('show'); return; }
+  // 骞存湀閫夋嫨鍣?  if (e.target === yearText) { yearPickerOverlay.classList.add('show'); return; }
   if (e.target === monthText) { monthPickerOverlay.classList.add('show'); return; }
   if (e.target === yearPickerOverlay) { yearPickerOverlay.classList.remove('show'); return; }
   if (e.target === monthPickerOverlay) { monthPickerOverlay.classList.remove('show'); return; }
@@ -1463,26 +1445,23 @@ appEl.addEventListener('change', (e) => {
     if (taskItem) handleToggleTask(taskItem.dataset.taskId);
   }
 });
-// 键盘快捷键
-document.addEventListener('keydown', (e) => {
+// 閿洏蹇嵎閿?document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('prev'); }
   else if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('next'); }
   else if (e.key === 't' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('today'); }
 });
 
-// ==================== 初始化 ====================
+// ==================== 鍒濆鍖?====================
 function showReminderPopup() {
   const today = getTodayKey();
 
-  // 检查是否今日已关闭
+  // 妫€鏌ユ槸鍚︿粖鏃ュ凡鍏抽棴
   if (localStorage.getItem('dopaminePopupDismissed') === today) return;
 
-  // 收集纪念日提醒（7天内）
-  const upcoming = getUpcomingMemorials(30);
+  // 鏀堕泦绾康鏃ユ彁閱掞紙7澶╁唴锛?  const upcoming = getUpcomingMemorials(30);
   const memAlerts = upcoming.filter(u => u.daysUntil > 0 && u.daysUntil <= 7);
 
-  // 收集紧急重要任务提醒（5天内）
-  const taskAlerts = [];
+  // 鏀堕泦绱ф€ラ噸瑕佷换鍔℃彁閱掞紙5澶╁唴锛?  const taskAlerts = [];
   for (let d = 0; d <= 5; d++) {
     const checkD = new Date(new Date(today+'T00:00:00').getTime() + d * 86400000);
     const ck = dateKey(checkD.getFullYear(), checkD.getMonth(), checkD.getDate());
@@ -1492,25 +1471,25 @@ function showReminderPopup() {
 
   if (memAlerts.length === 0 && taskAlerts.length === 0) return;
 
-  let msg = '<h3>⏰ 今日提醒</h3><div style="text-align:left;max-height:220px;overflow-y:auto;">';
+  let msg = '<h3>鈴?浠婃棩鎻愰啋</h3><div style="text-align:left;max-height:220px;overflow-y:auto;">';
 
   if (memAlerts.length > 0) {
-    msg += '<div style="font-weight:600;color:var(--mint);margin:4px 0;">📌 纪念日</div>';
+    msg += '<div style="font-weight:600;color:var(--mint);margin:4px 0;">馃搶 绾康鏃?/div>';
     for (const a of memAlerts) {
-      const icon = MEMORIAL_ICONS[a.type] || '📌';
+      const icon = MEMORIAL_ICONS[a.type] || '馃搶';
       const cls = a.daysUntil <= 3 ? 'color:#E74C3C;' : '';
       msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;${cls}">
-        ${icon} <b>${a.name}</b> — ${a.daysUntil}天后
-        ${a.daysUntil <= 3 ? '🔔' : ''}
+        ${icon} <b>${a.name}</b> 鈥?${a.daysUntil}澶╁悗
+        ${a.daysUntil <= 3 ? '馃敂' : ''}
       </div>`;
     }
   }
 
   if (taskAlerts.length > 0) {
-    msg += '<div style="font-weight:600;color:#E74C3C;margin:8px 0 4px;">🚨 紧急重要任务</div>';
+    msg += '<div style="font-weight:600;color:#E74C3C;margin:8px 0 4px;">馃毃 绱ф€ラ噸瑕佷换鍔?/div>';
     for (const t of taskAlerts) {
       msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;color:#E74C3C;">
-        🚨 <b>${t.text}</b> — ${t.daysLeft === 0 ? '今天!' : t.daysLeft + '天后'}
+        馃毃 <b>${t.text}</b> 鈥?${t.daysLeft === 0 ? '浠婂ぉ!' : t.daysLeft + '澶╁悗'}
       </div>`;
     }
   }
@@ -1518,8 +1497,8 @@ function showReminderPopup() {
   msg += '</div>';
   msg += '<div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;">';
   msg += '<label style="font-size:0.8rem;color:var(--text-muted);cursor:pointer;">';
-  msg += '<input type="checkbox" id="popup-dismiss-today" style="margin-right:4px;">今日不再提醒</label>';
-  msg += '<button class="picker-close" id="popup-close" style="margin:0;">关闭</button>';
+  msg += '<input type="checkbox" id="popup-dismiss-today" style="margin-right:4px;">浠婃棩涓嶅啀鎻愰啋</label>';
+  msg += '<button class="picker-close" id="popup-close" style="margin:0;">鍏抽棴</button>';
   msg += '</div>';
 
   const overlay = document.createElement('div');
@@ -1538,19 +1517,19 @@ function showReminderPopup() {
   });
 }
 
-// ==================== 登录 / 登出 ====================
+// ==================== 鐧诲綍 / 鐧诲嚭 ====================
 function showLoginModal() {
   try {
   const box = document.getElementById('login-modal-box');
-  if (!box) { alert('页面加载中，请刷新重试'); return; }
+  if (!box) { alert('椤甸潰鍔犺浇涓紝璇峰埛鏂伴噸璇?); return; }
   if (currentUser) {
     box.innerHTML = `
-      <h3>👤 已登录</h3>
+      <h3>馃懁 宸茬櫥褰?/h3>
       <div style="text-align:center;padding:8px;color:var(--text-muted);">${currentUser.email}</div>
-      <div style="text-align:center;margin-top:10px;">📱💻🖥 数据已开启云端同步</div>
+      <div style="text-align:center;margin-top:10px;">馃摫馃捇馃枼 鏁版嵁宸插紑鍚簯绔悓姝?/div>
       <div class="btn-row" style="justify-content:center;margin-top:12px;">
-        <button class="btn-delete-memorial" id="btn-logout">退出登录</button>
-        <button class="btn-cancel" id="btn-login-close">关闭</button>
+        <button class="btn-delete-memorial" id="btn-logout">閫€鍑虹櫥褰?/button>
+        <button class="btn-cancel" id="btn-login-close">鍏抽棴</button>
       </div>`;
     document.getElementById('login-modal').classList.add('show');
     document.getElementById('btn-logout').addEventListener('click', ()=>{
@@ -1564,45 +1543,47 @@ function showLoginModal() {
     });
   } else {
     box.innerHTML = `
-      <h3>🔐 登录同步</h3>
-      <div style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:8px 0;">登录后电脑、手机、平板自动同步</div>
-      <input type="email" id="login-email" placeholder="输入邮箱" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem;margin-bottom:10px;">
-      <button class="btn-save" id="btn-send-magic" style="width:100%;">发送登录链接 →</button>
-      <div style="font-size:0.72rem;color:var(--text-light);text-align:center;margin-top:8px;">无需密码，邮箱收链接即登入</div>
-      <button class="btn-cancel" id="btn-login-close2" style="display:block;margin:10px auto 0;">关闭</button>`;
+      <h3>馃攼 鐧诲綍鍚屾</h3>
+      <div style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:8px 0;">鐧诲綍鍚庣數鑴戙€佹墜鏈恒€佸钩鏉胯嚜鍔ㄥ悓姝?/div>
+      <input type="email" id="login-email" placeholder="杈撳叆閭" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem;margin-bottom:10px;">
+      <button class="btn-save" id="btn-send-magic" style="width:100%;">鍙戦€佺櫥褰曢摼鎺?鈫?/button>
+      <div style="font-size:0.72rem;color:var(--text-light);text-align:center;margin-top:8px;">鏃犻渶瀵嗙爜锛岄偖绠辨敹閾炬帴鍗崇櫥鍏?/div>
+      <button class="btn-cancel" id="btn-login-close2" style="display:block;margin:10px auto 0;">鍏抽棴</button>`;
     document.getElementById('login-modal').classList.add('show');
     document.getElementById('btn-send-magic').addEventListener('click', async ()=>{
       const email = document.getElementById('login-email').value.trim();
-      if (!email) { alert('请输入邮箱'); return; }
+      if (!email) { alert('璇疯緭鍏ラ偖绠?); return; }
       try {
         await signIn(email);
-        box.innerHTML = '<h3>📧 已发送!</h3><div style="text-align:center;padding:12px;color:var(--text-muted);">登录链接已发送到 <b>'+email+'</b><br><br>请查收邮件点击链接<br><span style="font-size:0.8rem;">（检查垃圾邮件箱）</span></div><button class="btn-cancel" id="btn-login-close3" style="display:block;margin:10px auto 0;">关闭</button>';
+        box.innerHTML = '<h3>馃摟 宸插彂閫?</h3><div style="text-align:center;padding:12px;color:var(--text-muted);">鐧诲綍閾炬帴宸插彂閫佸埌 <b>'+email+'</b><br><br>璇锋煡鏀堕偖浠剁偣鍑婚摼鎺?br><span style="font-size:0.8rem;">锛堟鏌ュ瀮鍦鹃偖浠剁锛?/span></div><button class="btn-cancel" id="btn-login-close3" style="display:block;margin:10px auto 0;">鍏抽棴</button>';
         document.getElementById('btn-login-close3').addEventListener('click', ()=>{
           document.getElementById('login-modal').classList.remove('show');
         });
-      } catch(e) { alert('发送失败: '+e.message); }
+      } catch(e) { alert('鍙戦€佸け璐? '+e.message); }
     });
     document.getElementById('btn-login-close2').addEventListener('click', ()=>{
       document.getElementById('login-modal').classList.remove('show');
     });
   }
-}
 
-  } catch(e) { alert('操作失败: '+e.message); }
+  } catch(e) { alert('鎿嶄綔澶辫触: '+e.message); }
 }
 
 function updateLoginButton() {
   const btn = document.getElementById('btn-login');
-  if (btn) { btn.textContent = currentUser ? '☁️' : '👤'; btn.title = currentUser ? '已登录: '+currentUser.email : '登录同步'; }
+  if (btn) { btn.textContent = currentUser ? '鈽侊笍' : '馃懁'; btn.title = currentUser ? '宸茬櫥褰? '+currentUser.email : '鐧诲綍鍚屾'; }
 }
 
 function init() {
   loadLocalState();
   renderApp();
-  // 登录按钮绑定
+  // 璇婃柇锛氬湪鎺у埗鍙拌緭鍑虹増鏈彿
+  console.log('鉁?澶氬反鑳烘棩鍘?V4 宸插姞杞?鈥?, new Date().toLocaleString());
+  // 鐧诲綍鎸夐挳缁戝畾
   const loginBtn = document.getElementById('btn-login');
-  if (loginBtn) loginBtn.addEventListener('click', showLoginModal);
-  // 检查是否从 magic link 返回
+  if (loginBtn) { loginBtn.addEventListener('click', showLoginModal); console.log('鉁?鐧诲綍鎸夐挳宸茬粦瀹?); }
+  else console.warn('鉂?鎵句笉鍒扮櫥褰曟寜閽?);
+  // 妫€鏌ユ槸鍚︿粠 magic link 杩斿洖
   getSession().then(async (user) => {
     if (user) {
       currentUser = user;
