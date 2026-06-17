@@ -141,8 +141,8 @@ var STORAGE_KEY='dopamineCalV4';
 var DOT_COLORS=['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
 var WEEKDAY_LABELS=['一','二','三','四','五','六','日'];
 var MOOD_EMOJIS=['😊','😄','😍','🤩','😌','😐','😢','😡','😴','🤒','🎉','💪','❤️','🌟','💡','🔥','🥳','😎','🤗','🥰','😤','😭','🤯','😱','🫠','🌈','☀️','🌙','🍀','🎵'];
-var MEM_TYPES={birthday:'🎂 生日',anniversary:'💍 纪念日',holiday:'🎉 节日',memorial:'🕯 忌日',custom:'📌 自定义',countup:'📆 正数日',countdown:'⏳ 倒数日'};
-var MEM_ICONS={birthday:'🎂',anniversary:'💍',holiday:'🎉',memorial:'🕯',custom:'📌',countup:'📆',countdown:'⏳'};
+var MEM_TYPES={birthday:'🎂 生日',anniversary:'💍 纪念日',holiday:'🎉 节日',custom:'📌 自定义',countup:'📆 正数日',countdown:'⏳ 倒数日'};
+var MEM_ICONS={birthday:'🎂',anniversary:'💍',holiday:'🎉',custom:'📌',countup:'📆',countdown:'⏳'};
 
 // 状态
 var state={currentYear:new Date().getFullYear(),currentMonth:new Date().getMonth(),selectedDate:null,tasksByDate:{},memorials:[],priorityFilter:null,moods:{},journals:{}};
@@ -335,8 +335,7 @@ function renderApp(){renderHeader();renderCalendar();renderSidePanel();renderYea
 function renderHeader(){yearTxt.textContent=state.currentYear;monthTxt.textContent=(state.currentMonth+1)+'月';}
 function renderCalendar(){
   var today=getTodayKey(),cells=getMonthGridData(state.currentYear,state.currentMonth);
-  var h='<div style="position:relative"><button id="btn-add-mem-cal" style="position:absolute;top:-6px;left:-6px;width:44px;height:44px;border-radius:50%;border:3px solid var(--mint);background:var(--mint);cursor:pointer;font-size:1.8rem;color:#fff;z-index:10;line-height:1;padding:0;box-shadow:0 2px 8px rgba(126,200,160,0.5);font-weight:700">+</button>';
-  h+='<div class="weekday-row">';for(var i=0;i<7;i++)h+='<div class="weekday-cell">'+WEEKDAY_LABELS[i]+'</div>';h+='</div></div><div class="calendar-grid">';
+  var h='<div class="weekday-row">';for(var i=0;i<7;i++)h+='<div class="weekday-cell">'+WEEKDAY_LABELS[i]+'</div>';h+='</div><div class="calendar-grid" style="position:relative">';
   for(var j=0;j<cells.length;j++){
     var c=cells[j],key=dateKey(c.year,c.month,c.day),isToday=key===today,isSel=key===state.selectedDate,isOth=!c.curMonth;
     var lunar=solarToLunar(c.year,c.month,c.day),holiday=getLegalHoliday(c.year,c.month,c.day),term=getTermName(c.year,c.month,c.day),obs=getObservance(c.year,c.month,c.day),mems=getMemorialsForDate(key);
@@ -350,7 +349,7 @@ function renderCalendar(){
     else{var ld=lunar.lunarDay===1?lunar.monthName:(lunar.dayName||lunar.lunarDay);h+='<span class="lunar-text">'+ld+'</span>';}
     h+=renderTaskDots(key)+'</div>';
   }
-  h+='</div>';calPanel.innerHTML=h;
+  h+='<button id="btn-add-mem-cal" style="position:absolute;bottom:4px;right:4px;width:52px;height:52px;border-radius:50%;border:none;background:var(--lime);cursor:pointer;font-size:2.2rem;color:#fff;z-index:10;line-height:1;padding:0;font-weight:400;box-shadow:0 3px 12px rgba(199,233,144,0.6)">+</button></div>';calPanel.innerHTML=h;
 }
 function renderTaskDots(dk){var ts=getTasks(dk);if(!ts.length)return'';var h='<div class="task-dots">';for(var i=0;i<Math.min(ts.length,5);i++)h+='<span class="task-dot" style="background:'+DOT_COLORS[i%6]+'"></span>';if(ts.length>5)h+='<span style="font-size:0.5rem;color:#999">+'+ (ts.length-5)+'</span>';h+='</div>';return h;}
 function renderSidePanel(){
