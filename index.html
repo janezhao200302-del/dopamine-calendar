@@ -166,7 +166,7 @@ window.openLogin=function(){
       if(b2)b2.onclick=function(){modal.style.display='none';};
     },50);
   } else {
-    box.innerHTML='<h3 style="text-align:center">登录同步</h3><p style="font-size:0.85rem;color:#636E72;text-align:center">登录后多设备自动同步数据</p><input type="email" id="login-email" placeholder="邮箱" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><input type="password" id="login-password" placeholder="密码" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn-save" id="btn-login-go" style="flex:1">登录</button><button class="btn-cancel" id="btn-signup-go" style="flex:1">注册</button></div><p style="font-size:0.65rem;color:#999;text-align:center">首次使用请先注册，之后登录即可</p><button class="btn-cancel" id="btn-login-close2" style="display:block;margin:8px auto 0">关闭</button>';
+    box.innerHTML='<h3 style="text-align:center">登录同步</h3><p style="font-size:0.85rem;color:#636E72;text-align:center">登录后多设备自动同步数据</p><input type="email" id="login-email" placeholder="邮箱" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><input type="password" id="login-password" placeholder="密码" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:6px"><div style="display:flex;gap:6px;margin-bottom:6px"><button class="btn-save" id="btn-login-go" style="flex:1">登录</button><button class="btn-cancel" id="btn-signup-go" style="flex:1">注册</button></div><p style="font-size:0.65rem;color:#999;text-align:center">密码需6位以上，首次请点注册</p><button class="btn-cancel" id="btn-login-close2" style="display:block;margin:8px auto 0">关闭</button>';
     modal.style.display='flex';
     setTimeout(function(){
       var bLogin=document.getElementById('btn-login-go'),bSignup=document.getElementById('btn-signup-go'),bClose=document.getElementById('btn-login-close2');
@@ -190,7 +190,7 @@ window.openLogin=function(){
 
 // ==================== Supabase ====================
 async function signUp(email,password){
-  var r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password,data:{email_confirm:true}})});
+  var r=await fetch(SUPABASE_URL+'/auth/v1/signup',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,password:password,email_confirm:true})});
   if(!r.ok){var e=await r.json();throw new Error(e.msg||e.message||'注册失败');}
   var data=await r.json();
   return{id:data.user.id,email:data.user.email,token:data.session.access_token};
