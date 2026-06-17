@@ -256,9 +256,21 @@ let currentUser = null;
 let syncChannel = null;
 
 function initSupabase() {
-  if (typeof supabase !== 'undefined' && window.supabase) {
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      console.log('Supabase ready');
+    } else {
+      console.log('Supabase SDK not loaded yet, will retry on login');
+    }
+  } catch(e) { console.warn('Supabase init error:', e); }
+}
+
+function ensureSupabase() {
+  if (!supabase && window.supabase && window.supabase.createClient) {
     supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
   }
+  return !!supabase;
 }
 
 async function loadCloudData() {
@@ -1406,7 +1418,7 @@ appEl.addEventListener('click', (e) => {
   if (e.target === memorialModal) { memorialModal.classList.remove('show'); return; }
   const loginModal = document.getElementById('login-modal');
   if (loginModal && e.target === loginModal) { loginModal.classList.remove('show'); return; }
-  if (e.target.id === 'btn-login') { showLoginModal(); return; }
+  if (e.target.closest('#btn-login')) { showLoginModal(); return; }
 });
 appEl.addEventListener('change', (e) => {
   const cb = e.target.closest('.task-checkbox');
@@ -1520,6 +1532,7 @@ function showLoginModal() {
       <button class="btn-cancel" id="btn-login-close2" style="display:block;margin:10px auto 0;">关闭</button>`;
     document.getElementById('login-modal').classList.add('show');
     document.getElementById('btn-send-magic').addEventListener('click', async ()=>{
+      if (!ensureSupabase()) { alert('正在加载，请稍后再试'); return; }
       const email = document.getElementById('login-email').value.trim();
       if (!email) { alert('请输入邮箱'); return; }
       const redirectTo = window.location.href.split('?')[0].split('#')[0];
@@ -1559,16 +1572,20 @@ function init() {
   initSupabase();
   loadLocalState();
   renderApp();
-  if (supabase) {
-    supabase.auth.onAuthStateChange(handleAuthChanged);
-    supabase.auth.getSession().then(({ data })=>{
-      if (data.session) {
-        currentUser = data.session.user;
-        updateLoginButton();
-        loadState().then(()=>renderApp());
-      }
-    });
-  }
+  // SDK 可能还没加载完，延迟初始化 auth
+  setTimeout(() => {
+    initSupabase(); // 重试
+    if (supabase) {
+      supabase.auth.onAuthStateChange(handleAuthChanged);
+      supabase.auth.getSession().then(({ data })=>{
+        if (data.session) {
+          currentUser = data.session.user;
+          updateLoginButton();
+          loadState().then(()=>renderApp());
+        }
+      });
+    }
+  }, 1000);
   setTimeout(showReminderPopup, 500);
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
