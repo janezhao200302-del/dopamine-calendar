@@ -3,1599 +3,530 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>澶氬反鑳烘棩鍘?- Dopamine Planner</title>
+<title>多巴胺日历 V4</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#7EC8A0">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="澶氬反鑳烘棩鍘?>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%237EC8A0'/><text x='50' y='68' font-size='55' text-anchor='middle' fill='white'>馃搮</text></svg>">
+<meta name="apple-mobile-web-app-title" content="多巴胺日历">
 <style>
-/* ============ CSS 鍙橀噺 ============ */
-:root {
-  --mint: #7EC8A0; --lime: #C7E990; --purple: #B5A0D8; --blue: #8EC8E8;
-  --dogwood: #EDCFD0; --green: #8ED8B8;
-  --bg-page: #FFF9F0; --bg-card: #FFFFFF;
-  --bg-header: linear-gradient(135deg, #7EC8A0, #8EC8E8);
-  --bg-today: #E8F8F0;
-  --text-primary: #2D3436; --text-muted: #636E72; --text-light: #B2BEC3;
-  --border: #E0E8E3; --done-color: #7EC8A0;
-  --urgent-red: #E74C3C; --important-blue: #3498DB; --normal-gray: #B2BEC3;
-  --holiday-bg: #FFF0F0; --festival-bg: #FFF8E8;
-  --shadow: 0 4px 20px rgba(0,0,0,0.06); --radius: 14px;
-}
-
-/* ============ 鍏ㄥ眬 ============ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
-  background: var(--bg-page); color: var(--text-primary); min-height: 100dvh; overflow-x: hidden;
-}
-.app-container { display: flex; flex-direction: column; min-height: 100dvh; max-width: 1200px; margin: 0 auto; }
-.main-content { display: flex; flex: 1; overflow: hidden; }
-
-/* ============ 澶撮儴 ============ */
-.header {
-  background: var(--bg-header); color: #fff; padding: 12px 20px;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  flex-shrink: 0; box-shadow: 0 2px 12px rgba(126,200,160,0.3); user-select: none;
-}
-.nav-btn, .today-btn {
-  background: rgba(255,255,255,0.2); border: none; color: #fff;
-  padding: 6px 14px; border-radius: 20px; cursor: pointer; font-size: 0.9rem;
-  font-family: inherit; transition: background 0.2s,transform 0.1s;
-}
-.nav-btn { font-size: 1.1rem; padding: 4px 12px; }
-.nav-btn:hover, .today-btn:hover { background: rgba(255,255,255,0.35); }
-.nav-btn:active, .today-btn:active { transform: scale(0.95); }
-.year-text, .month-text {
-  cursor: pointer; font-weight: 700; font-size: 1.4rem; padding: 2px 6px;
-  border-radius: 8px; transition: background 0.2s;
-}
-.year-text:hover, .month-text:hover { background: rgba(255,255,255,0.25); }
-.header-sep { font-size: 1.2rem; opacity: 0.8; }
-
-/* 骞存湀閫夋嫨鍣ㄥ脊绐?*/
-.picker-overlay {
-  display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.3); z-index: 200; justify-content: center; align-items: center;
-}
-.picker-overlay.show { display: flex; }
-.picker-popup {
-  background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.2);
-  max-width: 340px; width: 90%;
-}
-.picker-popup h3 { text-align: center; margin-bottom: 12px; color: var(--text-primary); }
-.picker-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
-}
-.picker-item {
-  padding: 10px 6px; text-align: center; border-radius: 10px; cursor: pointer;
-  font-size: 0.9rem; transition: all 0.15s; background: #f5f5f5;
-}
-.picker-item:hover { background: var(--mint); color: #fff; }
-.picker-item.active { background: var(--purple); color: #fff; font-weight: 700; }
-.picker-year-row { display: flex; gap: 8px; align-items: center; justify-content: center; margin-bottom: 12px; }
-.picker-year-row input {
-  width: 80px; padding: 8px; border: 2px solid var(--border); border-radius: 8px;
-  text-align: center; font-size: 1.1rem; font-family: inherit;
-}
-.picker-year-row button {
-  padding: 8px 16px; border: none; border-radius: 8px; background: var(--mint); color: #fff;
-  cursor: pointer; font-family: inherit;
-}
-.picker-close {
-  display: block; margin: 12px auto 0; padding: 6px 20px; border: none;
-  background: #eee; border-radius: 20px; cursor: pointer; font-family: inherit;
-}
-
-/* ============ 鏃ュ巻闈㈡澘 ============ */
-.calendar-panel { flex: 2; padding: 16px 20px; display: flex; flex-direction: column; overflow-y: auto; }
-.weekday-row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 4px; }
-.weekday-cell { text-align: center; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); padding: 2px 0; }
-.weekday-cell.weekend { color: var(--mint); }
-.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; flex: 1; }
-.calendar-cell {
-  aspect-ratio: 1; display: flex; flex-direction: column; align-items: center;
-  justify-content: flex-start; padding: 3px 2px; border-radius: 10px; cursor: pointer;
-  transition: background 0.15s,transform 0.1s; position: relative; min-height: 54px;
-  background: var(--bg-card); box-shadow: 0 1px 3px rgba(0,0,0,0.04); overflow: hidden;
-}
-.calendar-cell:hover { background: #F0F8F4; transform: scale(1.03); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.calendar-cell:active { transform: scale(0.96); }
-.calendar-cell.today { background: var(--bg-today); box-shadow: 0 2px 10px rgba(126,200,160,0.35); font-weight: 700; }
-.calendar-cell.today .day-num { background: var(--lime); border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; }
-.calendar-cell.selected { outline: 3px solid var(--purple); outline-offset: -3px; box-shadow: 0 2px 14px rgba(181,160,216,0.45); }
-.calendar-cell.other-month { opacity: 0.35; pointer-events: none; }
-.calendar-cell.holiday { background: #e8f5ee; }
-.calendar-cell.rest-day { background: #f0faf5; }
-
-.day-num { font-size: 0.9rem; margin-bottom: 1px; z-index: 1; transition: all 0.15s; }
-.lunar-text { font-size: 0.62rem; color: var(--text-muted); line-height: 1.1; z-index: 1; }
-.lunar-text.festival { color: #2E7D52; font-weight: 600; }
-.lunar-text.term { color: #7EC8A0; }
-.lunar-text.observance { color: #2E7D52; font-weight: 600; font-size: 0.62rem; }
-.holiday-label { font-size: 0.58rem; color: #2E7D52; font-weight: 600; z-index: 1; line-height: 1.1; }
-.memorial-icon { font-size: 0.7rem; z-index: 1; position: absolute; top: 2px; right: 3px; }
-.task-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; max-width: 100%; z-index: 1; }
-.task-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-.task-dot.more { font-size: 0.55rem; color: var(--text-muted); line-height: 6px; }
-
-/* ============ 渚ч潰鏉?============ */
-.side-panel { flex: 1; padding: 16px 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-card); border-left: 1px solid var(--border); overflow-y: auto; min-width: 280px; }
-.panel-date { font-size: 1.1rem; font-weight: 700; text-align: center; }
-.panel-date small { display: block; font-weight: 400; font-size: 0.8rem; color: var(--text-muted); margin-top: 1px; }
-.panel-empty { text-align: center; color: var(--text-light); padding: 30px 16px; font-size: 0.9rem; line-height: 1.8; }
-.panel-empty .emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
-
-/* 娣诲姞浠诲姟 */
-.add-task-row { display: flex; gap: 6px; align-items: center; }
-.add-task-input { flex: 1; padding: 8px 12px; border: 2px solid var(--border); border-radius: 20px; font-size: 0.85rem; font-family: inherit; outline: none; transition: border-color 0.2s; background: #fafafa; }
-.add-task-input:focus { border-color: var(--purple); }
-.priority-select { display: flex; gap: 3px; }
-.priority-dot { width: 22px; height: 22px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.15s; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; }
-.priority-dot.p0 { background: #eee; } .priority-dot.p1 { background: #DBEAFE; } .priority-dot.p2 { background: #FFF3E0; } .priority-dot.p3 { background: #FFE0E0; }
-.priority-dot.selected { border-color: var(--text-primary); transform: scale(1.2); }
-.add-task-btn { padding: 8px 16px; background: var(--purple); color: #fff; border: none; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 0.85rem; font-weight: 600; transition: all 0.2s; white-space: nowrap; }
-.add-task-btn:hover { background: #9B8AD0; }
-
-/* 浠诲姟鍒楄〃 */
-.task-list { display: flex; flex-direction: column; gap: 4px; }
-.task-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px; transition: background 0.15s; border-left: 3px solid transparent; }
-.task-item:hover { background: #fafafa; }
-.task-item.p0 { border-left-color: #ddd; } .task-item.p1 { border-left-color: var(--important-blue); } .task-item.p2 { border-left-color: #F39C12; } .task-item.p3 { border-left-color: var(--urgent-red); }
-.task-checkbox { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid #ddd; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: all 0.2s; position: relative; }
-.task-checkbox:checked { background: var(--mint); border-color: var(--mint); }
-.task-checkbox:checked::after { content: '鉁?; position: absolute; top: -1px; left: 3px; color: #fff; font-size: 12px; font-weight: 700; }
-.task-text { flex: 1; font-size: 0.9rem; word-break: break-word; }
-.task-item.done .task-text { text-decoration: line-through; color: var(--text-light); text-decoration-color: var(--mint); text-decoration-thickness: 2px; }
-.task-priority-badge { font-size: 0.65rem; padding: 1px 5px; border-radius: 8px; flex-shrink: 0; }
-.task-countdown { font-size: 0.7rem; color: var(--urgent-red); font-weight: 600; flex-shrink: 0; }
-.task-delete { background: none; border: none; cursor: pointer; font-size: 0.9rem; opacity: 0; transition: opacity 0.15s,transform 0.1s; padding: 2px; color: var(--text-light); }
-.task-item:hover .task-delete { opacity: 1; }
-.task-delete:hover { color: var(--dogwood); transform: scale(1.2); }
-
-/* 绾康鏃ュ尯鍩?*/
-.memorial-section { border-top: 1px solid var(--border); padding-top: 8px; }
-.memorial-section h4 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 6px; }
-.memorial-item { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; padding: 3px 0; }
-.memorial-item .memo-icon { font-size: 1rem; }
-.memorial-countdown { font-size: 0.75rem; color: var(--urgent-red); margin-left: auto; }
-.btn-del-memorial { background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--text-light); padding: 0 4px; transition: color 0.15s; line-height: 1; }
-.btn-del-memorial:hover { color: #E74C3C; }
-.btn-add-memorial { padding: 6px 14px; border: 2px dashed var(--border); border-radius: 16px; background: none; cursor: pointer; font-family: inherit; font-size: 0.8rem; color: var(--text-muted); transition: all 0.2s; }
-.btn-add-memorial:hover { border-color: var(--mint); color: var(--mint); }
-.memorial-clickable { cursor: pointer; border-radius: 8px; padding: 4px 8px; transition: background 0.15s; }
-.memorial-clickable:hover { background: #f0f8f4; }
-
-/* 绾康鏃ヨ〃鍗曞脊绐?*/
-.modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.3); z-index: 300; justify-content: center; align-items: center; }
-.modal-overlay.show { display: flex; }
-.modal-box { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 40px rgba(0,0,0,0.2); max-width: 360px; width: 90%; }
-.modal-box h3 { text-align: center; margin-bottom: 12px; }
-.modal-box label { font-size: 0.85rem; color: var(--text-muted); display: block; margin-bottom: 4px; }
-.modal-box input, .modal-box select { width: 100%; padding: 8px 12px; border: 2px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 0.9rem; margin-bottom: 10px; }
-.modal-box .btn-row { display: flex; gap: 8px; justify-content: flex-end; }
-.modal-box .btn-row button { padding: 8px 20px; border: none; border-radius: 20px; cursor: pointer; font-family: inherit; }
-.btn-save { background: var(--mint); color: #fff; }
-.btn-cancel { background: #eee; }
-.btn-delete-memorial { background: var(--urgent-red); color: #fff; padding: 4px 10px; border: none; border-radius: 10px; cursor: pointer; font-size: 0.7rem; font-family: inherit; margin-left: auto; }
-
-/* 杩涘害鏉?*/
-.progress-section { border-top: 1px solid var(--border); padding-top: 10px; }
-.progress-text { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-bottom: 6px; }
-.progress-bar { height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
-.progress-fill { height: 100%; background: linear-gradient(90deg, var(--mint), var(--purple)); border-radius: 3px; transition: width 0.4s ease; }
-.sync-section { border-top: 1px solid var(--border); padding-top: 10px; display: flex; gap: 6px; }
-.sync-btn { flex: 1; padding: 6px 10px; border: 2px solid var(--border); border-radius: 16px; background: #fff; cursor: pointer; font-size: 0.78rem; font-family: inherit; color: var(--text-muted); transition: all 0.2s; }
-.sync-btn:hover { border-color: var(--mint); color: var(--mint); background: #f5fdf8; }
-.sync-hint { font-size: 0.68rem; color: var(--text-light); text-align: center; margin-top: 6px; }
-
-/* 蹇冩儏 & 鎬荤粨 */
-.mood-section { border-top: 1px solid var(--border); padding-top: 10px; }
-.mood-section h4 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
-.mood-grid { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; }
-.mood-btn { font-size: 1.3rem; cursor: pointer; padding: 3px; border-radius: 8px; border: 2px solid transparent; background: none; transition: all 0.15s; line-height: 1; }
-.mood-btn:hover { background: #f0f8f4; transform: scale(1.2); }
-.mood-btn.selected { border-color: var(--mint); background: #e8f5ee; transform: scale(1.25); }
-.journal-section { border-top: 1px solid var(--border); padding-top: 10px; }
-.journal-section h4 { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 6px; }
-.journal-textarea { width: 100%; min-height: 60px; padding: 8px 12px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 0.85rem; resize: vertical; outline: none; transition: border-color 0.2s; background: #fafafa; }
-.journal-textarea:focus { border-color: var(--mint); }
-.journal-save-hint { font-size: 0.68rem; color: var(--text-light); text-align: right; margin-top: 3px; }
-
-/* 鎾掕姳 */
-.celebration-particle { position: fixed; border-radius: 50%; pointer-events: none; z-index: 9999; animation: celebrate-burst 1.2s ease-out forwards; }
-@keyframes celebrate-burst {
-  0% { transform: translate(0,0) rotate(0deg) scale(1); opacity: 1; }
-  60% { opacity: 1; }
-  100% { transform: translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0.2); opacity: 0; }
-}
-
-/* 鍝嶅簲寮?*/
-@media (max-width: 768px) {
-  .main-content { flex-direction: column; overflow: visible; }
-  .calendar-panel { flex: none; padding: 8px 6px; overflow: visible; }
-  .calendar-cell { min-height: 40px; padding: 2px 1px; border-radius: 6px; }
-  .day-num { font-size: 0.75rem; }
-  .lunar-text { font-size: 0.55rem; }
-  .side-panel { flex: none; border-left: none; border-top: 1px solid var(--border); min-width: auto; overflow: visible; }
-  .header { padding: 8px 10px; gap: 6px; }
-  .year-text, .month-text { font-size: 1.1rem; }
-}
+:root{--mint:#7EC8A0;--lime:#C7E990;--purple:#B5A0D8;--blue:#8EC8E8;--bg-page:#FFF9F0;--bg-card:#FFF;--bg-header:linear-gradient(135deg,#7EC8A0,#8EC8E8);--bg-today:#E8F8F0;--text:#2D3436;--text-muted:#636E72;--text-light:#B2BEC3;--border:#E0E8E3;--red:#E74C3C;--iblue:#3498DB}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg-page);color:var(--text);min-height:100dvh}
+.app-container{display:flex;flex-direction:column;min-height:100dvh;max-width:1200px;margin:0 auto}
+.main-content{display:flex;flex:1;overflow:hidden}
+.header{background:var(--bg-header);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:center;gap:8px;flex-shrink:0;box-shadow:0 2px 12px rgba(126,200,160,0.3)}
+.nav-btn,.today-btn{background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:20px;cursor:pointer;font-size:0.85rem;font-family:inherit}
+.nav-btn:hover,.today-btn:hover{background:rgba(255,255,255,0.35)}
+.nav-btn{font-size:1.1rem;padding:4px 10px}
+.year-text,.month-text{cursor:pointer;font-weight:700;font-size:1.3rem;padding:2px 4px;border-radius:8px}
+.year-text:hover,.month-text:hover{background:rgba(255,255,255,0.25)}
+.picker-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:200;justify-content:center;align-items:center}
+.picker-overlay.show{display:flex}
+.picker-popup{background:#fff;border-radius:16px;padding:20px;box-shadow:0 8px 40px rgba(0,0,0,0.2);max-width:360px;width:90%}
+.picker-popup h3{text-align:center;margin-bottom:10px}
+.picker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.picker-item{padding:8px;text-align:center;border-radius:10px;cursor:pointer;font-size:0.85rem;background:#f5f5f5}
+.picker-item:hover{background:var(--mint);color:#fff}
+.picker-item.active{background:var(--purple);color:#fff;font-weight:700}
+.calendar-panel{flex:2;padding:12px 16px;display:flex;flex-direction:column;overflow-y:auto}
+.weekday-row{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:3px}
+.weekday-cell{text-align:center;font-size:0.8rem;font-weight:600;color:var(--text-muted);padding:2px 0}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;flex:1}
+.calendar-cell{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:2px;border-radius:8px;cursor:pointer;position:relative;min-height:50px;background:var(--bg-card);box-shadow:0 1px 2px rgba(0,0,0,0.04);overflow:hidden}
+.calendar-cell:hover{background:#F0F8F4;transform:scale(1.03)}
+.calendar-cell.today{background:var(--bg-today);box-shadow:0 2px 8px rgba(126,200,160,0.35)}
+.calendar-cell.today .day-num{background:var(--lime);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700}
+.calendar-cell.selected{outline:3px solid var(--purple);outline-offset:-3px}
+.calendar-cell.other-month{opacity:0.35;pointer-events:none}
+.calendar-cell.holiday{background:#e8f5ee}
+.day-num{font-size:0.85rem;margin-bottom:1px;z-index:1}
+.lunar-text{font-size:0.6rem;color:var(--text-muted);line-height:1.1;z-index:1}
+.lunar-text.term{color:#7EC8A0}.lunar-text.festival{color:#2E7D52;font-weight:600}
+.lunar-text.observance{color:#2E7D52;font-weight:600;font-size:0.62rem}
+.holiday-label{font-size:0.58rem;color:#2E7D52;font-weight:600}
+.memorial-icon{font-size:0.7rem;position:absolute;top:1px;right:2px;z-index:1}
+.task-dots{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;z-index:1}
+.task-dot{width:5px;height:5px;border-radius:50%}
+.side-panel{flex:1;padding:12px 10px;display:flex;flex-direction:column;gap:8px;background:var(--bg-card);border-left:1px solid var(--border);overflow-y:auto;min-width:270px}
+.panel-date{font-size:1rem;font-weight:700;text-align:center}
+.panel-date small{display:block;font-weight:400;font-size:0.75rem;color:var(--text-muted)}
+.panel-empty{text-align:center;color:var(--text-light);padding:20px 10px;font-size:0.85rem;line-height:1.8}
+.add-task-row{display:flex;gap:5px;align-items:center}
+.add-task-input{flex:1;padding:7px 10px;border:2px solid var(--border);border-radius:18px;font-size:0.82rem;font-family:inherit;outline:none;background:#fafafa}
+.add-task-input:focus{border-color:var(--purple)}
+.priority-dot{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;font-size:0.6rem;display:flex;align-items:center;justify-content:center}
+.priority-dot.p0{background:#eee}.priority-dot.p1{background:#DBEAFE}.priority-dot.p2{background:#FFF3E0}.priority-dot.p3{background:#FFE0E0}
+.priority-dot.sel{border-color:var(--text);transform:scale(1.2)}
+.add-task-btn{padding:7px 14px;background:var(--purple);color:#fff;border:none;border-radius:18px;cursor:pointer;font-family:inherit;font-size:0.82rem;white-space:nowrap}
+.task-list{display:flex;flex-direction:column;gap:3px}
+.task-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:6px;border-left:3px solid transparent}
+.task-item:hover{background:#fafafa}
+.task-item.p0{border-left-color:#ddd}.task-item.p1{border-left-color:var(--iblue)}
+.task-item.p2{border-left-color:#F39C12}.task-item.p3{border-left-color:var(--red)}
+.task-checkbox{appearance:none;width:18px;height:18px;border:2px solid #ddd;border-radius:50%;cursor:pointer;flex-shrink:0;position:relative}
+.task-checkbox:checked{background:var(--mint);border-color:var(--mint)}
+.task-checkbox:checked::after{content:'\2713';position:absolute;top:-1px;left:2px;color:#fff;font-size:11px;font-weight:700}
+.task-text{flex:1;font-size:0.85rem;word-break:break-word}
+.task-item.done .task-text{text-decoration:line-through;color:var(--text-light)}
+.task-countdown{font-size:0.7rem;color:var(--red);font-weight:600}
+.task-delete{background:none;border:none;cursor:pointer;font-size:0.85rem;opacity:0;color:var(--text-light)}
+.task-item:hover .task-delete{opacity:1}
+.task-delete:hover{color:#EDCFD0}
+.memorial-section{border-top:1px solid var(--border);padding-top:6px}
+.memorial-section h4{font-size:0.78rem;color:var(--text-muted);margin-bottom:4px}
+.memorial-item{display:flex;align-items:center;gap:6px;font-size:0.8rem;padding:2px 0}
+.memorial-countdown{font-size:0.72rem;color:var(--red);margin-left:auto}
+.memorial-clickable{cursor:pointer;border-radius:6px;padding:3px 6px}
+.memorial-clickable:hover{background:#f0f8f4}
+.btn-add-memorial{padding:5px 12px;border:2px dashed var(--border);border-radius:14px;background:none;cursor:pointer;font-family:inherit;font-size:0.78rem;color:var(--text-muted);width:100%}
+.btn-add-memorial:hover{border-color:var(--mint);color:var(--mint)}
+.mood-section h4,.journal-section h4{font-size:0.78rem;color:var(--text-muted);margin-bottom:4px}
+.mood-grid{display:flex;flex-wrap:wrap;gap:4px;justify-content:center}
+.mood-btn{font-size:1.2rem;cursor:pointer;padding:2px;border-radius:6px;border:2px solid transparent;background:none}
+.mood-btn:hover{background:#f0f8f4;transform:scale(1.2)}
+.mood-btn.sel2{border-color:var(--mint);background:#e8f5ee;transform:scale(1.25)}
+.journal-textarea{width:100%;min-height:50px;padding:6px 10px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.8rem;resize:vertical;outline:none;background:#fafafa}
+.journal-textarea:focus{border-color:var(--mint)}
+.progress-section{border-top:1px solid var(--border);padding-top:8px}
+.progress-text{font-size:0.78rem;color:var(--text-muted);text-align:center;margin-bottom:4px}
+.progress-bar{height:5px;background:#eee;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--mint),var(--purple));border-radius:3px;transition:width 0.4s}
+.sync-section{border-top:1px solid var(--border);padding-top:8px;display:flex;gap:5px}
+.sync-btn{flex:1;padding:5px 8px;border:2px solid var(--border);border-radius:14px;background:#fff;cursor:pointer;font-size:0.75rem;font-family:inherit;color:var(--text-muted)}
+.sync-btn:hover{border-color:var(--mint);color:var(--mint)}
+.celebration-particle{position:fixed;border-radius:50%;pointer-events:none;z-index:9999;animation:burst 1.2s ease-out forwards}
+@keyframes burst{0%{transform:translate(0,0) rotate(0deg) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) rotate(var(--rot)) scale(0);opacity:0}}
+.btn-save{background:var(--mint);color:#fff;padding:8px 18px;border:none;border-radius:18px;cursor:pointer;font-family:inherit}
+.btn-cancel{background:#eee;padding:8px 18px;border:none;border-radius:18px;cursor:pointer;font-family:inherit}
+.btn-delete{background:var(--red);color:#fff;padding:6px 14px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-size:0.8rem}
+.btn-row{display:flex;gap:6px}
+@media(max-width:768px){.main-content{flex-direction:column;overflow:visible}.calendar-panel{flex:none;padding:6px 4px}.calendar-cell{min-height:38px;padding:1px;border-radius:5px}.day-num{font-size:0.72rem}.lunar-text{font-size:0.5rem}.side-panel{flex:none;border-left:none;border-top:1px solid var(--border);min-width:auto}.header{padding:6px 8px;gap:4px}.year-text,.month-text{font-size:1rem}}
 </style>
 </head>
 <body>
 <div class="app-container" id="app">
-  <header class="header">
-    <button class="nav-btn" data-action="prev" title="涓婁竴鏈?>鈼€</button>
-    <span class="year-text" id="year-text">2026</span><span class="header-sep">骞?/span>
-    <span class="month-text" id="month-text">6鏈?/span>
-    <button class="nav-btn" data-action="next" title="涓嬩竴鏈?>鈻?/button>
-    <button class="today-btn" data-action="today">鉁?浠婂ぉ</button>
-    <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="showLoginModal()">馃懁</button>
-  </header>
-  <div class="main-content">
-    <section class="calendar-panel" id="calendar-panel"></section>
-    <aside class="side-panel" id="side-panel"></aside>
-  </div>
+<header class="header">
+<button class="nav-btn" data-action="prev">&#9664;</button>
+<span class="year-text" id="year-text">2026</span><span>年</span>
+<span class="month-text" id="month-text">6月</span>
+<button class="nav-btn" data-action="next">&#9654;</button>
+<button class="today-btn" data-action="today">今天</button>
+<button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="openLogin()">登录</button>
+</header>
+<div class="main-content">
+<section class="calendar-panel" id="calendar-panel"></section>
+<aside class="side-panel" id="side-panel"></aside>
+</div>
 </div>
 <div class="picker-overlay" id="year-picker-overlay"><div class="picker-popup" id="year-picker-popup"></div></div>
 <div class="picker-overlay" id="month-picker-overlay"><div class="picker-popup" id="month-picker-popup"></div></div>
-<div class="modal-overlay" id="memorial-modal"><div class="modal-box" id="memorial-modal-box"></div></div>
-<div class="modal-overlay" id="login-modal"><div class="modal-box" id="login-modal-box"></div></div>
+<div class="modal-overlay" id="memorial-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:300;justify-content:center;align-items:center;"><div class="modal-box" id="memorial-modal-box" style="background:#fff;border-radius:16px;padding:20px;max-width:360px;width:90%"></div></div>
+<div class="modal-overlay" id="login-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:400;justify-content:center;align-items:center;"><div class="modal-box" id="login-modal-box" style="background:#fff;border-radius:16px;padding:20px;max-width:360px;width:90%"></div></div>
 
 <script>
-// 璇婃柇鍑芥暟 - 楠岃瘉鑴氭湰鏄惁姝ｅ父鍔犺浇
-window.calTest = function() { alert('鉁?鏃ュ巻鑴氭湰鍔犺浇姝ｅ父锛佺増鏈? V4-cloud'); };
-console.log('馃搮 澶氬反鑳烘棩鍘嗚剼鏈紑濮嬪姞杞?..');
+// ==================== 日历脚本 V4 ====================
+console.log('日历脚本开始加载...');
 
-// ==================== Supabase 浜戝悓姝?(绾?fetch锛岄浂渚濊禆) ====================
-const SUPABASE_URL = 'https://futrwpbrnuxwhqvxsnxb.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_C4jFxMZExcjBEOtIbV2nTg_Hoyrsa1U';
-let currentUser = null;
+// Supabase 配置
+var SUPABASE_URL='https://futrwpbrnuxwhqvxsnxb.supabase.co';
+var SUPABASE_KEY='sb_publishable_C4jFxMZExcjBEOtIbV2nTg_Hoyrsa1U';
+var currentUser=null;
+var syncTimer=null;
 
-function supabaseHeaders() {
-  const h = { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-  if (currentUser) h['Authorization'] = 'Bearer ' + currentUser.token;
-  return h;
-}
+// 常量
+var STORAGE_KEY='dopamineCalV4';
+var DOT_COLORS=['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
+var WEEKDAY_LABELS=['一','二','三','四','五','六','日'];
+var MOOD_EMOJIS=['😊','😄','😍','🤩','😌','😐','😢','😡','😴','🤒','🎉','💪','❤️','🌟','💡','🔥'];
+var MEM_TYPES={birthday:'🎂 生日',anniversary:'💍 纪念日',holiday:'🎉 节日',memorial:'🕯 忌日',custom:'📌 自定义',countup:'📆 正数日',countdown:'⏳ 倒数日'};
+var MEM_ICONS={birthday:'🎂',anniversary:'💍',holiday:'🎉',memorial:'🕯',custom:'📌',countup:'📆',countdown:'⏳'};
 
-async function loadCloudData() {
-  if (!currentUser) return null;
-  try {
-    const r = await fetch(SUPABASE_URL + '/rest/v1/user_data?select=data&user_id=eq.' + currentUser.id, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + currentUser.token }
-    });
-    if (!r.ok) return null;
-    const rows = await r.json();
-    return rows.length > 0 ? rows[0].data : null;
-  } catch(e) { console.warn('loadCloud:', e); return null; }
-}
+// 状态
+var state={currentYear:new Date().getFullYear(),currentMonth:new Date().getMonth(),selectedDate:null,tasksByDate:{},memorials:[],priorityFilter:null,moods:{},journals:{}};
 
-async function saveCloudData(data) {
-  if (!currentUser) return;
-  try {
-    // Try PATCH first, then POST if 404
-    let r = await fetch(SUPABASE_URL + '/rest/v1/user_data?user_id=eq.' + currentUser.id, {
-      method: 'PATCH',
-      headers: { ...supabaseHeaders(), 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ data, updated_at: new Date().toISOString() })
-    });
-    if (r.status === 404) {
-      r = await fetch(SUPABASE_URL + '/rest/v1/user_data', {
-        method: 'POST',
-        headers: supabaseHeaders(),
-        body: JSON.stringify({ user_id: currentUser.id, data, updated_at: new Date().toISOString() })
-      });
-    }
-  } catch(e) { console.warn('saveCloud:', e); }
-}
+// 工具函数
+function getTodayKey(){var d=new Date();return dateKey(d.getFullYear(),d.getMonth(),d.getDate());}
+function dateKey(y,m,d){return y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');}
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,10);}
+function sanitize(t){return t.replace(/</g,'&lt;').replace(/>/g,'&gt;').trim();}
+function daysInMonth(y,m){return new Date(y,m+1,0).getDate();}
 
-let syncTimer = null;
-function startRealtimeSync() {
-  if (!currentUser) return;
-  if (syncTimer) clearInterval(syncTimer);
-  syncTimer = setInterval(async () => {
-    const cloud = await loadCloudData();
-    if (cloud) {
-      const local = dumpState();
-      const merged = deepMerge(local, cloud);
-      if (JSON.stringify(merged) !== JSON.stringify(local)) {
-        applyState(merged);
-        saveLocalState(merged);
-        renderApp();
-      }
-    }
-  }, 5000); // 姣?绉掓鏌ヤ竴娆′簯绔洿鏂?}
-
-async function signIn(email) {
-  const r = await fetch(SUPABASE_URL + '/auth/v1/otp', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, create_user: true })
-  });
-  if (!r.ok) { const e = await r.text(); throw new Error('鍙戦€佸け璐? ' + e); }
-}
-
-async function verifyOtp(email, token) {
-  const r = await fetch(SUPABASE_URL + '/auth/v1/verify', {
-    method: 'POST',
-    headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, token, type: 'magiclink' })
-  });
-  if (!r.ok) throw new Error('楠岃瘉澶辫触');
-  const data = await r.json();
-  return { id: data.user.id, email: data.user.email, token: data.access_token };
-}
-
-async function getSession() {
-  // 浠?URL hash 涓幏鍙?token
-  const hash = window.location.hash;
-  if (!hash) return null;
-  const params = new URLSearchParams(hash.replace('#', ''));
-  const accessToken = params.get('access_token');
-  const refreshToken = params.get('refresh_token');
-  if (!accessToken) return null;
-  // 鐢?token 鑾峰彇鐢ㄦ埛淇℃伅
-  const r = await fetch(SUPABASE_URL + '/auth/v1/user', {
-    headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + accessToken }
-  });
-  if (!r.ok) return null;
-  const data = await r.json();
-  // 娓呴櫎 URL hash
-  window.location.hash = '';
-  return { id: data.id, email: data.email, token: accessToken };
-}
-
-function deepMerge(local, remote) {
-  if (!remote) return local;
-  const result = { ...local };
-  for (const key of ['tasks','moods','journals']) {
-    if (remote[key]) result[key] = { ...local[key], ...remote[key] };
-  }
-  if (remote.memorials) {
-    const localIds = new Set((result.memorials||[]).map(m=>m.id));
-    result.memorials = [...(result.memorials||[])];
-    for (const m of remote.memorials) {
-      if (!localIds.has(m.id)) result.memorials.push(m);
-    }
-  }
-  return result;
-}
-
-function dumpState() {
-  return { tasks: state.tasksByDate, memorials: state.memorials, moods: state.moods, journals: state.journals };
-}
-
-function applyState(data) {
-  if (data.tasks) state.tasksByDate = data.tasks;
-  if (data.memorials) state.memorials = data.memorials;
-  if (data.moods) state.moods = data.moods;
-  if (data.journals) state.journals = data.journals;
-}
-
-// ==================== 甯搁噺 ====================
-const STORAGE_KEY = 'dopamineCalV3';
-const DOT_COLORS = ['#7EC8A0','#C7E990','#B5A0D8','#8EC8E8','#EDCFD0','#8ED8B8'];
-const WEEKDAY_LABELS = ['涓€','浜?,'涓?,'鍥?,'浜?,'鍏?,'鏃?];
-const MEMORIAL_TYPES = { birthday:'馃巶 鐢熸棩', anniversary:'馃拲 绾康鏃?, holiday:'馃帀 鑺傛棩', memorial:'馃暞 蹇屾棩', custom:'馃搶 鑷畾涔?, countup:'馃搯 姝ｆ暟鏃?, countdown:'鈴?鍊掓暟鏃? };
-const MEMORIAL_ICONS = { birthday:'馃巶', anniversary:'馃拲', holiday:'馃帀', memorial:'馃暞', custom:'馃搶', countup:'馃搯', countdown:'鈴? };
-const PRIORITY_LABELS = { 0:'', 1:'猸?, 2:'馃敟', 3:'馃毃' };
-const PRIORITY_COLORS = { 0:'#ddd', 1:'#3498DB', 2:'#F39C12', 3:'#E74C3C' };
-
-// ==================== DOM ====================
-const appEl = document.getElementById('app');
-const calendarPanel = document.getElementById('calendar-panel');
-const sidePanel = document.getElementById('side-panel');
-const yearText = document.getElementById('year-text');
-const monthText = document.getElementById('month-text');
-const yearPickerOverlay = document.getElementById('year-picker-overlay');
-const yearPickerPopup = document.getElementById('year-picker-popup');
-const monthPickerOverlay = document.getElementById('month-picker-overlay');
-const monthPickerPopup = document.getElementById('month-picker-popup');
-const memorialModal = document.getElementById('memorial-modal');
-const memorialModalBox = document.getElementById('memorial-modal-box');
-
-// ==================== 鐘舵€?====================
-const MOOD_EMOJIS = ['馃槉','馃槃','馃槏','馃ぉ','馃槍','馃槓','馃槩','馃槨','馃槾','馃','馃帀','馃挭','鉂わ笍','馃専','馃挕','馃敟'];
-let state = {
-  currentYear: new Date().getFullYear(),
-  currentMonth: new Date().getMonth(),
-  selectedDate: null,
-  tasksByDate: {},
-  memorials: [],
-  priorityFilter: null,
-  moods: {},            // { "YYYY-MM-DD": "馃槉" }
-  journals: {}          // { "YYYY-MM-DD": "浠婂ぉ..." }
-};
-
-function getTodayKey() {
-  const d = new Date();
-  return dateKey(d.getFullYear(), d.getMonth(), d.getDate());
-}
-function dateKey(y, m, d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
-function generateId() {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
-  return Date.now().toString(36) + Math.random().toString(36).slice(2,10);
-}
-function sanitize(text) { return text.replace(/</g,'&lt;').replace(/>/g,'&gt;').trim(); }
-
-// ==================== 鎸佷箙鍖?(鏈湴 + 浜戠) ====================
-function loadLocalState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const data = JSON.parse(raw);
-      applyState(data);
-    }
-  } catch(e) {}
-}
-
-function saveLocalState(data) {
-  try {
-    const d = data || dumpState();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 3, ...d }));
-  } catch(e) {}
-}
-
-async function loadState() {
-  const now = new Date();
-  state.currentYear = now.getFullYear();
-  state.currentMonth = now.getMonth();
-  state.selectedDate = getTodayKey();
-
-  if (currentUser) {
-    const cloudData = await loadCloudData();
-    if (cloudData) {
-      // 浜戠鏈夋暟鎹?鈫?鍚堝苟鍒版湰鍦?      const local = dumpState();
-      const merged = deepMerge(local, cloudData);
-      applyState(merged);
-      saveLocalState(merged);
-      // 濡傛灉鏈湴鏈変簯绔病鏈夌殑鏁版嵁锛屼笂浼?      if (JSON.stringify(local) !== JSON.stringify(cloudData)) {
-        saveCloudData(merged);
-      }
-    } else {
-      // 浜戠绌?鈫?涓婁紶鏈湴鏁版嵁
-      const local = dumpState();
-      saveCloudData(local);
-    }
-    startRealtimeSync();
+// ==================== 登录弹窗（全局函数，HTML onclick 直接调用）====================
+window.openLogin=function(){
+  var box=document.getElementById('login-modal-box');
+  var modal=document.getElementById('login-modal');
+  if(currentUser){
+    box.innerHTML='<h3 style="text-align:center">已登录</h3><p style="text-align:center;color:#636E72">'+currentUser.email+'</p><p style="text-align:center">云端同步中</p><div class="btn-row" style="justify-content:center;margin-top:12px"><button class="btn-delete" id="btn-logout">退出</button><button class="btn-cancel" id="btn-login-close">关闭</button></div>';
+    modal.style.display='flex';
+    setTimeout(function(){
+      var b1=document.getElementById('btn-logout'),b2=document.getElementById('btn-login-close');
+      if(b1)b1.onclick=function(){currentUser=null;updateLoginBtn();loadLocalState();renderApp();modal.style.display='none';};
+      if(b2)b2.onclick=function(){modal.style.display='none';};
+    },50);
   } else {
-    loadLocalState();
+    box.innerHTML='<h3 style="text-align:center">登录同步</h3><p style="font-size:0.85rem;color:#636E72;text-align:center">登录后电脑/手机/平板自动同步</p><input type="email" id="login-email" placeholder="输入邮箱" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:10px;font-size:0.9rem;margin-bottom:8px"><button class="btn-save" id="btn-send-magic" style="width:100%">发送登录链接</button><p style="font-size:0.7rem;color:#999;text-align:center;margin-top:6px">无需密码，邮箱收链接即登入</p><button class="btn-cancel" id="btn-login-close2" style="display:block;margin:8px auto 0">关闭</button>';
+    modal.style.display='flex';
+    setTimeout(function(){
+      var b3=document.getElementById('btn-send-magic'),b4=document.getElementById('btn-login-close2');
+      if(b3)b3.onclick=async function(){
+        var email=document.getElementById('login-email').value.trim();
+        if(!email){alert('请输入邮箱');return;}
+        try{
+          await signIn(email);
+          box.innerHTML='<h3 style="text-align:center">已发送!</h3><p style="text-align:center;color:#636E72">登录链接已发送到 <b>'+email+'</b></p><p style="text-align:center;font-size:0.8rem;color:#999">请查收邮件点击链接<br>（检查垃圾邮件箱）</p><button class="btn-cancel" id="btn-login-close3" style="display:block;margin:8px auto 0">关闭</button>';
+          var b5=document.getElementById('btn-login-close3');
+          if(b5)b5.onclick=function(){modal.style.display='none';};
+        }catch(e){alert('发送失败: '+e.message);}
+      };
+      if(b4)b4.onclick=function(){modal.style.display='none';};
+    },50);
   }
-}
-
-async function saveState() {
-  const data = dumpState();
-  saveLocalState(data);
-  if (currentUser) await saveCloudData(data);
-}
-
-// ==================== 鍐滃巻绠楁硶 ====================
-const LUNAR_INFO = [
-  0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,
-  0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,
-  0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,
-  0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,
-  0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,
-  0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,
-  0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,
-  0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,
-  0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,
-  0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,
-  0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,
-  0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,
-  0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,
-  0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,
-  0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,
-  0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06aa0,0x1a6c4,0x0aae0,
-  0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,
-  0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,
-  0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,
-  0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,
-  0x0d520
-];
-const STEMS = ['鐢?,'涔?,'涓?,'涓?,'鎴?,'宸?,'搴?,'杈?,'澹?,'鐧?];
-const BRANCHES = ['瀛?,'涓?,'瀵?,'鍗?,'杈?,'宸?,'鍗?,'鏈?,'鐢?,'閰?,'鎴?,'浜?];
-const LUNAR_MONTHS = ['姝?,'浜?,'涓?,'鍥?,'浜?,'鍏?,'涓?,'鍏?,'涔?,'鍗?,'鍐?,'鑵?];
-const LUNAR_DAYS = ['','鍒濅竴','鍒濅簩','鍒濅笁','鍒濆洓','鍒濅簲','鍒濆叚','鍒濅竷','鍒濆叓','鍒濅節','鍒濆崄','鍗佷竴','鍗佷簩','鍗佷笁','鍗佸洓','鍗佷簲','鍗佸叚','鍗佷竷','鍗佸叓','鍗佷節','浜屽崄','寤夸竴','寤夸簩','寤夸笁','寤垮洓','寤夸簲','寤垮叚','寤夸竷','寤垮叓','寤夸節','涓夊崄'];
-
-function lunarYearDays(y) {
-  let sum = 348;
-  for (let i = 0x8000; i > 0x8; i >>= 1) sum += (LUNAR_INFO[y - 1900] & i) ? 1 : 0;
-  return sum + lunarLeapDays(y);
-}
-function lunarLeapMonth(y) { return LUNAR_INFO[y - 1900] & 0xf; }
-function lunarLeapDays(y) {
-  if (lunarLeapMonth(y)) return (LUNAR_INFO[y - 1900] & 0x10000) ? 30 : 29;
-  return 0;
-}
-function lunarMonthDays(y, m) {
-  return (LUNAR_INFO[y - 1900] & (0x10000 >> m)) ? 30 : 29;
-}
-function solarToLunar(y, m, d) {
-  // m: 0-11, d: 1-31
-  if (y < 1900 || y > 2100) return { lunarYear: y, lunarMonth: m, lunarDay: d, isLeap: false };
-  const baseDate = new Date(1900, 0, 31);
-  const targetDate = new Date(y, m, d);
-  let offset = Math.round((targetDate - baseDate) / 86400000);
-  let ly, lm, ld, isLeap = false;
-  for (ly = 1900; ly < 2101 && offset > 0; ly++) {
-    const days = lunarYearDays(ly);
-    if (offset < days) break;
-    offset -= days;
-  }
-  const leap = lunarLeapMonth(ly);
-  let isLeapMonth = false;
-  for (lm = 1; lm < 13 && offset > 0; lm++) {
-    if (leap > 0 && lm === leap + 1 && !isLeapMonth) {
-      --lm; isLeapMonth = true;
-      const ld2 = lunarLeapDays(ly);
-      if (offset < ld2) break;
-      offset -= ld2;
-    } else {
-      const md = lunarMonthDays(ly, lm);
-      if (offset < md) break;
-      offset -= md;
-      if (isLeapMonth && lm === leap) { isLeapMonth = false; }
-    }
-  }
-  ld = offset + 1;
-  if (isLeapMonth) { isLeap = true; }
-  return {
-    lunarYear: ly, lunarMonth: lm === 0 ? 1 : lm, lunarDay: ld,
-    isLeap: isLeap,
-    monthName: (isLeap ? '闂? : '') + LUNAR_MONTHS[(lm - 1 + 12) % 12],
-    dayName: LUNAR_DAYS[ld] || ld
-  };
-}
-function lunarToSolar(year, lunarMonth, lunarDay, isLeap) {
-  // 璁＄畻鍐滃巻鏃ユ湡瀵瑰簲鐨勫叕鍘嗘棩鏈?  const baseDate = new Date(1900, 0, 31);
-  let offset = 0;
-  for (let y = 1900; y < year; y++) offset += lunarYearDays(y);
-  const leap = lunarLeapMonth(year);
-  for (let m = 1; m < lunarMonth; m++) {
-    if (m === leap + 1 && isLeap) offset += lunarLeapDays(year);
-    offset += lunarMonthDays(year, m);
-  }
-  if (isLeap && lunarMonth === leap) offset += lunarMonthDays(year, lunarMonth);
-  offset += lunarDay - 1;
-  const d = new Date(baseDate.getTime() + offset * 86400000);
-  return { year: d.getFullYear(), month: d.getMonth() + 1, day: d.getDate() };
-}
-
-// ==================== 鑺傛皵 ====================
-const SOLAR_TERMS = ['灏忓瘨','澶у瘨','绔嬫槬','闆ㄦ按','鎯婅洶','鏄ュ垎','娓呮槑','璋烽洦','绔嬪','灏忔弧','鑺掔','澶忚嚦','灏忔殤','澶ф殤','绔嬬','澶勬殤','鐧介湶','绉嬪垎','瀵掗湶','闇滈檷','绔嬪啲','灏忛洩','澶ч洩','鍐嚦'];
-function getTerm(y, n) {
-  // 绠€鍖栧ぉ鏂囩畻娉曪紝n: 0=灏忓瘨, 1=澶у瘨...23=鍐嚦
-  const D = 0.2422;
-  const C = [
-    5.4055,20.12,3.87,18.73,5.63,20.646,4.81,20.1,5.52,21.04,5.678,21.37,
-    7.108,22.83,7.5,23.13,7.646,23.042,8.318,23.438,7.438,22.36,7.18,21.94
-  ];
-  const y21 = Math.floor(y / 100) * 100 === 2000 ? y - 2000 : 0; // 浠呮敮鎸?2000 骞村悗杩戜技
-  let d = Math.floor(y * D + C[n]) - Math.floor((y - 1) / 4);
-  if (y >= 2000) d -= Math.floor((y - 2000) / 100) - Math.floor((y - 2000) / 400);
-  if (d < 1 || d > 31) { /* 杈圭晫澶勭悊 */ d = Math.min(31, Math.max(1, d)); }
-  const m = Math.floor(n / 2) + 1;
-  return { month: m, day: Math.floor(d) };
-}
-function getTermName(y, m, d) {
-  for (let i = 0; i < 24; i++) {
-    const t = getTerm(y, i);
-    if (t.month === m + 1 && t.day === d) return SOLAR_TERMS[i];
-  }
-  return null;
-}
-
-// ==================== 娉曞畾鑺傚亣鏃ユ斁鍋囪皟浼戞暟鎹?====================
-// 鏍煎紡: "YYYY-M-D": { type: 'rest'(鏀惧亣) | 'work'(璋冧紤涓婄彮), name: '鑺傛棩鍚? }
-// 鏁版嵁鏉ユ簮: 鍥藉姟闄㈠姙鍏巺鏀惧亣瀹夋帓閫氱煡
-const HOLIDAY_SCHEDULE = {
-  // === 2026骞?===
-  // 鍏冩棪: 1鏈?鏃?3鏃ユ斁鍋? 浠?鏈?鏃ユ槸鍏冩棪
-  '2026-1-1':{t:'rest',n:'鍏冩棪'},'2026-1-2':{t:'rest',n:''},'2026-1-3':{t:'rest',n:''},
-  '2026-1-4':{t:'work',n:'琛ュ厓鏃?},
-  // 鏄ヨ妭: 1鏈?9鏃?姝ｆ湀鍒濅竴)-2鏈?鏃ユ斁鍋? 浠呮鏈堝垵涓€鏄?鏄ヨ妭"
-  '2026-1-29':{t:'rest',n:'鏄ヨ妭'},'2026-1-30':{t:'rest',n:''},'2026-1-31':{t:'rest',n:''},
-  '2026-2-1':{t:'rest',n:''},'2026-2-2':{t:'rest',n:''},'2026-2-3':{t:'rest',n:''},
-  '2026-2-4':{t:'rest',n:''},
-  '2026-1-25':{t:'work',n:'琛ユ槬鑺?},'2026-2-7':{t:'work',n:'琛ユ槬鑺?},
-  // 娓呮槑鑺? 4鏈?鏃?7鏃ユ斁鍋? 浠?鏈?鏃ユ槸娓呮槑鑺傛皵
-  '2026-4-5':{t:'rest',n:'娓呮槑'},'2026-4-6':{t:'rest',n:''},'2026-4-7':{t:'rest',n:''},
-  '2026-4-4':{t:'work',n:'琛ユ竻鏄?},
-  // 鍔冲姩鑺? 5鏈?鏃?5鏃ユ斁鍋? 浠?鏈?鏃ユ槸鍔冲姩鑺?  '2026-5-1':{t:'rest',n:'鍔冲姩鑺?},'2026-5-2':{t:'rest',n:''},'2026-5-3':{t:'rest',n:''},
-  '2026-5-4':{t:'rest',n:''},'2026-5-5':{t:'rest',n:''},
-  '2026-4-26':{t:'work',n:'琛ュ姵鍔ㄨ妭'},'2026-5-9':{t:'work',n:'琛ュ姵鍔ㄨ妭'},
-  // 绔崍鑺? 6鏈?9鏃?浜旀湀鍒濅簲)-21鏃ユ斁鍋? 浠?鏈?9鏃ユ槸绔崍
-  '2026-6-19':{t:'rest',n:'绔崍'},'2026-6-20':{t:'rest',n:''},'2026-6-21':{t:'rest',n:''},
-  // 涓鑺? 9鏈?7鏃?鍐滃巻鍏湀鍗佷簲)鏄腑绉? 9鏈?8-30鏄浗搴嗚繛浼戠殑鏅€氬亣鏃?  '2026-9-27':{t:'rest',n:'涓'},
-  // 鍥藉簡鑺?涓鑺傝繛浼? 9鏈?8鏃?10鏈?鏃? 鍏朵腑10鏈?-3鏃ユ槸鍥藉簡, 鍏朵綑鏄繛浼戝亣鏃?  '2026-9-28':{t:'rest',n:''},'2026-9-29':{t:'rest',n:''},'2026-9-30':{t:'rest',n:''},
-  '2026-10-1':{t:'rest',n:'鍥藉簡'},'2026-10-2':{t:'rest',n:'鍥藉簡'},'2026-10-3':{t:'rest',n:'鍥藉簡'},
-  '2026-10-4':{t:'rest',n:''},'2026-10-5':{t:'rest',n:''},'2026-10-6':{t:'rest',n:''},
-  '2026-10-7':{t:'rest',n:''},'2026-10-8':{t:'rest',n:''},
-  '2026-9-20':{t:'work',n:'琛ュ浗搴?},'2026-10-10':{t:'work',n:'琛ュ浗搴?},
-  // === 2027骞?(棰勬帓) ===
-  '2027-1-1':{t:'rest',n:'鍏冩棪'},'2027-1-2':{t:'rest',n:'鍏冩棪'},'2027-1-3':{t:'rest',n:'鍏冩棪'},
-  '2027-5-1':{t:'rest',n:'鍔冲姩鑺?},'2027-5-2':{t:'rest',n:'鍔冲姩鑺?},'2027-5-3':{t:'rest',n:'鍔冲姩鑺?},
-  '2027-5-4':{t:'rest',n:'鍔冲姩鑺?},'2027-5-5':{t:'rest',n:'鍔冲姩鑺?},
-  '2027-10-1':{t:'rest',n:'鍥藉簡'},'2027-10-2':{t:'rest',n:'鍥藉簡'},'2027-10-3':{t:'rest',n:'鍥藉簡'},
-  '2027-10-4':{t:'rest',n:'鍥藉簡'},'2027-10-5':{t:'rest',n:'鍥藉簡'},'2027-10-6':{t:'rest',n:'鍥藉簡'},
-  '2027-10-7':{t:'rest',n:'鍥藉簡'},
 };
 
-function getHolidaySchedule(y, m, d) {
-  return HOLIDAY_SCHEDULE[`${y}-${m+1}-${d}`] || null;
+// ==================== Supabase ====================
+async function signIn(email){
+  var r=await fetch(SUPABASE_URL+'/auth/v1/otp',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email,create_user:true})});
+  if(!r.ok)throw new Error(await r.text());
 }
+async function loadCloudData(){
+  if(!currentUser)return null;
+  try{
+    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?select=data&user_id=eq.'+currentUser.id,{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+currentUser.token}});
+    if(!r.ok)return null;
+    var rows=await r.json();
+    return rows.length?rows[0].data:null;
+  }catch(e){return null;}
+}
+async function saveCloudData(data){
+  if(!currentUser)return;
+  try{
+    var h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+currentUser.token,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?user_id=eq.'+currentUser.id,{method:'PATCH',headers:h,body:JSON.stringify({data:data,updated_at:new Date().toISOString()})});
+    if(r.status===404)await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:JSON.stringify({user_id:currentUser.id,data:data,updated_at:new Date().toISOString()})});
+  }catch(e){}
+}
+function startSync(){
+  if(!currentUser||syncTimer)return;
+  syncTimer=setInterval(async function(){
+    var cloud=await loadCloudData();
+    if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);if(JSON.stringify(merged)!==JSON.stringify(local)){applyState(merged);saveLocalState(merged);renderApp();}}
+  },5000);
+}
+async function getSession(){
+  var hash=window.location.hash;
+  if(!hash)return null;
+  var params=new URLSearchParams(hash.replace('#',''));
+  var token=params.get('access_token');
+  if(!token)return null;
+  var r=await fetch(SUPABASE_URL+'/auth/v1/user',{headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+token}});
+  if(!r.ok)return null;
+  var data=await r.json();
+  window.location.hash='';
+  return{id:data.id,email:data.email,token:token};
+}
+function deepMerge(local,remote){
+  if(!remote)return local;
+  var r={tasks:local.tasks||{},memorials:local.memorials||[],moods:local.moods||{},journals:local.journals||{}};
+  if(remote.tasks)for(var k in remote.tasks)r.tasks[k]=remote.tasks[k];
+  if(remote.moods)for(var k in remote.moods)r.moods[k]=remote.moods[k];
+  if(remote.journals)for(var k in remote.journals)r.journals[k]=remote.journals[k];
+  if(remote.memorials){var ids=new Set(r.memorials.map(function(m){return m.id}));for(var i=0;i<remote.memorials.length;i++)if(!ids.has(remote.memorials[i].id))r.memorials.push(remote.memorials[i]);}
+  return r;
+}
+function dumpState(){return{tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals};}
+function applyState(data){if(data.tasks)state.tasksByDate=data.tasks;if(data.memorials)state.memorials=data.memorials;if(data.moods)state.moods=data.moods;if(data.journals)state.journals=data.journals;}
+function updateLoginBtn(){var b=document.getElementById('btn-login');if(b)b.textContent=currentUser?'已登录':'登录';}
 
-function getLegalHoliday(y, m, d) {
-  // 鍏堟煡鏀惧亣璋冧紤琛?  const sched = getHolidaySchedule(y, m, d);
-  if (sched) return { name: sched.n, isRest: sched.t==='rest', isWork: sched.t==='work' };
+// ==================== 持久化 ====================
+function loadLocalState(){try{var r=localStorage.getItem(STORAGE_KEY);if(r)applyState(JSON.parse(r));}catch(e){}}
+function saveLocalState(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:4,tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals}));}catch(e){}}
+async function loadState(){
+  var now=new Date();state.currentYear=now.getFullYear();state.currentMonth=now.getMonth();state.selectedDate=getTodayKey();
+  if(currentUser){var cloud=await loadCloudData();if(cloud){var local=dumpState();var merged=deepMerge(local,cloud);applyState(merged);saveLocalState(merged);}else{saveCloudData(dumpState());}startSync();}
+  else{loadLocalState();}
+}
+async function saveState(){var d=dumpState();saveLocalState(d);if(currentUser)await saveCloudData(d);}
 
-  // 鍐滃巻鑺傛棩锛堜紶缁熻妭鏃ワ紝涓嶅湪娉曞畾鏀惧亣琛ㄩ噷鐨勶級
-  const lunar = solarToLunar(y, m, d);
-  if (!lunar.isLeap) {
-    if (lunar.lunarMonth === 1 && lunar.lunarDay === 1) return { name: '鏄ヨ妭', isRest: false };
-    if (lunar.lunarMonth === 1 && lunar.lunarDay === 15) return { name: '鍏冨鑺?, isRest: false };
-    if (lunar.lunarMonth === 5 && lunar.lunarDay === 5) return { name: '绔崍', isRest: false };
-    if (lunar.lunarMonth === 7 && lunar.lunarDay === 7) return { name: '涓冨', isRest: false };
-    if (lunar.lunarMonth === 7 && lunar.lunarDay === 15) return { name: '涓厓鑺?, isRest: false };
-    if (lunar.lunarMonth === 8 && lunar.lunarDay === 15) return { name: '涓', isRest: false };
-    if (lunar.lunarMonth === 9 && lunar.lunarDay === 9) return { name: '閲嶉槼', isRest: false };
+// ==================== 农历 ====================
+var LUNAR_INFO=[0x04bd8,0x04ae0,0x0a570,0x054d5,0x0d260,0x0d950,0x16554,0x056a0,0x09ad0,0x055d2,0x04ae0,0x0a5b6,0x0a4d0,0x0d250,0x1d255,0x0b540,0x0d6a0,0x0ada2,0x095b0,0x14977,0x04970,0x0a4b0,0x0b4b5,0x06a50,0x06d40,0x1ab54,0x02b60,0x09570,0x052f2,0x04970,0x06566,0x0d4a0,0x0ea50,0x06e95,0x05ad0,0x02b60,0x186e3,0x092e0,0x1c8d7,0x0c950,0x0d4a0,0x1d8a6,0x0b550,0x056a0,0x1a5b4,0x025d0,0x092d0,0x0d2b2,0x0a950,0x0b557,0x06ca0,0x0b550,0x15355,0x04da0,0x0a5b0,0x14573,0x052b0,0x0a9a8,0x0e950,0x06aa0,0x0aea6,0x0ab50,0x04b60,0x0aae4,0x0a570,0x05260,0x0f263,0x0d950,0x05b57,0x056a0,0x096d0,0x04dd5,0x04ad0,0x0a4d0,0x0d4d4,0x0d250,0x0d558,0x0b540,0x0b6a0,0x195a6,0x095b0,0x049b0,0x0a974,0x0a4b0,0x0b27a,0x06a50,0x06d40,0x0af46,0x0ab60,0x09570,0x04af5,0x04970,0x064b0,0x074a3,0x0ea50,0x06b58,0x05ac0,0x0ab60,0x096d5,0x092e0,0x0c960,0x0d954,0x0d4a0,0x0da50,0x07552,0x056a0,0x0abb7,0x025d0,0x092d0,0x0cab5,0x0a950,0x0b4a0,0x0baa4,0x0ad50,0x055d9,0x04ba0,0x0a5b0,0x15176,0x052b0,0x0a930,0x07954,0x06aa0,0x0ad50,0x05b52,0x04b60,0x0a6e6,0x0a4e0,0x0d260,0x0ea65,0x0d530,0x05aa0,0x076a3,0x096d0,0x04afb,0x04ad0,0x0a4d0,0x1d0b6,0x0d250,0x0d520,0x0dd45,0x0b5a0,0x056d0,0x055b2,0x049b0,0x0a577,0x0a4b0,0x0aa50,0x1b255,0x06d20,0x0ada0,0x14b63,0x09370,0x049f8,0x04970,0x064b0,0x168a6,0x0ea50,0x06aa0,0x1a6c4,0x0aae0,0x092e0,0x0d2e3,0x0c960,0x0d557,0x0d4a0,0x0da50,0x05d55,0x056a0,0x0a6d0,0x055d4,0x052d0,0x0a9b8,0x0a950,0x0b4a0,0x0b6a6,0x0ad50,0x055a0,0x0aba4,0x0a5b0,0x052b0,0x0b273,0x06930,0x07337,0x06aa0,0x0ad50,0x14b55,0x04b60,0x0a570,0x054e4,0x0d160,0x0e968,0x0d520,0x0daa0,0x16aa6,0x056d0,0x04ae0,0x0a9d4,0x0a4d0,0x0d150,0x0f252,0x0d520];
+var LUNAR_MONTHS=['正','二','三','四','五','六','七','八','九','十','冬','腊'];
+var LUNAR_DAYS=['','初一','初二','初三','初四','初五','初六','初七','初八','初九','初十','十一','十二','十三','十四','十五','十六','十七','十八','十九','二十','廿一','廿二','廿三','廿四','廿五','廿六','廿七','廿八','廿九','三十'];
+function lunarYearDays(y){var s=348;for(var i=0x8000;i>0x8;i>>=1)s+=(LUNAR_INFO[y-1900]&i)?1:0;return s+lunarLeapDays(y);}
+function lunarLeapMonth(y){return LUNAR_INFO[y-1900]&0xf;}
+function lunarLeapDays(y){if(lunarLeapMonth(y))return(LUNAR_INFO[y-1900]&0x10000)?30:29;return 0;}
+function lunarMonthDays(y,m){return(LUNAR_INFO[y-1900]&(0x10000>>m))?30:29;}
+function solarToLunar(y,m,d){
+  if(y<1900||y>2100)return{lunarYear:y,lunarMonth:m+1,lunarDay:d,isLeap:false,monthName:'',dayName:''};
+  var base=new Date(1900,0,31),target=new Date(y,m,d),offset=Math.round((target-base)/86400000),ly,lm,ld,isLeap=false;
+  for(ly=1900;ly<2101&&offset>0;ly++){var d2=lunarYearDays(ly);if(offset<d2)break;offset-=d2;}
+  var leap=lunarLeapMonth(ly),isLeapMonth=false;
+  for(lm=1;lm<13&&offset>0;lm++){if(leap>0&&lm===leap+1&&!isLeapMonth){--lm;isLeapMonth=true;var ld2=lunarLeapDays(ly);if(offset<ld2)break;offset-=ld2;}else{var md=lunarMonthDays(ly,lm);if(offset<md)break;offset-=md;if(isLeapMonth&&lm===leap)isLeapMonth=false;}}
+  ld=offset+1;if(isLeapMonth)isLeap=true;
+  return{lunarYear:ly,lunarMonth:lm,isLeap:isLeap,monthName:(isLeap?'闰':'')+LUNAR_MONTHS[(lm-1+12)%12],dayName:LUNAR_DAYS[ld]||''+ld};
+}
+function lunarToSolar(year,lm,ld,isLeap){
+  var base=new Date(1900,0,31),offset=0;
+  for(var y=1900;y<year;y++)offset+=lunarYearDays(y);
+  var leap=lunarLeapMonth(year);
+  for(var m=1;m<lm;m++){if(m===leap+1&&isLeap)offset+=lunarLeapDays(year);offset+=lunarMonthDays(year,m);}
+  if(isLeap&&lm===leap)offset+=lunarMonthDays(year,lm);
+  offset+=ld-1;
+  var d=new Date(base.getTime()+offset*86400000);
+  return{year:d.getFullYear(),month:d.getMonth(),day:d.getDate()};
+}
+var SOLAR_TERMS=['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+function getTerm(y,n){var D=0.2422,C=[5.4055,20.12,3.87,18.73,5.63,20.646,4.81,20.1,5.52,21.04,5.678,21.37,7.108,22.83,7.5,23.13,7.646,23.042,8.318,23.438,7.438,22.36,7.18,21.94];var d=Math.floor(y*D+C[n])-Math.floor((y-1)/4);if(y>=2000)d-=Math.floor((y-2000)/100)-Math.floor((y-2000)/400);d=Math.min(31,Math.max(1,d));return{month:Math.floor(n/2)+1,day:Math.floor(d)};}
+function getTermName(y,m,d){for(var i=0;i<24;i++){var t=getTerm(y,i);if(t.month===m+1&&t.day===d)return SOLAR_TERMS[i];}return null;}
+
+// ==================== 节假日 ====================
+var HOLIDAY_SCHEDULE={'2026-1-1':{t:'rest',n:'元旦'},'2026-1-2':{t:'rest',n:''},'2026-1-3':{t:'rest',n:''},'2026-1-4':{t:'work',n:'补元旦'},'2026-1-29':{t:'rest',n:'春节'},'2026-1-30':{t:'rest',n:''},'2026-1-31':{t:'rest',n:''},'2026-2-1':{t:'rest',n:''},'2026-2-2':{t:'rest',n:''},'2026-2-3':{t:'rest',n:''},'2026-2-4':{t:'rest',n:''},'2026-1-25':{t:'work',n:'补春节'},'2026-2-7':{t:'work',n:'补春节'},'2026-4-5':{t:'rest',n:'清明'},'2026-4-6':{t:'rest',n:''},'2026-4-7':{t:'rest',n:''},'2026-4-4':{t:'work',n:'补清明'},'2026-5-1':{t:'rest',n:'劳动节'},'2026-5-2':{t:'rest',n:''},'2026-5-3':{t:'rest',n:''},'2026-5-4':{t:'rest',n:''},'2026-5-5':{t:'rest',n:''},'2026-4-26':{t:'work',n:'补劳动节'},'2026-5-9':{t:'work',n:'补劳动节'},'2026-6-19':{t:'rest',n:'端午'},'2026-6-20':{t:'rest',n:''},'2026-6-21':{t:'rest',n:''},'2026-9-27':{t:'rest',n:'中秋'},'2026-9-28':{t:'rest',n:''},'2026-9-29':{t:'rest',n:''},'2026-9-30':{t:'rest',n:''},'2026-10-1':{t:'rest',n:'国庆'},'2026-10-2':{t:'rest',n:'国庆'},'2026-10-3':{t:'rest',n:'国庆'},'2026-10-4':{t:'rest',n:''},'2026-10-5':{t:'rest',n:''},'2026-10-6':{t:'rest',n:''},'2026-10-7':{t:'rest',n:''},'2026-10-8':{t:'rest',n:''},'2026-9-20':{t:'work',n:'补国庆'},'2026-10-10':{t:'work',n:'补国庆'}};
+function getHoliday(y,m,d){return HOLIDAY_SCHEDULE[y+'-'+(m+1)+'-'+d]||null;}
+function getNthDay(y,m,dow,n){var c=0;for(var d=1;d<=daysInMonth(y,m);d++){if(new Date(y,m,d).getDay()===dow){c++;if(c===n)return d;}}return 0;}
+function getObservance(y,m,d){
+  var md=(m+1)+'-'+d,fixed={'1-1':'元旦','2-14':'情人节','3-8':'妇女节','4-1':'愚人节','5-1':'劳动节','5-4':'青年节','6-1':'儿童节','7-1':'建党节','8-1':'建军节','9-10':'教师节','10-1':'国庆节','10-31':'万圣节','12-24':'平安夜','12-25':'圣诞节','12-31':'跨年夜'};
+  if(fixed[md])return fixed[md];
+  if(m===4&&d===getNthDay(y,4,0,2))return'母亲节';
+  if(m===5&&d===getNthDay(y,5,0,3))return'父亲节';
+  if(m===10&&d===getNthDay(y,10,4,4))return'感恩节';
+  return null;
+}
+function getLegalHoliday(y,m,d){
+  var sched=getHoliday(y,m,d);
+  if(sched)return{name:sched.n,isRest:sched.t==='rest',isWork:sched.t==='work'};
+  var lunar=solarToLunar(y,m,d);
+  if(!lunar.isLeap){
+    if(lunar.lunarMonth===1&&lunar.lunarDay===1)return{name:'春节',isRest:false};
+    if(lunar.lunarMonth===1&&lunar.lunarDay===15)return{name:'元宵节',isRest:false};
+    if(lunar.lunarMonth===5&&lunar.lunarDay===5)return{name:'端午',isRest:false};
+    if(lunar.lunarMonth===8&&lunar.lunarDay===15)return{name:'中秋',isRest:false};
   }
-  // 娓呮槑鑺?  if (m === 3 && (d === 4 || d === 5 || d === 6)) {
-    const term = getTerm(y, 6);
-    if (term.month === 4 && term.day === d) return { name: '娓呮槑', isRest: false };
-  }
+  if(m===3){var t=getTerm(y,6);if(t.month===4&&(d===t.day||d===t.day))return{name:'清明',isRest:false};}
   return null;
 }
 
-// ==================== 鍥介檯/閲嶈鑺傛棩 ====================
-function getNthDayOfMonth(y, m, dow, n) {
-  // 杩斿洖 y骞磎鏈?绗琻涓?鏄熸湡dow 鐨勬棩鏈?(dow: 0=Sun)
-  let count = 0;
-  const days = daysInMonth(y, m);
-  for (let d = 1; d <= days; d++) {
-    if (new Date(y, m, d).getDay() === dow) {
-      count++;
-      if (count === n) return d;
-    }
-  }
-  return 0;
-}
-function getObservance(y, m, d) {
-  // 杩斿洖鑺傛棩鍚嶇О锛屾垨null
-  const md = `${m+1}-${d}`;
-  const fixed = {
-    '1-1': '鍏冩棪', '2-14': '鎯呬汉鑺傪煉?, '3-8': '濡囧コ鑺?, '3-12': '妞嶆爲鑺?,
-    '4-1': '鎰氫汉鑺?, '5-4': '闈掑勾鑺?, '6-1': '鍎跨鑺傪煣?,
-    '7-1': '寤哄厷鑺?, '8-1': '寤哄啗鑺?, '9-10': '鏁欏笀鑺傪煋?,
-    '10-31': '涓囧湥鑺傪煄?, '12-24': '骞冲畨澶滒煄?, '12-25': '鍦ｈ癁鑺傪煄?, '12-31': '璺ㄥ勾澶滒煄?
-  };
-  if (fixed[md]) return fixed[md];
-  // 姣嶄翰鑺? 5鏈堢2涓懆鏃?  if (m === 4 && d === getNthDayOfMonth(y, 4, 0, 2)) return '姣嶄翰鑺傪煂?;
-  // 鐖朵翰鑺? 6鏈堢3涓懆鏃?  if (m === 5 && d === getNthDayOfMonth(y, 5, 0, 3)) return '鐖朵翰鑺傪煈?;
-  // 鎰熸仼鑺? 11鏈堢4涓懆鍥?  if (m === 10 && d === getNthDayOfMonth(y, 10, 4, 4)) return '鎰熸仼鑺傪煢?;
-  return null;
-}
-
-// ==================== 鏃ュ巻璁＄畻 ====================
-function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
-function getMonthGridData(y, m) {
-  const firstDay = new Date(y, m, 1);
-  const realDow = firstDay.getDay();           // 0=Sun JS
-  const startIdx = (realDow + 6) % 7;          // 鍛ㄤ竴=0, 鍛ㄦ棩=6
-  const totalDays = daysInMonth(y, m);
-  const prevTotal = daysInMonth(m === 0 ? y - 1 : y, m === 0 ? 11 : m - 1);
-  const cells = [];
-  for (let i = startIdx - 1; i >= 0; i--) {
-    cells.push({ year: m===0 ? y-1 : y, month: m===0 ? 11 : m-1, day: prevTotal - i, currentMonth: false });
-  }
-  for (let d = 1; d <= totalDays; d++) cells.push({ year: y, month: m, day: d, currentMonth: true });
-  const rem = (7 - cells.length % 7) % 7;
-  for (let d = 1; d <= rem; d++) cells.push({ year: m===11 ? y+1 : y, month: m===11 ? 0 : m+1, day: d, currentMonth: false });
-  return cells;
-}
-function getChineseWeekday(dk) {
-  const d = new Date(dk + 'T00:00:00');
-  return ['鏄熸湡鏃?,'鏄熸湡涓€','鏄熸湡浜?,'鏄熸湡涓?,'鏄熸湡鍥?,'鏄熸湡浜?,'鏄熸湡鍏?][d.getDay()];
-}
-function formatDateChinese(dk) {
-  const [y, mm, d] = dk.split('-').map(Number);
-  return `${y}骞?{mm}鏈?{d}鏃;
-}
-
-// ==================== 绾康鏃?====================
-function getMemorialSolarDate(mem, year) {
-  if (mem.calendar === 'solar') {
-    return { year, month: mem.month, day: mem.day };
-  }
-  return lunarToSolar(year, mem.lunarMonth, mem.lunarDay, mem.lunarIsLeap || false);
-}
-function getMemorialsForDate(dateKeyStr) {
-  const [y, mm, d] = dateKeyStr.split('-').map(Number);
-  const checkDate = new Date(y, mm, d);
-  const results = [];
-  for (const mem of state.memorials) {
-    if (mem.repeat === 'yearly') {
-      const sd = getMemorialSolarDate(mem, y);
-      if (sd.month === mm && sd.day === d) results.push(mem);
-    } else if (mem.repeat === 'monthly') {
-      // 姣忔湀鍚屼竴澶╋紙澶勭悊鏈堟湯杈圭晫锛?1鏃モ啋璇ユ湀鏈€鍚庝竴澶╋級
-      const origDay = mem.day || mem.lunarDay || 1;
-      const maxDay = daysInMonth(y, mm);
-      const targetDay = Math.min(origDay, maxDay);
-      if (d === targetDay) results.push(mem);
-    } else if (mem.repeat === 'weekly') {
-      // 姣忓懆鍚屾槦鏈熷嚑
-      const origDate = new Date(mem.originalYear || y, (mem.month||1)-1, mem.day||1);
-      const origDow = origDate.getDay();
-      if (checkDate.getDay() === origDow) results.push(mem);
-    } else {
-      // once
-      const sd = getMemorialSolarDate(mem, mem.originalYear || y);
-      if (sd.month === mm && sd.day === d && mem.originalYear === y) results.push(mem);
-    }
+// ==================== 纪念日 ====================
+function getMemSolarDate(mem,year){if(mem.calendar==='solar')return{year:year,month:mem.month,day:mem.day};return lunarToSolar(year,mem.lunarMonth,mem.lunarDay,mem.lunarIsLeap||false);}
+function getMemorialsForDate(dk){
+  var parts=dk.split('-'),y=+parts[0],mm=+parts[1],d=+parts[2],check=new Date(y,mm-1,d),results=[];
+  for(var i=0;i<state.memorials.length;i++){
+    var mem=state.memorials[i];
+    if(mem.repeat==='yearly'){var sd=getMemSolarDate(mem,y);if(sd.month===mm&&sd.day===d)results.push(mem);}
+    else if(mem.repeat==='monthly'){var od=mem.day||mem.lunarDay||1;if(d===Math.min(od,daysInMonth(y,mm-1)))results.push(mem);}
+    else if(mem.repeat==='weekly'){var orig=new Date(mem.originalYear||y,(mem.month||1)-1,mem.day||1);if(check.getDay()===orig.getDay())results.push(mem);}
+    else{var sd2=getMemSolarDate(mem,mem.originalYear||y);if(sd2.month===mm&&sd2.day===d&&mem.originalYear===y)results.push(mem);}
   }
   return results;
 }
-function getUpcomingMemorials(limit) {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const upcoming = [];
-  const seen = new Set();
-  for (let offset = 0; offset < 365; offset++) {
-    const d = new Date(today.getTime() + offset * 86400000);
-    const key = dateKey(d.getFullYear(), d.getMonth(), d.getDate());
-    const mems = getMemorialsForDate(key);
-    for (const mem of mems) {
-      if (!seen.has(mem.id)) {
-        seen.add(mem.id);
-        upcoming.push({ ...mem, dateKey: key, daysUntil: offset });
-      }
-    }
-    if (upcoming.length >= limit) break;
-  }
-  return upcoming.slice(0, limit);
+function getUpcomingMemorials(limit){
+  var today=new Date();today.setHours(0,0,0,0);var up=[],seen=new Set();
+  for(var o=0;o<365;o++){var d=new Date(today.getTime()+o*86400000),k=dateKey(d.getFullYear(),d.getMonth(),d.getDate()),ms=getMemorialsForDate(k);for(var i=0;i<ms.length;i++){if(!seen.has(ms[i].id)){seen.add(ms[i].id);up.push({mem:ms[i],dateKey:k,daysUntil:o});}}if(up.length>=limit)break;}
+  return up;
 }
 
-// ==================== 浠诲姟鎿嶄綔 ====================
-function getTasks(dk) { return state.tasksByDate[dk] || []; }
-function addTask(dk, text, priority) {
-  text = sanitize(text);
-  if (!text) return false;
-  if (!state.tasksByDate[dk]) state.tasksByDate[dk] = [];
-  state.tasksByDate[dk].push({
-    id: generateId(), text, done: false, priority: priority || 0,
-    createdAt: new Date().toISOString(), completedAt: null
-  });
-  saveState(); return true;
-}
-function toggleTask(dk, taskId) {
-  const tasks = state.tasksByDate[dk]; if (!tasks) return;
-  const task = tasks.find(t => t.id === taskId); if (!task) return;
-  task.done = !task.done;
-  task.completedAt = task.done ? new Date().toISOString() : null;
-  saveState();
-  if (task.done) showCelebration();
-}
-function deleteTask(dk, taskId) {
-  const tasks = state.tasksByDate[dk]; if (!tasks) return;
-  state.tasksByDate[dk] = tasks.filter(t => t.id !== taskId);
-  if (state.tasksByDate[dk].length === 0) delete state.tasksByDate[dk];
-  saveState();
-}
-function getTaskStats(dk) {
-  const tasks = getTasks(dk);
-  return { total: tasks.length, done: tasks.filter(t => t.done).length };
+// ==================== 日历 ====================
+function getMonthGridData(y,m){
+  var firstDay=new Date(y,m,1),startIdx=(firstDay.getDay()+6)%7,total=daysInMonth(y,m);
+  var prevTotal=daysInMonth(m===0?y-1:y,m===0?11:m-1),cells=[];
+  for(var i=startIdx-1;i>=0;i--)cells.push({year:m===0?y-1:y,month:m===0?11:m-1,day:prevTotal-i,curMonth:false});
+  for(var d=1;d<=total;d++)cells.push({year:y,month:m,day:d,curMonth:true});
+  var rem=(7-cells.length%7)%7;
+  for(var d=1;d<=rem;d++)cells.push({year:m===11?y+1:y,month:m===11?0:m+1,day:d,curMonth:false});
+  return cells;
 }
 
-// ==================== 娓叉煋 ====================
-function renderApp() {
-  renderHeader();
-  renderCalendar();
-  renderSidePanel();
-  renderYearPicker();
-  renderMonthPicker();
+// ==================== 任务 ====================
+function getTasks(dk){return state.tasksByDate[dk]||[];}
+function addTask(dk,text,prio){text=sanitize(text);if(!text)return false;if(!state.tasksByDate[dk])state.tasksByDate[dk]=[];state.tasksByDate[dk].push({id:genId(),text:text,done:false,priority:prio||0,createdAt:new Date().toISOString(),completedAt:null});saveState();return true;}
+function toggleTask(dk,tid){var ts=state.tasksByDate[dk];if(!ts)return;var t=ts.find(function(x){return x.id===tid});if(!t)return;t.done=!t.done;t.completedAt=t.done?new Date().toISOString():null;saveState();if(t.done)showCelebration();}
+function deleteTask(dk,tid){var ts=state.tasksByDate[dk];if(!ts)return;state.tasksByDate[dk]=ts.filter(function(x){return x.id!==tid});if(!state.tasksByDate[dk].length)delete state.tasksByDate[dk];saveState();}
+
+// ==================== DOM ====================
+var app=document.getElementById('app'),calPanel=document.getElementById('calendar-panel'),sideP=document.getElementById('side-panel'),yearTxt=document.getElementById('year-text'),monthTxt=document.getElementById('month-text'),yearOL=document.getElementById('year-picker-overlay'),yearPP=document.getElementById('year-picker-popup'),monthOL=document.getElementById('month-picker-overlay'),monthPP=document.getElementById('month-picker-popup'),memModal=document.getElementById('memorial-modal'),memBox=document.getElementById('memorial-modal-box');
+
+// ==================== 渲染 ====================
+function renderApp(){renderHeader();renderCalendar();renderSidePanel();renderYearPicker();renderMonthPicker();}
+function renderHeader(){yearTxt.textContent=state.currentYear;monthTxt.textContent=(state.currentMonth+1)+'月';}
+function renderCalendar(){
+  var today=getTodayKey(),cells=getMonthGridData(state.currentYear,state.currentMonth);
+  var h='<div class="weekday-row">';for(var i=0;i<7;i++)h+='<div class="weekday-cell">'+WEEKDAY_LABELS[i]+'</div>';h+='</div><div class="calendar-grid">';
+  for(var j=0;j<cells.length;j++){
+    var c=cells[j],key=dateKey(c.year,c.month,c.day),isToday=key===today,isSel=key===state.selectedDate,isOth=!c.curMonth;
+    var lunar=solarToLunar(c.year,c.month,c.day),holiday=getLegalHoliday(c.year,c.month,c.day),term=getTermName(c.year,c.month,c.day),obs=getObservance(c.year,c.month,c.day),mems=getMemorialsForDate(key);
+    var cls='calendar-cell';if(isToday)cls+=' today';if(isSel)cls+=' selected';if(isOth)cls+=' other-month';if(holiday&&holiday.isRest)cls+=' holiday';
+    h+='<div class="'+cls+'" data-date="'+key+'"><span class="day-num">'+c.day+'</span>';
+    if(mems.length)for(var k=0;k<Math.min(mems.length,2);k++)h+='<span class="memorial-icon" title="'+mems[k].name+'">'+(MEM_ICONS[mems[k].type]||'📌')+'</span>';
+    if(holiday&&holiday.isRest){if(holiday.name||obs)h+='<span class="lunar-text observance">'+(holiday.name||obs)+'</span>';h+='<span class="lunar-text" style="color:#388E5C;font-weight:700">休</span>';}
+    else if(holiday&&holiday.isWork){h+='<span class="lunar-text" style="color:#999">'+holiday.name+'</span><span class="lunar-text" style="color:#999">班</span>';}
+    else if(obs){h+='<span class="lunar-text observance">'+obs+'</span>';}
+    else if(term){h+='<span class="lunar-text term">'+term+'</span>';}
+    else{var ld=lunar.lunarDay===1?lunar.monthName:(lunar.dayName||lunar.lunarDay);h+='<span class="lunar-text">'+ld+'</span>';}
+    h+=renderTaskDots(key)+'</div>';
+  }
+  h+='</div>';calPanel.innerHTML=h;
 }
-function renderHeader() {
-  yearText.textContent = state.currentYear;
-  monthText.textContent = `${state.currentMonth + 1}鏈坄;
-}
-function renderCalendar() {
-  const today = getTodayKey();
-  const cells = getMonthGridData(state.currentYear, state.currentMonth);
-  let html = '<div class="weekday-row">';
-  for (let i = 0; i < 7; i++) {
-    html += `<div class="weekday-cell${i===5||i===6?' weekend':''}">${WEEKDAY_LABELS[i]}</div>`;
-  }
-  html += '</div><div class="calendar-grid">';
-  for (const cell of cells) {
-    const key = dateKey(cell.year, cell.month, cell.day);
-    const isToday = key === today;
-    const isSelected = key === state.selectedDate;
-    const isOther = !cell.currentMonth;
-    const lunar = solarToLunar(cell.year, cell.month, cell.day);
-    const holiday = getLegalHoliday(cell.year, cell.month, cell.day);
-    const termName = getTermName(cell.year, cell.month, cell.day);
-    const observance = getObservance(cell.year, cell.month, cell.day);
-    const memorials = getMemorialsForDate(key);
-
-    let cls = 'calendar-cell';
-    if (isToday) cls += ' today';
-    if (isSelected) cls += ' selected';
-    if (isOther) cls += ' other-month';
-    if (holiday && holiday.isRest) cls += ' holiday';
-    if (holiday && holiday.isWork) cls += ' rest-day';
-
-    html += `<div class="${cls}" data-date="${key}">`;
-    html += `<span class="day-num">${cell.day}</span>`;
-
-    // 绾康鏃ュ浘鏍?    if (memorials.length > 0) {
-      for (const mem of memorials.slice(0,2)) {
-        const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
-        html += `<span class="memorial-icon" title="${mem.name}">${icon}</span>`;
-      }
-    }
-    // 鏄剧ず浼樺厛绾э細娉曞畾鑺傛棩鍚?> 閲嶈鑺傛棩 > 鑺傛皵 > 鍐滃巻
-    if (holiday && holiday.isRest) {
-      const label = holiday.name || observance || '';
-      if (label) html += `<span class="lunar-text observance">${label}</span>`;
-      html += `<span class="lunar-text" style="color:#388E5C;font-weight:700;">浼?/span>`;
-    } else if (holiday && holiday.isWork) {
-      html += `<span class="lunar-text" style="color:#999;font-weight:700;">${holiday.name}</span>`;
-      html += `<span class="lunar-text" style="color:#999;font-weight:700;">鐝?/span>`;
-    } else if (observance) {
-      html += `<span class="lunar-text observance">${observance}</span>`;
-    } else if (termName) {
-      html += `<span class="lunar-text term">${termName}</span>`;
-    } else {
-      const lunarDisplay = lunar.lunarDay === 1 ? lunar.monthName : (lunar.dayName || lunar.lunarDay);
-      const isFestival = lunar.isLeap ? false : (
-        (lunar.lunarMonth === 1 && lunar.lunarDay === 1) ||
-        (lunar.lunarMonth === 5 && lunar.lunarDay === 5) ||
-        (lunar.lunarMonth === 8 && lunar.lunarDay === 15)
-      );
-      html += `<span class="lunar-text${isFestival?' festival':''}">${lunarDisplay}</span>`;
-    }
-    // 浠诲姟鍦嗙偣
-    html += renderTaskDots(key);
-    html += '</div>';
-  }
-  html += '</div>';
-  calendarPanel.innerHTML = html;
-}
-function renderTaskDots(dk) {
-  const tasks = getTasks(dk);
-  if (tasks.length === 0) return '';
-  const maxDots = 5;
-  let html = '<div class="task-dots">';
-  // 浼樺厛鏄剧ず楂樹紭鍏堢骇鏈畬鎴愪换鍔?  const sorted = [...tasks].sort((a,b) => (b.priority||0) - (a.priority||0));
-  for (let i = 0; i < Math.min(sorted.length, maxDots); i++) {
-    const color = PRIORITY_COLORS[sorted[i].priority || 0] || DOT_COLORS[i % DOT_COLORS.length];
-    html += `<span class="task-dot" style="background:${color}"></span>`;
-  }
-  if (tasks.length > maxDots) html += `<span class="task-dot more">+${tasks.length - maxDots}</span>`;
-  html += '</div>';
-  return html;
-}
-function renderSidePanel() {
-  const dk = state.selectedDate;
-  if (!dk) {
-    sidePanel.innerHTML = `<div class="panel-empty"><span class="emoji">馃憜</span>鐐瑰嚮鏃ュ巻涓婄殑鏃ユ湡鏌ョ湅鍜屾坊鍔犱换鍔?/div>`;
-    return;
-  }
-  const tasks = getTasks(dk);
-  const stats = getTaskStats(dk);
-  const weekday = getChineseWeekday(dk);
-  const dateDisplay = formatDateChinese(dk);
-  const lunar = solarToLunar(
-    parseInt(dk.slice(0,4)), parseInt(dk.slice(5,7))-1, parseInt(dk.slice(8,10))
-  );
-  const memorials = getMemorialsForDate(dk);
-
-  let html = `<div class="panel-date">
-    馃搮 ${dateDisplay} <small>${weekday} 路 鍐滃巻${lunar.monthName}${lunar.dayName || lunar.lunarDay}</small>
-  </div>`;
-
-  // 褰撳ぉ绾康鏃ワ紙鐐瑰嚮寮瑰嚭绠＄悊绐楀彛锛?  if (memorials.length > 0) {
-    html += '<div class="memorial-section"><h4>馃搶 浠婃棩绾康鏃?/h4>';
-    for (const mem of memorials) {
-      const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
-      let countLabel = '';
-      if (mem.type === 'countup' || mem.type === 'countdown') {
-        const origDate = new Date((mem.originalYear||2024)+'-'+
-          String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00');
-        const todayDate = new Date(getTodayKey()+'T00:00:00');
-        const diff = Math.floor((todayDate - origDate) / 86400000);
-        if (mem.type === 'countup') {
-          countLabel = diff >= 0 ? ` 鑷充粖 ${diff+1} 澶ー : ` 杩樻湁 ${Math.abs(diff)} 澶ー;
-        } else {
-          countLabel = diff >= 0 ? ` 宸茶繃 ${diff} 澶ー : ` 杩樻湁 ${Math.abs(diff)} 澶ー;
-        }
-      }
-      html += `<div class="memorial-item memorial-clickable" data-memorial-id="${mem.id}" title="鐐瑰嚮绠＄悊绾康鏃?>
-        <span class="memo-icon">${icon}</span> ${mem.name}<span class="memorial-countdown">${countLabel}</span>
-      </div>`;
-    }
-    html += '</div>';
-  }
-
-  // 娣诲姞浠诲姟
-  html += `<div class="add-task-row">
-    <input type="text" class="add-task-input" id="task-input" placeholder="馃摑 娣诲姞浠诲姟..." maxlength="120" autocomplete="off">
-    <div class="priority-select" id="priority-select">
-      <span class="priority-dot p0 selected" data-p="0" title="鏅€?>鈼?/span>
-      <span class="priority-dot p1" data-p="1" title="閲嶈">猸?/span>
-      <span class="priority-dot p2" data-p="2" title="绱ф€?>馃敟</span>
-      <span class="priority-dot p3" data-p="3" title="閲嶈涓旂揣鎬?>馃毃</span>
-    </div>
-    <button class="add-task-btn" id="btn-add-task">娣诲姞</button>
-  </div>`;
-
-  // 浠诲姟鍒楄〃
-  if (tasks.length === 0) {
-    html += `<div class="panel-empty"><span class="emoji">${dk===getTodayKey()?'馃帀':'馃搵'}</span>${dk===getTodayKey()?'浠婂ぉ娌℃湁瀹夋帓锛屼韩鍙楄嚜鐢辨椂鍏墌':'杩樻病鏈変换鍔★紝娣诲姞涓€涓惂~'}</div>`;
-  } else {
-    html += '<div class="task-list">';
-    const sorted = [...tasks].sort((a,b) => {
-      if (a.done !== b.done) return a.done ? 1 : -1;
-      return (b.priority||0) - (a.priority||0) || b.createdAt.localeCompare(a.createdAt);
-    });
-    for (const task of sorted) {
-      const prio = task.priority || 0;
-      const todayDk = getTodayKey();
-      const daysLeft = (prio >= 3 && dk >= todayDk)
-        ? Math.ceil((new Date(dk+'T00:00:00') - new Date(todayDk+'T00:00:00')) / 86400000)
-        : null;
-      const doneCls = task.done ? ' done' : '';
-      html += `<div class="task-item p${prio}${doneCls}" data-task-id="${task.id}">
-        <input type="checkbox" class="task-checkbox" ${task.done?'checked':''}>
-        <span class="task-text">${task.text}</span>
-        ${prio > 0 ? `<span class="task-priority-badge" style="background:${PRIORITY_COLORS[prio]}20;color:${PRIORITY_COLORS[prio]}">${PRIORITY_LABELS[prio]}</span>` : ''}
-        ${daysLeft !== null && daysLeft >= 0 ? `<span class="task-countdown">鈿狅笍${daysLeft}澶?/span>` : ''}
-        <button class="task-delete" title="鍒犻櫎">馃棏</button>
-      </div>`;
-    }
-    html += '</div>';
-  }
-
-  // 杩涘害鏉?  if (tasks.length > 0) {
-    const pct = stats.total > 0 ? Math.round(stats.done / stats.total * 100) : 0;
-    html += `<div class="progress-section">
-      <div class="progress-text">${stats.done===stats.total?'馃帄 鍏ㄩ儴瀹屾垚锛?:`宸插畬鎴?${stats.done}/${stats.total}`}</div>
-      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
-    </div>`;
-  }
-
-  // 蹇冩儏锛堝彲鐐瑰嚮寮瑰嚭閫夋嫨锛?  const todayMood = state.moods[dk] || '';
-  html += `<div class="mood-section">
-    <h4>馃槉 浠婂ぉ蹇冩儏</h4>
-    <div class="memorial-clickable" id="mood-label" style="text-align:center;font-size:2rem;padding:6px;">${todayMood || '鈰?}</div>
-  </div>`;
-
-  // 姣忔棩鎬荤粨
-  const todayJournal = state.journals[dk] || '';
-  html += '<div class="journal-section"><h4>馃摑 浠婃棩鎬荤粨</h4>';
-  html += `<textarea class="journal-textarea" id="journal-textarea" placeholder="浠婂ぉ鍙戠敓浜嗕粈涔堬紵鏈変粈涔堟劅鎮?..">${todayJournal}</textarea>`;
-  html += '<div class="journal-save-hint">杈撳叆鍚庤嚜鍔ㄤ繚瀛?/div>';
-  html += '</div>';
-
-  // 娣诲姞绾康鏃?  html += '<div class="memorial-section">';
-  html += '<button class="btn-add-memorial" id="btn-add-memorial" style="width:100%;">锛?娣诲姞绾康鏃?/button>';
-  html += '</div>';
-
-  // 鍗冲皢鍒版潵鐨勭邯蹇垫棩
-  const upcoming = getUpcomingMemorials(5);
-  if (upcoming.length > 0) {
-    html += '<div class="memorial-section"><h4>鈴?鍗冲皢鍒版潵</h4>';
-    for (const u of upcoming) {
-      const icon = MEMORIAL_ICONS[u.type] || '馃搶';
-      html += `<div class="memorial-item">
-        <span class="memo-icon">${icon}</span> ${u.name}
-        <span class="memorial-countdown">${u.daysUntil === 0 ? '馃帀浠婂ぉ!' : `杩樻湁${u.daysUntil}澶ー}</span>
-      </div>`;
-    }
-    html += '</div>';
-  }
-
-  // 绱ф€ラ噸瑕佷换鍔″€掕鏃?  const urgentTasks = [];
-  const todayDk = getTodayKey();
-  for (let d = 0; d <= 7; d++) {
-    const checkD = new Date(new Date(todayDk+'T00:00:00').getTime() + d * 86400000);
-    const ck = dateKey(checkD.getFullYear(), checkD.getMonth(), checkD.getDate());
-    const tks = (state.tasksByDate[ck] || []).filter(t => !t.done && (t.priority||0) >= 3);
-    for (const t of tks) urgentTasks.push({ ...t, dateKey: ck, daysLeft: d });
-  }
-  if (urgentTasks.length > 0) {
-    html += '<div class="memorial-section"><h4>馃毃 绱ф€ラ噸瑕?/h4>';
-    for (const ut of urgentTasks.slice(0,5)) {
-      html += `<div class="memorial-item">
-        <span>馃毃</span> ${ut.text}
-        <span class="memorial-countdown">${ut.daysLeft===0?'鈿狅笍浠婂ぉ!':`杩樻湁${ut.daysLeft}澶ー}</span>
-      </div>`;
-    }
-    html += '</div>';
-  }
-
-  // 鍚屾鎸夐挳
-  html += `<div class="sync-section">
-    <button class="sync-btn" id="btn-export">馃摛 瀵煎嚭澶囦唤</button>
-    <button class="sync-btn" id="btn-import">馃摜 瀵煎叆澶囦唤</button>
-  </div>
-  <div class="sync-hint">瀵煎嚭鍚庡彂鍒板彟涓€鍙拌澶囧鍏ュ嵆鍙悓姝?/div>`;
-
-  sidePanel.innerHTML = html;
-
-  // 缁戝畾浜嬩欢
-  const input = document.getElementById('task-input');
-  if (input) {
-    input.focus();
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAddTask(e); });
-  }
-  const addBtn = document.getElementById('btn-add-task');
-  if (addBtn) addBtn.addEventListener('click', handleAddTask);
-  const btnExport = document.getElementById('btn-export');
-  const btnImport = document.getElementById('btn-import');
-  if (btnExport) btnExport.addEventListener('click', handleExport);
-  if (btnImport) btnImport.addEventListener('click', handleImport);
-  const btnMemorial = document.getElementById('btn-add-memorial');
-  if (btnMemorial) btnMemorial.addEventListener('click', () => showMemorialForm(dk));
-  // 浼樺厛绾ч€夋嫨
-  document.querySelectorAll('.priority-dot').forEach(dot => {
-    dot.addEventListener('click', () => {
-      document.querySelectorAll('.priority-dot').forEach(d => d.classList.remove('selected'));
-      dot.classList.add('selected');
-      state.priorityFilter = parseInt(dot.dataset.p);
-    });
-  });
-  // 蹇冩儏鏍囩鐐瑰嚮 鈫?寮瑰嚭閫夋嫨绐楀彛
-  const moodLabel = document.getElementById('mood-label');
-  if (moodLabel) {
-    moodLabel.addEventListener('click', () => showMoodPopup(dk));
-  }
-  // 姣忔棩鎬荤粨锛堣嚜鍔ㄤ繚瀛橈級
-  const journalTA = document.getElementById('journal-textarea');
-  if (journalTA) {
-    let journalTimer;
-    journalTA.addEventListener('input', () => {
-      clearTimeout(journalTimer);
-      journalTimer = setTimeout(() => {
-        const val = journalTA.value.trim();
-        if (val) {
-          state.journals[dk] = val;
-        } else {
-          delete state.journals[dk];
-        }
-        saveState();
-      }, 600); // 600ms 闃叉姈
-    });
-  }
+function renderTaskDots(dk){var ts=getTasks(dk);if(!ts.length)return'';var h='<div class="task-dots">';for(var i=0;i<Math.min(ts.length,5);i++)h+='<span class="task-dot" style="background:'+DOT_COLORS[i%6]+'"></span>';if(ts.length>5)h+='<span style="font-size:0.5rem;color:#999">+'+ (ts.length-5)+'</span>';h+='</div>';return h;}
+function renderSidePanel(){
+  var dk=state.selectedDate;if(!dk){sideP.innerHTML='<div class="panel-empty"><span style="font-size:2rem">👆</span><br>点击日期查看任务</div>';return;}
+  var tasks=getTasks(dk),total=tasks.length,done=tasks.filter(function(t){return t.done}).length;
+  var parts=dk.split('-'),lunar=solarToLunar(+parts[0],+parts[1]-1,+parts[2]),mems=getMemorialsForDate(dk);
+  var wd=['星期日','星期一','星期二','星期三','星期四','星期五','星期六'][new Date(dk+'T00:00:00').getDay()];
+  var h='<div class="panel-date">📅 '+dk+' <small>'+wd+' · 农历'+lunar.monthName+(lunar.dayName||lunar.lunarDay)+'</small></div>';
+  if(mems.length){h+='<div class="memorial-section"><h4>📌 今日纪念日</h4>';for(var i=0;i<mems.length;i++){var mem=mems[i],cl='';if(mem.type==='countup'||mem.type==='countdown'){var oo=new Date((mem.originalYear||2024)+'-'+String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00'),tt=new Date(getTodayKey()+'T00:00:00'),df=Math.floor((tt-oo)/86400000);cl=mem.type==='countup'?' 至今'+(df+1)+'天':' 还有'+Math.abs(df)+'天';}h+='<div class="memorial-item memorial-clickable" data-memorial-id="'+mem.id+'"><span>'+(MEM_ICONS[mem.type]||'📌')+'</span> '+mem.name+'<span class="memorial-countdown">'+cl+'</span></div>';}h+='</div>';}
+  h+='<div class="add-task-row"><input class="add-task-input" id="task-input" placeholder="📝 添加任务..." maxlength="120" autocomplete="off"><div style="display:flex;gap:2px" id="priority-sel"><span class="priority-dot p0 sel" data-p="0">○</span><span class="priority-dot p1" data-p="1">⭐</span><span class="priority-dot p2" data-p="2">🔥</span><span class="priority-dot p3" data-p="3">🚨</span></div><button class="add-task-btn" id="btn-add-task">添加</button></div>';
+  if(!total){h+='<div class="panel-empty"><span style="font-size:1.5rem">'+(dk===getTodayKey()?'🎉':'📋')+'</span><br>'+(dk===getTodayKey()?'今天没有安排~':'还没有任务')+'</div>';}
+  else{h+='<div class="task-list">';var srt=tasks.slice().sort(function(a,b){if(a.done!==b.done)return a.done?1:-1;return(b.priority||0)-(a.priority||0);});for(var j=0;j<srt.length;j++){var t=srt[j],p=t.priority||0,todayDk=getTodayKey(),dl=(p>=3&&dk>=todayDk)?Math.ceil((new Date(dk+'T00:00:00')-new Date(todayDk+'T00:00:00'))/86400000):null;h+='<div class="task-item p'+p+(t.done?' done':'')+'" data-task-id="'+t.id+'"><input type="checkbox" class="task-checkbox"'+(t.done?' checked':'')+'><span class="task-text">'+t.text+'</span>'+(p>0?'<span style="font-size:0.6rem;padding:1px 4px;border-radius:6px;background:#eee">'+['','⭐','🔥','🚨'][p]+'</span>':'')+(dl!==null&&dl>=0?'<span class="task-countdown">⚠️'+dl+'天</span>':'')+'<button class="task-delete">🗑</button></div>';}h+='</div>';}
+  if(total){var pct=done?Math.round(done/total*100):0;h+='<div class="progress-section"><div class="progress-text">'+(done===total?'🎊 全部完成！':'已完成 '+done+'/'+total)+'</div><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';}
+  var mood=state.moods[dk]||'';h+='<div class="mood-section"><h4>今天心情</h4><div style="text-align:center;font-size:2rem;cursor:pointer" id="mood-label">'+(mood||'⋯')+'</div></div>';
+  var jnl=state.journals[dk]||'';h+='<div class="journal-section"><h4>今日总结</h4><textarea class="journal-textarea" id="journal-textarea" placeholder="今天发生了什么？">'+jnl+'</textarea><div style="font-size:0.65rem;color:#999;text-align:right">自动保存</div></div>';
+  h+='<div class="memorial-section"><button class="btn-add-memorial" id="btn-add-memorial">＋ 纪念日</button></div>';
+  var upc=getUpcomingMemorials(5);if(upc.length){h+='<div class="memorial-section"><h4>即将到来</h4>';for(var u=0;u<upc.length;u++){var um=upc[u];h+='<div class="memorial-item"><span>'+(MEM_ICONS[um.mem.type]||'📌')+'</span> '+um.mem.name+'<span class="memorial-countdown">'+(um.daysUntil===0?'今天!':'还有'+um.daysUntil+'天')+'</span></div>';}h+='</div>';}
+  var urg=[];for(var d2=0;d2<=7;d2++){var cd=new Date(new Date(getTodayKey()+'T00:00:00').getTime()+d2*86400000),ck=dateKey(cd.getFullYear(),cd.getMonth(),cd.getDate()),tks=(state.tasksByDate[ck]||[]).filter(function(t){return!t.done&&(t.priority||0)>=3});for(var t2=0;t2<tks.length;t2++)urg.push({text:tks[t2].text,daysLeft:d2});}
+  if(urg.length){h+='<div class="memorial-section"><h4>紧急重要</h4>';for(var u2=0;u2<Math.min(urg.length,5);u2++)h+='<div class="memorial-item"><span>🚨</span> '+urg[u2].text+'<span class="memorial-countdown">'+(urg[u2].daysLeft===0?'今天!':'还有'+urg[u2].daysLeft+'天')+'</span></div>';h+='</div>';}
+  h+='<div class="sync-section"><button class="sync-btn" id="btn-export">📤 导出</button><button class="sync-btn" id="btn-import">📥 导入</button></div>';
+  sideP.innerHTML=h;
+  var inp=document.getElementById('task-input');if(inp){inp.focus();inp.onkeydown=function(e){if(e.key==='Enter')handleAddTask();};}
+  var ab=document.getElementById('btn-add-task');if(ab)ab.onclick=handleAddTask;
+  var be=document.getElementById('btn-export');if(be)be.onclick=handleExport;
+  var bi=document.getElementById('btn-import');if(bi)bi.onclick=handleImport;
+  var bm=document.getElementById('btn-add-memorial');if(bm)bm.onclick=function(){showMemorialForm(dk);};
+  var dots=document.querySelectorAll('#priority-sel .priority-dot');for(var pi=0;pi<dots.length;pi++){dots[pi].onclick=function(){var dd=document.querySelectorAll('#priority-sel .priority-dot');for(var x=0;x<dd.length;x++)dd[x].classList.remove('sel');this.classList.add('sel');state.priorityFilter=+this.dataset.p;};}
+  var ml=document.getElementById('mood-label');if(ml)ml.onclick=function(){showMoodPopup(dk);};
+  var jt=document.getElementById('journal-textarea');if(jt){var jto;jt.oninput=function(){clearTimeout(jto);jto=setTimeout(function(){var v=jt.value.trim();if(v)state.journals[dk]=v;else delete state.journals[dk];saveState();},600);};}
 }
 
-// ==================== 骞存湀閫夋嫨鍣?====================
-function renderYearPicker() {
-  const startY = state.currentYear - 6;
-  let html = '<h3>閫夋嫨骞翠唤</h3><div class="picker-year-row">';
-  html += `<button id="year-decade-down">芦</button>`;
-  html += `<input type="number" id="year-input" value="${state.currentYear}" min="1900" max="2100">`;
-  html += `<button id="year-decade-up">禄</button>`;
-  html += '</div><button class="picker-close" id="year-picker-close">鍏抽棴</button>';
-  yearPickerPopup.innerHTML = html;
-  document.getElementById('year-input').addEventListener('change', (e) => {
-    jumpToYearMonth(parseInt(e.target.value), state.currentMonth);
-    yearPickerOverlay.classList.remove('show');
-  });
-  document.getElementById('year-decade-down').addEventListener('click', () => {
-    document.getElementById('year-input').value = Math.max(1900, state.currentYear - 10);
-  });
-  document.getElementById('year-decade-up').addEventListener('click', () => {
-    document.getElementById('year-input').value = Math.min(2100, state.currentYear + 10);
-  });
-  document.getElementById('year-picker-close').addEventListener('click', () => {
-    yearPickerOverlay.classList.remove('show');
-  });
+// ==================== 年月选择器 ====================
+function renderYearPicker(){
+  var h='<h3>选择年份</h3><div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px"><button id="ydown">«</button><input type="number" id="yinput" value="'+state.currentYear+'" min="1900" max="2100" style="width:80px;text-align:center;padding:6px;border:2px solid #ddd;border-radius:8px"><button id="yup">»</button></div><button class="btn-cancel" id="yclose" style="display:block;margin:0 auto">关闭</button>';
+  yearPP.innerHTML=h;
+  document.getElementById('yinput').onchange=function(){jumpTo(+this.value,state.currentMonth);yearOL.style.display='none';};
+  document.getElementById('ydown').onclick=function(){document.getElementById('yinput').value=Math.max(1900,state.currentYear-10);};
+  document.getElementById('yup').onclick=function(){document.getElementById('yinput').value=Math.min(2100,state.currentYear+10);};
+  document.getElementById('yclose').onclick=function(){yearOL.style.display='none';};
 }
-function renderMonthPicker() {
-  let html = '<h3>閫夋嫨鏈堜唤</h3><div class="picker-grid">';
-  const monthNames = ['1鏈?,'2鏈?,'3鏈?,'4鏈?,'5鏈?,'6鏈?,'7鏈?,'8鏈?,'9鏈?,'10鏈?,'11鏈?,'12鏈?];
-  for (let i = 0; i < 12; i++) {
-    const active = i === state.currentMonth ? ' active' : '';
-    html += `<div class="picker-item${active}" data-month="${i}">${monthNames[i]}</div>`;
-  }
-  html += '</div><button class="picker-close" id="month-picker-close">鍏抽棴</button>';
-  monthPickerPopup.innerHTML = html;
-  monthPickerPopup.querySelectorAll('.picker-item').forEach(item => {
-    item.addEventListener('click', () => {
-      jumpToYearMonth(state.currentYear, parseInt(item.dataset.month));
-      monthPickerOverlay.classList.remove('show');
-    });
-  });
-  document.getElementById('month-picker-close').addEventListener('click', () => {
-    monthPickerOverlay.classList.remove('show');
-  });
+function renderMonthPicker(){
+  var h='<h3>选择月份</h3><div class="picker-grid">';for(var i=0;i<12;i++)h+='<div class="picker-item'+(i===state.currentMonth?' active':'')+'" data-m="'+i+'">'+(i+1)+'月</div>';h+='</div><button class="btn-cancel" id="mclose" style="display:block;margin:8px auto 0">关闭</button>';
+  monthPP.innerHTML=h;var its=monthPP.querySelectorAll('.picker-item');for(var j=0;j<its.length;j++)its[j].onclick=function(){jumpTo(state.currentYear,+this.dataset.m);monthOL.style.display='none';};
+  document.getElementById('mclose').onclick=function(){monthOL.style.display='none';};
 }
-function jumpToYearMonth(y, m) {
-  state.currentYear = y;
-  state.currentMonth = m;
-  // 淇濇寔閫変腑鏃ユ湡鍦ㄥ悓涓€澶╋紙濡傛灉璇ユ湀鏈夋鏃ユ湡锛?  if (state.selectedDate) {
-    const [_, sm, sd] = state.selectedDate.split('-').map(Number);
-    const maxDay = daysInMonth(y, m);
-    const day = Math.min(sd, maxDay);
-    state.selectedDate = dateKey(y, m, day);
-  }
-  renderApp();
+function jumpTo(y,m){state.currentYear=y;state.currentMonth=m;if(state.selectedDate){var parts=state.selectedDate.split('-');state.selectedDate=dateKey(y,m,Math.min(+parts[2],daysInMonth(y,m)));}renderApp();}
+
+// ==================== 心情弹窗 ====================
+function showMoodPopup(dk){
+  var cur=state.moods[dk]||'',h='<h3>选择心情</h3><div class="mood-grid">';
+  for(var i=0;i<MOOD_EMOJIS.length;i++)h+='<button class="mood-btn'+(cur===MOOD_EMOJIS[i]?' sel2':'')+'" data-mood="'+MOOD_EMOJIS[i]+'">'+MOOD_EMOJIS[i]+'</button>';
+  h+='</div><div style="text-align:center;margin-top:10px"><button class="btn-cancel" id="mclear">清除</button><button class="btn-cancel" id="mclose2" style="margin-left:6px">关闭</button></div>';
+  memBox.innerHTML=h;memModal.style.display='flex';
+  var bs=memBox.querySelectorAll('.mood-btn');for(var j=0;j<bs.length;j++){bs[j].onclick=function(){var m=this.dataset.mood;if(state.moods[dk]===m)delete state.moods[dk];else state.moods[dk]=m;saveState();memModal.style.display='none';renderApp();};}
+  document.getElementById('mclear').onclick=function(){delete state.moods[dk];saveState();memModal.style.display='none';renderApp();};
+  document.getElementById('mclose2').onclick=function(){memModal.style.display='none';};
 }
 
-// ==================== 绾康鏃ヨ鎯呭脊绐?====================
-function showMemorialDetailPopup(mem) {
-  const icon = MEMORIAL_ICONS[mem.type] || '馃搶';
-  const calLabel = mem.calendar === 'lunar' ? '鍐滃巻' : '闃冲巻';
-  const repeatLabels = { yearly:'姣忓勾', once:'浠呬竴娆?, weekly:'姣忓懆', monthly:'姣忔湀' };
-  let html = '<h3>馃搶 绾康鏃ヨ鎯?/h3>';
-  html += `<div style="text-align:center;font-size:2rem;margin:8px 0;">${icon}</div>`;
-  html += `<div style="text-align:center;font-size:1.2rem;font-weight:700;">${mem.name}</div>`;
-  html += `<div style="text-align:center;color:var(--text-muted);font-size:0.85rem;">${MEMORIAL_TYPES[mem.type]} 路 ${calLabel} 路 ${repeatLabels[mem.repeat]||mem.repeat}</div>`;
-  // 姝ｆ暟/鍊掓暟鏃ヨ缁嗕俊鎭?  if (mem.type === 'countup' || mem.type === 'countdown') {
-    const origDate = new Date((mem.originalYear||2024)+'-'+
-      String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00');
-    const todayDate = new Date(getTodayKey()+'T00:00:00');
-    const diff = Math.floor((todayDate - origDate) / 86400000);
-    const origStr = `${mem.originalYear||2024}骞?{mem.month||1}鏈?{mem.day||1}鏃;
-    if (mem.type === 'countup') {
-      html += `<div style="text-align:center;font-size:1.1rem;color:var(--mint);margin:8px 0;">鑷?${origStr} 璧?br>鑷充粖宸?<b>${diff >= 0 ? diff + 1 : Math.abs(diff)}</b> 澶?/div>`;
-    } else {
-      html += `<div style="text-align:center;font-size:1.1rem;color:#E74C3C;margin:8px 0;">璺濈 ${origStr}<br>杩樻湁 <b>${diff >= 0 ? diff : Math.abs(diff)}</b> 澶?/div>`;
-    }
-  }
-  html += '<div class="btn-row" style="justify-content:center;margin-top:12px;">';
-  html += '<button class="btn-save" id="popup-edit-mem">鉁?缂栬緫</button>';
-  html += '<button class="btn-delete-memorial" id="popup-del-mem">馃棏 鍒犻櫎</button>';
-  html += '<button class="btn-cancel" id="popup-close-mem">鍏抽棴</button>';
-  html += '</div>';
-  memorialModalBox.innerHTML = html;
-  memorialModal.classList.add('show');
-  document.getElementById('popup-close-mem').addEventListener('click', () => memorialModal.classList.remove('show'));
-  document.getElementById('popup-edit-mem').addEventListener('click', () => {
-    memorialModal.classList.remove('show');
-    const dk = dateKey(state.currentYear, state.currentMonth, 1);
-    showMemorialForm(dk, mem);
-  });
-  document.getElementById('popup-del-mem').addEventListener('click', () => {
-    if (confirm(`纭畾鍒犻櫎绾康鏃ャ€?{mem.name}銆嶏紵`)) {
-      state.memorials = state.memorials.filter(m => m.id !== mem.id);
-      saveState();
-      memorialModal.classList.remove('show');
-      renderApp();
-    }
-  });
-}
-
-// ==================== 蹇冩儏寮圭獥 ====================
-function showMoodPopup(dk) {
-  const todayMood = state.moods[dk] || '';
-  let html = '<h3>馃槉 閫夋嫨浠婂ぉ蹇冩儏</h3>';
-  html += '<div class="mood-grid" style="justify-content:center;">';
-  for (const emoji of MOOD_EMOJIS) {
-    html += `<button class="mood-btn${todayMood===emoji?' selected':''}" data-mood="${emoji}" title="${emoji}">${emoji}</button>`;
-  }
-  html += '</div>';
-  html += '<div style="text-align:center;margin-top:10px;">';
-  html += '<button class="btn-cancel" id="mood-clear">娓呴櫎</button>';
-  html += '<button class="btn-cancel" id="mood-close" style="margin-left:6px;">鍏抽棴</button>';
-  html += '</div>';
-  memorialModalBox.innerHTML = html;
-  memorialModal.classList.add('show');
-
-  document.querySelectorAll('#memorial-modal-box .mood-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const mood = btn.dataset.mood;
-      if (state.moods[dk] === mood) {
-        delete state.moods[dk];
-      } else {
-        state.moods[dk] = mood;
-      }
-      saveState();
-      memorialModal.classList.remove('show');
-      renderApp();
-    });
-  });
-  document.getElementById('mood-clear').addEventListener('click', () => {
-    delete state.moods[dk];
-    saveState();
-    memorialModal.classList.remove('show');
-    renderApp();
-  });
-  document.getElementById('mood-close').addEventListener('click', () => {
-    memorialModal.classList.remove('show');
-  });
-}
-
-// ==================== 绾康鏃ヨ〃鍗?====================
-let editingMemorialId = null;
-function showMemorialForm(dk, editMemorial) {
-  editingMemorialId = editMemorial ? editMemorial.id : null;
-  const [y, mm, d] = dk.split('-').map(Number);
-  const lunar = solarToLunar(y, mm - 1, d);
-  let html = `<h3>${editMemorial ? '缂栬緫绾康鏃? : '娣诲姞绾康鏃?}</h3>`;
-  html += '<label>绫诲瀷</label><select id="mem-type">';
-  for (const [k, v] of Object.entries(MEMORIAL_TYPES)) {
-    html += `<option value="${k}" ${editMemorial && editMemorial.type===k?'selected':''}>${v}</option>`;
-  }
-  html += '</select>';
-  html += `<label>鍚嶇О</label><input type="text" id="mem-name" value="${editMemorial?editMemorial.name:''}" placeholder="濡傦細濡堝鐢熸棩">`;
-  html += '<label>鏃ュ巻</label><select id="mem-calendar">';
-  html += `<option value="solar" ${editMemorial && editMemorial.calendar==='solar'?'selected':''}>闃冲巻锛堝叕鍘嗭級</option>`;
-  html += `<option value="lunar" ${editMemorial && editMemorial.calendar==='lunar'?'selected':''}>闃村巻锛堝啘鍘嗭級</option>`;
-  html += '</select>';
-  html += '<div id="mem-solar-fields">';
-  html += `<label>鏃ユ湡</label><input type="date" id="mem-solar-date" value="${dk}">`;
-  html += '</div>';
-  html += '<div id="mem-lunar-fields" style="display:none">';
-  html += `<label>鍐滃巻鏈?/label><select id="mem-lunar-month">`;
-  for (let i = 0; i < 12; i++) {
-    html += `<option value="${i}" ${editMemorial && editMemorial.lunarMonth===i?'selected':''} ${lunar.lunarMonth-1===i?'selected':''}>${LUNAR_MONTHS[i]}鏈?/option>`;
-  }
-  html += '</select>';
-  html += `<label>鍐滃巻鏃?/label><select id="mem-lunar-day">`;
-  for (let i = 1; i <= 30; i++) {
-    html += `<option value="${i}" ${editMemorial && editMemorial.lunarDay===i?'selected':''} ${lunar.lunarDay===i?'selected':''}>${LUNAR_DAYS[i]||i}</option>`;
-  }
-  html += '</select>';
-  html += `<label><input type="checkbox" id="mem-lunar-isleap" ${editMemorial && editMemorial.lunarIsLeap?'checked':''}> 闂版湀</label>`;
-  html += '</div>';
-  html += '<label>閲嶅</label><select id="mem-repeat">';
-  html += `<option value="yearly" ${editMemorial && editMemorial.repeat==='yearly'?'selected':''}>姣忓勾</option>`;
-  html += `<option value="monthly" ${editMemorial && editMemorial.repeat==='monthly'?'selected':''}>姣忔湀</option>`;
-  html += `<option value="weekly" ${editMemorial && editMemorial.repeat==='weekly'?'selected':''}>姣忓懆</option>`;
-  html += `<option value="once" ${editMemorial && editMemorial.repeat==='once'?'selected':''}>浠呬竴娆?/option>`;
-  html += '</select>';
-  html += '<div class="btn-row">';
-  if (editMemorial) html += '<button class="btn-delete-memorial" id="btn-delete-memorial">鍒犻櫎</button>';
-  html += '<button class="btn-cancel" id="btn-memorial-cancel">鍙栨秷</button>';
-  html += '<button class="btn-save" id="btn-memorial-save">淇濆瓨</button>';
-  html += '</div>';
-  memorialModalBox.innerHTML = html;
-  memorialModal.classList.add('show');
-
-  // 鍒囨崲闃冲巻/闃村巻
-  document.getElementById('mem-calendar').addEventListener('change', (e) => {
-    document.getElementById('mem-solar-fields').style.display = e.target.value === 'solar' ? 'block' : 'none';
-    document.getElementById('mem-lunar-fields').style.display = e.target.value === 'lunar' ? 'block' : 'none';
-  });
-  document.getElementById('btn-memorial-cancel').addEventListener('click', () => {
-    memorialModal.classList.remove('show');
-  });
-  document.getElementById('btn-memorial-save').addEventListener('click', () => {
-    const calendar = document.getElementById('mem-calendar').value;
-    const name = sanitize(document.getElementById('mem-name').value);
-    if (!name) { alert('璇疯緭鍏ョ邯蹇垫棩鍚嶇О'); return; }
-    const mem = {
-      id: editingMemorialId || generateId(),
-      type: document.getElementById('mem-type').value,
-      name,
-      calendar,
-      repeat: document.getElementById('mem-repeat').value,
-      originalYear: parseInt(dk.slice(0,4))
-    };
-    if (calendar === 'solar') {
-      const sd = document.getElementById('mem-solar-date').value;
-      const [sy, sm, sd2] = sd.split('-').map(Number);
-      mem.month = sm; mem.day = sd2;
-      mem.originalYear = sy;
-    } else {
-      mem.lunarMonth = parseInt(document.getElementById('mem-lunar-month').value);
-      mem.lunarDay = parseInt(document.getElementById('mem-lunar-day').value);
-      mem.lunarIsLeap = document.getElementById('mem-lunar-isleap').checked;
-    }
-    if (editingMemorialId) {
-      state.memorials = state.memorials.filter(m => m.id !== editingMemorialId);
-    }
-    state.memorials.push(mem);
-    saveState();
-    memorialModal.classList.remove('show');
-    renderApp();
-  });
-  if (editMemorial) {
-    document.getElementById('btn-delete-memorial').addEventListener('click', () => {
-      if (confirm(`纭畾鍒犻櫎绾康鏃ャ€?{editMemorial.name}銆嶏紵`)) {
-        state.memorials = state.memorials.filter(m => m.id !== editingMemorialId);
-        saveState();
-        memorialModal.classList.remove('show');
-        renderApp();
-      }
-    });
-  }
-}
-
-// ==================== 瀵煎叆/瀵煎嚭 ====================
-function handleExport() {
-  const data = { version: 3, tasks: state.tasksByDate, memorials: state.memorials, moods: state.moods, journals: state.journals, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `dopamine-backup-${getTodayKey()}.json`; a.click();
-  URL.revokeObjectURL(url);
-  const btn = document.getElementById('btn-export');
-  if (btn) { const o = btn.textContent; btn.textContent = '鉁?宸插鍑?; setTimeout(() => { btn.textContent = o; }, 1500); }
-}
-function handleImport() {
-  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-  input.onchange = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (re) => {
-      try {
-        const data = JSON.parse(re.target.result);
-        if (data.tasks) state.tasksByDate = { ...state.tasksByDate, ...data.tasks };
-        if (data.memorials) {
-          const existingIds = new Set(state.memorials.map(m => m.id));
-          for (const m of data.memorials) {
-            if (!existingIds.has(m.id)) state.memorials.push(m);
-          }
-        }
-        if (data.moods) state.moods = { ...state.moods, ...data.moods };
-        if (data.journals) state.journals = { ...state.journals, ...data.journals };
-        saveState(); renderApp();
-        const btn = document.getElementById('btn-import');
-        if (btn) { const o = btn.textContent; btn.textContent = '鉁?宸插鍏?; setTimeout(() => { btn.textContent = o; }, 1500); }
-      } catch(err) { alert('瀵煎叆澶辫触锛氭枃浠舵牸寮忎笉姝ｇ‘'); }
-    };
-    reader.readAsText(file);
+// ==================== 纪念日表单 ====================
+var editingMemId=null;
+function showMemorialForm(dk,editMem){
+  editingMemId=editMem?editMem.id:null;var parts=dk.split('-'),y=+parts[0],mm=+parts[1],d=+parts[2],lunar=solarToLunar(y,mm-1,d);
+  var h='<h3>'+(editMem?'编辑':'添加')+'纪念日</h3><label>类型</label><select id="mem-type">';
+  for(var k in MEM_TYPES)h+='<option value="'+k+'"'+(editMem&&editMem.type===k?' selected':'')+'>'+MEM_TYPES[k]+'</option>';
+  h+='</select><label>名称</label><input type="text" id="mem-name" value="'+(editMem?editMem.name:'')+'" placeholder="如：妈妈生日"><label>日历</label><select id="mem-cal"><option value="solar"'+(editMem&&editMem.calendar==='solar'?' selected':'')+'>阳历</option><option value="lunar"'+(editMem&&editMem.calendar==='lunar'?' selected':'')+'>阴历</option></select>';
+  h+='<div id="mem-solar"><label>日期</label><input type="date" id="mem-solar-date" value="'+dk+'"></div>';
+  h+='<div id="mem-lunar" style="display:none"><label>农历月</label><select id="mem-lunar-month">';for(var i=0;i<12;i++)h+='<option value="'+i+'"'+(editMem&&editMem.lunarMonth===i?' selected':(lunar.lunarMonth-1===i?' selected':''))+'>'+LUNAR_MONTHS[i]+'月</option>';h+='</select><label>农历日</label><select id="mem-lunar-day">';for(var j=1;j<=30;j++)h+='<option value="'+j+'"'+(editMem&&editMem.lunarDay===j?' selected':(lunar.lunarDay===j?' selected':''))+'>'+(LUNAR_DAYS[j]||j)+'</option>';h+='</select><label><input type="checkbox" id="mem-lunar-isleap"'+(editMem&&editMem.lunarIsLeap?' checked':'')+'> 闰月</label></div>';
+  h+='<label>重复</label><select id="mem-repeat"><option value="yearly"'+(editMem&&editMem.repeat==='yearly'?' selected':'')+'>每年</option><option value="monthly"'+(editMem&&editMem.repeat==='monthly'?' selected':'')+'>每月</option><option value="weekly"'+(editMem&&editMem.repeat==='weekly'?' selected':'')+'>每周</option><option value="once"'+(editMem&&editMem.repeat==='once'?' selected':'')+'>仅一次</option></select>';
+  h+='<div class="btn-row" style="margin-top:10px;justify-content:flex-end">';if(editMem)h+='<button class="btn-delete" id="btn-del-mem">删除</button>';h+='<button class="btn-cancel" id="mem-cancel">取消</button><button class="btn-save" id="mem-save">保存</button></div>';
+  memBox.innerHTML=h;memModal.style.display='flex';
+  document.getElementById('mem-cal').onchange=function(){document.getElementById('mem-solar').style.display=this.value==='solar'?'block':'none';document.getElementById('mem-lunar').style.display=this.value==='lunar'?'block':'none';};
+  document.getElementById('mem-cancel').onclick=function(){memModal.style.display='none';};
+  document.getElementById('mem-save').onclick=function(){
+    var name=sanitize(document.getElementById('mem-name').value);if(!name){alert('请输入名称');return;}
+    var cal=document.getElementById('mem-cal').value,m={id:editingMemId||genId(),type:document.getElementById('mem-type').value,name:name,calendar:cal,repeat:document.getElementById('mem-repeat').value,originalYear:y};
+    if(cal==='solar'){var sd=document.getElementById('mem-solar-date').value.split('-');m.month=+sd[1];m.day=+sd[2];}
+    else{m.lunarMonth=+document.getElementById('mem-lunar-month').value;m.lunarDay=+document.getElementById('mem-lunar-day').value;m.lunarIsLeap=document.getElementById('mem-lunar-isleap').checked;}
+    if(editingMemId)state.memorials=state.memorials.filter(function(x){return x.id!==editingMemId;});
+    state.memorials.push(m);saveState();memModal.style.display='none';renderApp();
   };
-  input.click();
+  if(editMem)document.getElementById('btn-del-mem').onclick=function(){if(confirm('确定删除「'+editMem.name+'」？')){state.memorials=state.memorials.filter(function(x){return x.id!==editingMemId;});saveState();memModal.style.display='none';renderApp();}};
 }
 
-// ==================== 鎾掕姳 ====================
-function showCelebration() {
-  const count = 30; const f = document.createDocumentFragment();
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div'); p.className = 'celebration-particle';
-    const s = Math.random()*10+6; const c = DOT_COLORS[Math.floor(Math.random()*DOT_COLORS.length)];
-    const a = Math.random()*Math.PI*2; const d = Math.random()*200+100;
-    p.style.cssText = `width:${s}px;height:${s}px;background:${c};top:50%;left:50%;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-100}px;--rot:${(Math.random()-0.5)*720}deg;animation-delay:${Math.random()*0.3}s;animation-duration:${0.9+Math.random()*0.6}s;`;
-    f.appendChild(p);
-  }
-  document.body.appendChild(f);
-  setTimeout(() => document.querySelectorAll('.celebration-particle').forEach(p => p.remove()), 1600);
+// ==================== 纪念日详情弹窗 ====================
+function showMemDetailPopup(mem){
+  var icon=MEM_ICONS[mem.type]||'📌',cl=mem.calendar==='lunar'?'农历':'阳历',rl={yearly:'每年',once:'仅一次',weekly:'每周',monthly:'每月'};
+  var h='<h3>纪念日详情</h3><div style="text-align:center;font-size:2rem">'+icon+'</div><div style="text-align:center;font-size:1.1rem;font-weight:700">'+mem.name+'</div><div style="text-align:center;color:#999;font-size:0.8rem">'+MEM_TYPES[mem.type]+' · '+cl+' · '+(rl[mem.repeat]||mem.repeat)+'</div>';
+  if(mem.type==='countup'||mem.type==='countdown'){var oo=new Date((mem.originalYear||2024)+'-'+String(mem.month||1).padStart(2,'0')+'-'+String(mem.day||1).padStart(2,'0')+'T00:00:00'),tt=new Date(getTodayKey()+'T00:00:00'),df=Math.floor((tt-oo)/86400000);if(mem.type==='countup')h+='<div style="text-align:center;color:var(--mint);font-size:1rem;margin:8px 0">自 '+(mem.originalYear||2024)+'年'+(mem.month||1)+'月'+(mem.day||1)+'日 起<br>至今已 <b>'+(df>=0?df+1:Math.abs(df))+'</b> 天</div>';else h+='<div style="text-align:center;color:#E74C3C;font-size:1rem;margin:8px 0">距离 '+(mem.originalYear||2024)+'年'+(mem.month||1)+'月'+(mem.day||1)+'日<br>还有 <b>'+(df>=0?df:Math.abs(df))+'</b> 天</div>';}
+  h+='<div class="btn-row" style="justify-content:center;margin-top:12px"><button class="btn-save" id="popup-edit">编辑</button><button class="btn-delete" id="popup-del">删除</button><button class="btn-cancel" id="popup-close">关闭</button></div>';
+  memBox.innerHTML=h;memModal.style.display='flex';
+  document.getElementById('popup-close').onclick=function(){memModal.style.display='none';};
+  document.getElementById('popup-edit').onclick=function(){memModal.style.display='none';showMemorialForm(dateKey(state.currentYear,state.currentMonth,1),mem);};
+  document.getElementById('popup-del').onclick=function(){if(confirm('确定删除「'+mem.name+'」？')){state.memorials=state.memorials.filter(function(x){return x.id!==mem.id;});saveState();memModal.style.display='none';renderApp();}};
 }
 
-// ==================== 浜嬩欢澶勭悊 ====================
-function handleHeaderClick(action) {
-  if (action === 'prev') {
-    if (state.currentMonth === 0) { state.currentYear--; state.currentMonth = 11; }
-    else state.currentMonth--;
-  } else if (action === 'next') {
-    if (state.currentMonth === 11) { state.currentYear++; state.currentMonth = 0; }
-    else state.currentMonth++;
-  } else if (action === 'today') {
-    const now = new Date();
-    state.currentYear = now.getFullYear();
-    state.currentMonth = now.getMonth();
-    state.selectedDate = getTodayKey();
-  }
-  renderApp();
-}
-function handleCalendarClick(dateKeyStr, cellEl) {
-  if (cellEl && cellEl.classList.contains('other-month')) {
-    const [y,m] = dateKeyStr.split('-').map(Number);
-    state.currentYear = y; state.currentMonth = m - 1;
-  }
-  state.selectedDate = dateKeyStr;
-  state.priorityFilter = null;
-  renderApp();
-}
-function handleAddTask(e) {
-  e.preventDefault();
-  const input = document.getElementById('task-input');
-  if (!input) return;
-  const text = input.value;
-  const priority = state.priorityFilter || 0;
-  if (addTask(state.selectedDate, text, priority)) {
-    input.value = ''; state.priorityFilter = null;
-    renderApp();
-    setTimeout(() => { const ni = document.getElementById('task-input'); if (ni) ni.focus(); }, 20);
-  }
-}
-function handleToggleTask(taskId) {
-  if (!state.selectedDate) return;
-  toggleTask(state.selectedDate, taskId);
-  renderApp();
-}
-function handleDeleteTask(taskId) {
-  if (!state.selectedDate) return;
-  deleteTask(state.selectedDate, taskId);
-  renderApp();
+// ==================== 导入导出 ====================
+function handleExport(){var d={version:4,tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals};var b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='dopamine-backup-'+getTodayKey()+'.json';a.click();URL.revokeObjectURL(u);}
+function handleImport(){var inp=document.createElement('input');inp.type='file';inp.accept='.json';inp.onchange=function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(re){try{var d=JSON.parse(re.target.result);if(d.tasks)for(var k in d.tasks)state.tasksByDate[k]=d.tasks[k];if(d.memorials){var ids=new Set(state.memorials.map(function(x){return x.id}));for(var i=0;i<d.memorials.length;i++)if(!ids.has(d.memorials[i].id))state.memorials.push(d.memorials[i]);}if(d.moods)for(var k in d.moods)state.moods[k]=d.moods[k];if(d.journals)for(var k in d.journals)state.journals[k]=d.journals[k];saveState();renderApp();}catch(err){alert('导入失败');}};r.readAsText(f);};inp.click();}
+
+// ==================== 撒花 ====================
+function showCelebration(){var n=30,f=document.createDocumentFragment();for(var i=0;i<n;i++){var p=document.createElement('div');p.className='celebration-particle';var s=Math.random()*10+6,c=DOT_COLORS[Math.floor(Math.random()*6)],a=Math.random()*Math.PI*2,d=Math.random()*200+100;p.style.cssText='width:'+s+'px;height:'+s+'px;background:'+c+';top:50%;left:50%;--dx:'+Math.cos(a)*d+'px;--dy:'+(Math.sin(a)*d-100)+'px;--rot:'+((Math.random()-0.5)*720)+'deg;animation-delay:'+(Math.random()*0.3)+'s';f.appendChild(p);}document.body.appendChild(f);setTimeout(function(){var ps=document.querySelectorAll('.celebration-particle');for(var j=0;j<ps.length;j++)ps[j].remove();},1600);}
+
+// ==================== 提醒弹窗 ====================
+function showReminderPopup(){
+  var today=getTodayKey();if(localStorage.getItem('popupDismissed')===today)return;
+  var upc=getUpcomingMemorials(30),ma=upc.filter(function(u){return u.daysUntil>0&&u.daysUntil<=7}),ta=[];
+  for(var d=0;d<=5;d++){var cd=new Date(new Date(today+'T00:00:00').getTime()+d*86400000),ck=dateKey(cd.getFullYear(),cd.getMonth(),cd.getDate()),tks=(state.tasksByDate[ck]||[]).filter(function(t){return!t.done&&(t.priority||0)>=3});for(var t=0;t<tks.length;t++)ta.push({text:tks[t].text,daysLeft:d});}
+  if(!ma.length&&!ta.length)return;
+  var msg='<h3 style="text-align:center">今日提醒</h3><div style="max-height:200px;overflow-y:auto">';
+  if(ma.length){msg+='<div style="font-weight:600;color:var(--mint)">纪念日</div>';for(var a=0;a<ma.length;a++)msg+='<div style="padding:3px 0;border-bottom:1px solid #f0f0f0">'+(MEM_ICONS[ma[a].mem.type]||'📌')+' <b>'+ma[a].mem.name+'</b> — '+ma[a].daysUntil+'天后'+(ma[a].daysUntil<=3?' 🔔':'')+'</div>';}
+  if(ta.length){msg+='<div style="font-weight:600;color:#E74C3C;margin-top:6px">紧急重要</div>';for(var b=0;b<ta.length;b++)msg+='<div style="padding:3px 0;border-bottom:1px solid #f0f0f0;color:#E74C3C">🚨 <b>'+ta[b].text+'</b> — '+(ta[b].daysLeft===0?'今天!':ta[b].daysLeft+'天后')+'</div>';}
+  msg+='</div><div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between"><label style="font-size:0.75rem;color:#999;cursor:pointer"><input type="checkbox" id="popup-dismiss"> 今日不再提醒</label><button class="btn-cancel" id="popup-close" style="margin:0">关闭</button></div>';
+  var ov=document.createElement('div');ov.className='picker-overlay show';ov.style.zIndex='500';ov.id='reminder-popup';ov.innerHTML='<div class="picker-popup">'+msg+'</div>';document.body.appendChild(ov);
+  ov.addEventListener('click',function(e){if(e.target===ov||e.target.id==='popup-close'){if(document.getElementById('popup-dismiss')&&document.getElementById('popup-dismiss').checked)localStorage.setItem('popupDismissed',today);ov.remove();}});
 }
 
-// 浜嬩欢濮旀墭
-appEl.addEventListener('click', (e) => {
-  const actionBtn = e.target.closest('[data-action]');
-  if (actionBtn) { handleHeaderClick(actionBtn.dataset.action); return; }
-  const cell = e.target.closest('.calendar-cell');
-  if (cell) { handleCalendarClick(cell.dataset.date, cell); return; }
-  const memClickable = e.target.closest('.memorial-clickable');
-  if (memClickable) {
-    const memId = memClickable.dataset.memorialId;
-    const mem = state.memorials.find(m => m.id === memId);
-    if (mem) showMemorialDetailPopup(mem);
-    return;
-  }
-  const deleteBtn = e.target.closest('.task-delete');
-  if (deleteBtn) {
-    const taskItem = deleteBtn.closest('.task-item');
-    if (taskItem) handleDeleteTask(taskItem.dataset.taskId);
-    return;
-  }
-  // 骞存湀閫夋嫨鍣?  if (e.target === yearText) { yearPickerOverlay.classList.add('show'); return; }
-  if (e.target === monthText) { monthPickerOverlay.classList.add('show'); return; }
-  if (e.target === yearPickerOverlay) { yearPickerOverlay.classList.remove('show'); return; }
-  if (e.target === monthPickerOverlay) { monthPickerOverlay.classList.remove('show'); return; }
-  if (e.target === memorialModal) { memorialModal.classList.remove('show'); return; }
-  const loginModal = document.getElementById('login-modal');
-  if (loginModal && e.target === loginModal) { loginModal.classList.remove('show'); return; }
-  if (e.target.closest('#btn-login')) { showLoginModal(); return; }
+// ==================== 事件处理 ====================
+function handleHeaderClick(action){
+  if(action==='prev'){if(state.currentMonth===0){state.currentYear--;state.currentMonth=11;}else state.currentMonth--;}
+  else if(action==='next'){if(state.currentMonth===11){state.currentYear++;state.currentMonth=0;}else state.currentMonth++;}
+  else if(action==='today'){var n=new Date();state.currentYear=n.getFullYear();state.currentMonth=n.getMonth();state.selectedDate=getTodayKey();}
+  renderApp();
+}
+function handleCalendarClick(dk,cellEl){
+  if(cellEl&&cellEl.classList.contains('other-month')){var p=dk.split('-');state.currentYear=+p[0];state.currentMonth=+p[1]-1;}
+  state.selectedDate=dk;state.priorityFilter=null;renderApp();
+}
+function handleAddTask(){var inp=document.getElementById('task-input');if(!inp)return;addTask(state.selectedDate,inp.value,state.priorityFilter||0);inp.value='';state.priorityFilter=null;renderApp();setTimeout(function(){var ni=document.getElementById('task-input');if(ni)ni.focus();},20);}
+function handleToggleTask(tid){if(!state.selectedDate)return;toggleTask(state.selectedDate,tid);renderApp();}
+function handleDeleteTask(tid){if(!state.selectedDate)return;deleteTask(state.selectedDate,tid);renderApp();}
+
+app.addEventListener('click',function(e){
+  var ab=e.target.closest('[data-action]');if(ab){handleHeaderClick(ab.dataset.action);return;}
+  var cell=e.target.closest('.calendar-cell');if(cell){handleCalendarClick(cell.dataset.date,cell);return;}
+  var del=e.target.closest('.task-delete');if(del){var ti=del.closest('.task-item');if(ti)handleDeleteTask(ti.dataset.taskId);return;}
+  var mc=e.target.closest('.memorial-clickable');if(mc){var mem=state.memorials.find(function(m){return m.id===mc.dataset.memorialId});if(mem)showMemDetailPopup(mem);return;}
+  if(e.target===yearTxt){yearOL.style.display='flex';return;}
+  if(e.target===monthTxt){monthOL.style.display='flex';return;}
+  if(e.target===yearOL){yearOL.style.display='none';return;}
+  if(e.target===monthOL){monthOL.style.display='none';return;}
+  if(e.target===memModal){memModal.style.display='none';return;}
+  var lm=document.getElementById('login-modal');if(lm&&e.target===lm){lm.style.display='none';return;}
 });
-appEl.addEventListener('change', (e) => {
-  const cb = e.target.closest('.task-checkbox');
-  if (cb) {
-    const taskItem = cb.closest('.task-item');
-    if (taskItem) handleToggleTask(taskItem.dataset.taskId);
-  }
+app.addEventListener('change',function(e){
+  var cb=e.target.closest('.task-checkbox');if(cb){var ti=cb.closest('.task-item');if(ti)handleToggleTask(ti.dataset.taskId);}
 });
-// 閿洏蹇嵎閿?document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowLeft' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('prev'); }
-  else if (e.key === 'ArrowRight' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('next'); }
-  else if (e.key === 't' && e.ctrlKey) { e.preventDefault(); handleHeaderClick('today'); }
+document.addEventListener('keydown',function(e){
+  if(e.key==='ArrowLeft'&&e.ctrlKey){e.preventDefault();handleHeaderClick('prev');}
+  else if(e.key==='ArrowRight'&&e.ctrlKey){e.preventDefault();handleHeaderClick('next');}
+  else if(e.key==='t'&&e.ctrlKey){e.preventDefault();handleHeaderClick('today');}
 });
 
-// ==================== 鍒濆鍖?====================
-function showReminderPopup() {
-  const today = getTodayKey();
-
-  // 妫€鏌ユ槸鍚︿粖鏃ュ凡鍏抽棴
-  if (localStorage.getItem('dopaminePopupDismissed') === today) return;
-
-  // 鏀堕泦绾康鏃ユ彁閱掞紙7澶╁唴锛?  const upcoming = getUpcomingMemorials(30);
-  const memAlerts = upcoming.filter(u => u.daysUntil > 0 && u.daysUntil <= 7);
-
-  // 鏀堕泦绱ф€ラ噸瑕佷换鍔℃彁閱掞紙5澶╁唴锛?  const taskAlerts = [];
-  for (let d = 0; d <= 5; d++) {
-    const checkD = new Date(new Date(today+'T00:00:00').getTime() + d * 86400000);
-    const ck = dateKey(checkD.getFullYear(), checkD.getMonth(), checkD.getDate());
-    const tks = (state.tasksByDate[ck] || []).filter(t => !t.done && (t.priority||0) >= 3);
-    for (const t of tks) taskAlerts.push({ text: t.text, dateKey: ck, daysLeft: d });
-  }
-
-  if (memAlerts.length === 0 && taskAlerts.length === 0) return;
-
-  let msg = '<h3>鈴?浠婃棩鎻愰啋</h3><div style="text-align:left;max-height:220px;overflow-y:auto;">';
-
-  if (memAlerts.length > 0) {
-    msg += '<div style="font-weight:600;color:var(--mint);margin:4px 0;">馃搶 绾康鏃?/div>';
-    for (const a of memAlerts) {
-      const icon = MEMORIAL_ICONS[a.type] || '馃搶';
-      const cls = a.daysUntil <= 3 ? 'color:#E74C3C;' : '';
-      msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;${cls}">
-        ${icon} <b>${a.name}</b> 鈥?${a.daysUntil}澶╁悗
-        ${a.daysUntil <= 3 ? '馃敂' : ''}
-      </div>`;
-    }
-  }
-
-  if (taskAlerts.length > 0) {
-    msg += '<div style="font-weight:600;color:#E74C3C;margin:8px 0 4px;">馃毃 绱ф€ラ噸瑕佷换鍔?/div>';
-    for (const t of taskAlerts) {
-      msg += `<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;color:#E74C3C;">
-        馃毃 <b>${t.text}</b> 鈥?${t.daysLeft === 0 ? '浠婂ぉ!' : t.daysLeft + '澶╁悗'}
-      </div>`;
-    }
-  }
-
-  msg += '</div>';
-  msg += '<div style="margin-top:10px;display:flex;align-items:center;justify-content:space-between;">';
-  msg += '<label style="font-size:0.8rem;color:var(--text-muted);cursor:pointer;">';
-  msg += '<input type="checkbox" id="popup-dismiss-today" style="margin-right:4px;">浠婃棩涓嶅啀鎻愰啋</label>';
-  msg += '<button class="picker-close" id="popup-close" style="margin:0;">鍏抽棴</button>';
-  msg += '</div>';
-
-  const overlay = document.createElement('div');
-  overlay.className = 'picker-overlay show';
-  overlay.id = 'reminder-popup-overlay';
-  overlay.innerHTML = `<div class="picker-popup" style="max-width:400px;">${msg}</div>`;
-  document.body.appendChild(overlay);
-
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay || e.target.id === 'popup-close') {
-      if (document.getElementById('popup-dismiss-today')?.checked) {
-        localStorage.setItem('dopaminePopupDismissed', today);
-      }
-      overlay.remove();
-    }
-  });
-}
-
-// ==================== 鐧诲綍 / 鐧诲嚭 ====================
-function showLoginModal() {
-  try {
-  const box = document.getElementById('login-modal-box');
-  if (!box) { alert('椤甸潰鍔犺浇涓紝璇峰埛鏂伴噸璇?); return; }
-  if (currentUser) {
-    box.innerHTML = `
-      <h3>馃懁 宸茬櫥褰?/h3>
-      <div style="text-align:center;padding:8px;color:var(--text-muted);">${currentUser.email}</div>
-      <div style="text-align:center;margin-top:10px;">馃摫馃捇馃枼 鏁版嵁宸插紑鍚簯绔悓姝?/div>
-      <div class="btn-row" style="justify-content:center;margin-top:12px;">
-        <button class="btn-delete-memorial" id="btn-logout">閫€鍑虹櫥褰?/button>
-        <button class="btn-cancel" id="btn-login-close">鍏抽棴</button>
-      </div>`;
-    document.getElementById('login-modal').classList.add('show');
-    document.getElementById('btn-logout').addEventListener('click', ()=>{
-      currentUser = null;
-      updateLoginButton();
-      loadLocalState(); renderApp();
-      document.getElementById('login-modal').classList.remove('show');
-    });
-    document.getElementById('btn-login-close').addEventListener('click', ()=>{
-      document.getElementById('login-modal').classList.remove('show');
-    });
-  } else {
-    box.innerHTML = `
-      <h3>馃攼 鐧诲綍鍚屾</h3>
-      <div style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:8px 0;">鐧诲綍鍚庣數鑴戙€佹墜鏈恒€佸钩鏉胯嚜鍔ㄥ悓姝?/div>
-      <input type="email" id="login-email" placeholder="杈撳叆閭" style="width:100%;padding:10px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.95rem;margin-bottom:10px;">
-      <button class="btn-save" id="btn-send-magic" style="width:100%;">鍙戦€佺櫥褰曢摼鎺?鈫?/button>
-      <div style="font-size:0.72rem;color:var(--text-light);text-align:center;margin-top:8px;">鏃犻渶瀵嗙爜锛岄偖绠辨敹閾炬帴鍗崇櫥鍏?/div>
-      <button class="btn-cancel" id="btn-login-close2" style="display:block;margin:10px auto 0;">鍏抽棴</button>`;
-    document.getElementById('login-modal').classList.add('show');
-    document.getElementById('btn-send-magic').addEventListener('click', async ()=>{
-      const email = document.getElementById('login-email').value.trim();
-      if (!email) { alert('璇疯緭鍏ラ偖绠?); return; }
-      try {
-        await signIn(email);
-        box.innerHTML = '<h3>馃摟 宸插彂閫?</h3><div style="text-align:center;padding:12px;color:var(--text-muted);">鐧诲綍閾炬帴宸插彂閫佸埌 <b>'+email+'</b><br><br>璇锋煡鏀堕偖浠剁偣鍑婚摼鎺?br><span style="font-size:0.8rem;">锛堟鏌ュ瀮鍦鹃偖浠剁锛?/span></div><button class="btn-cancel" id="btn-login-close3" style="display:block;margin:10px auto 0;">鍏抽棴</button>';
-        document.getElementById('btn-login-close3').addEventListener('click', ()=>{
-          document.getElementById('login-modal').classList.remove('show');
-        });
-      } catch(e) { alert('鍙戦€佸け璐? '+e.message); }
-    });
-    document.getElementById('btn-login-close2').addEventListener('click', ()=>{
-      document.getElementById('login-modal').classList.remove('show');
-    });
-  }
-
-  } catch(e) { alert('鎿嶄綔澶辫触: '+e.message); }
-}
-
-function updateLoginButton() {
-  const btn = document.getElementById('btn-login');
-  if (btn) { btn.textContent = currentUser ? '鈽侊笍' : '馃懁'; btn.title = currentUser ? '宸茬櫥褰? '+currentUser.email : '鐧诲綍鍚屾'; }
-}
-
-function init() {
-  loadLocalState();
-  renderApp();
-  // 璇婃柇锛氬湪鎺у埗鍙拌緭鍑虹増鏈彿
-  console.log('鉁?澶氬反鑳烘棩鍘?V4 宸插姞杞?鈥?, new Date().toLocaleString());
-  // 鐧诲綍鎸夐挳缁戝畾
-  const loginBtn = document.getElementById('btn-login');
-  if (loginBtn) { loginBtn.addEventListener('click', showLoginModal); console.log('鉁?鐧诲綍鎸夐挳宸茬粦瀹?); }
-  else console.warn('鉂?鎵句笉鍒扮櫥褰曟寜閽?);
-  // 妫€鏌ユ槸鍚︿粠 magic link 杩斿洖
-  getSession().then(async (user) => {
-    if (user) {
-      currentUser = user;
-      updateLoginButton();
-      await loadState();
-      renderApp();
-    }
-  });
-  setTimeout(showReminderPopup, 500);
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+// ==================== 初始化 ====================
+function init(){
+  console.log('初始化开始...');
+  loadLocalState();renderApp();
+  console.log('渲染完成，登录按钮: '+!!document.getElementById('btn-login'));
+  getSession().then(async function(user){if(user){currentUser=user;updateLoginBtn();await loadState();renderApp();}});
+  setTimeout(showReminderPopup,500);
+  if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(function(){});
 }
 init();
+console.log('脚本加载完成');
 </script>
 </body>
 </html>
