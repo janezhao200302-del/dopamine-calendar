@@ -102,7 +102,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .form-group label{display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:3px}
 .form-group input,.form-group select{width:100%;padding:8px 10px;border:2px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.85rem;outline:none;background:#fafafa}
 .form-group input:focus,.form-group select:focus{border-color:var(--mint)}
-@media(max-width:768px){.main-content{flex-direction:column;overflow:visible}.calendar-panel{flex:none;padding:6px 4px}.calendar-cell{min-height:38px;padding:1px;border-radius:5px}.day-num{font-size:0.72rem}.lunar-text{font-size:0.5rem}.side-panel{flex:none;border-left:none;border-top:1px solid var(--border);min-width:auto}.header{padding:6px 8px;gap:4px}.year-text,.month-text{font-size:1rem}}
+@media(max-width:768px){.main-content{flex-direction:column;overflow:visible}.calendar-panel{flex:none;padding:6px 4px}.calendar-cell{min-height:38px;padding:1px;border-radius:5px}.day-num{font-size:0.72rem}.lunar-text{font-size:0.5rem}.side-panel{flex:none;border-left:none;border-top:1px solid var(--border);min-width:auto}.header{padding:4px 4px;gap:2px;flex-wrap:wrap}.year-text,.month-text{font-size:0.9rem}.nav-btn{padding:3px 8px;font-size:0.9rem}.today-btn{padding:3px 6px;font-size:0.65rem}}
 </style>
 </head>
 <body>
@@ -112,9 +112,9 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 <span class="year-text" id="year-text">2026</span><span>年</span>
 <span class="month-text" id="month-text">6月</span>
 <button class="nav-btn" data-action="next">&#9654;</button>
-<button class="today-btn" data-action="today">今天</button>
-<button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.3);" onclick="openLogin()">登录</button>
-<button class="today-btn" style="background:rgba(255,255,255,0.2);" onclick="showHelp()">帮助</button>
+<button class="today-btn" data-action="today" style="padding:5px 8px;font-size:0.75rem">今天</button>
+<button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.25);padding:5px 7px;font-size:0.8rem;font-weight:700" onclick="openLogin()">↻</button>
+<button class="today-btn" style="background:rgba(255,255,255,0.25);padding:5px 9px;font-size:0.9rem;font-weight:700" onclick="showHelp()">?</button>
 </header>
 <div class="main-content">
 <section class="calendar-panel" id="calendar-panel"></section>
@@ -383,15 +383,15 @@ function renderSidePanel(){
 
 // ==================== 年月选择器 ====================
 function renderYearPicker(){
-  var h='<h3>选择年份</h3><div style="display:flex;gap:8px;justify-content:center;margin-bottom:10px"><button id="ydown">«</button><input type="number" id="yinput" value="'+state.currentYear+'" min="1900" max="2100" style="width:80px;text-align:center;padding:6px;border:2px solid #ddd;border-radius:8px"><button id="yup">»</button></div><button class="btn-cancel" id="yclose" style="display:block;margin:0 auto">关闭</button>';
+  var h='<h3 style="text-align:center;margin-bottom:12px">选择年份</h3><div style="display:flex;gap:10px;align-items:center;justify-content:center;margin-bottom:12px"><button id="ydown" style="width:38px;height:38px;border-radius:50%;border:none;background:#8ED8B8;color:#fff;cursor:pointer;font-size:1.2rem;line-height:1">◀</button><input type="number" id="yinput" value="'+state.currentYear+'" min="1900" max="2100" style="width:90px;text-align:center;padding:8px;border:2px solid #7EC8A0;border-radius:12px;font-size:1.2rem;font-weight:700;outline:none"><button id="yup" style="width:38px;height:38px;border-radius:50%;border:none;background:#8ED8B8;color:#fff;cursor:pointer;font-size:1.2rem;line-height:1">▶</button></div><button class="btn-cancel" id="yclose" style="display:block;margin:0 auto;padding:8px 24px">关闭</button>';
   yearPP.innerHTML=h;
   document.getElementById('yinput').onchange=function(){jumpTo(+this.value,state.currentMonth);yearOL.style.display='none';};
-  document.getElementById('ydown').onclick=function(){document.getElementById('yinput').value=Math.max(1900,state.currentYear-10);};
-  document.getElementById('yup').onclick=function(){document.getElementById('yinput').value=Math.min(2100,state.currentYear+10);};
+  document.getElementById('ydown').onclick=function(){document.getElementById('yinput').value=Math.max(1900,state.currentYear-1);document.getElementById('yinput').onchange();};
+  document.getElementById('yup').onclick=function(){document.getElementById('yinput').value=Math.min(2100,state.currentYear+1);document.getElementById('yinput').onchange();};
   document.getElementById('yclose').onclick=function(){yearOL.style.display='none';};
 }
 function renderMonthPicker(){
-  var h='<h3>选择月份</h3><div class="picker-grid">';for(var i=0;i<12;i++)h+='<div class="picker-item'+(i===state.currentMonth?' active':'')+'" data-m="'+i+'">'+(i+1)+'月</div>';h+='</div><button class="btn-cancel" id="mclose" style="display:block;margin:8px auto 0">关闭</button>';
+  var h='<h3 style="text-align:center;margin-bottom:10px">选择月份</h3><div class="picker-grid" style="gap:8px">';for(var i=0;i<12;i++)h+='<div class="picker-item'+(i===state.currentMonth?' active':'')+'" data-m="'+i+'" style="padding:12px 8px;font-size:1rem;border-radius:12px">'+(i+1)+'月</div>';h+='</div><button class="btn-cancel" id="mclose" style="display:block;margin:10px auto 0;padding:8px 24px">关闭</button>';
   monthPP.innerHTML=h;var its=monthPP.querySelectorAll('.picker-item');for(var j=0;j<its.length;j++)its[j].onclick=function(){jumpTo(state.currentYear,+this.dataset.m);monthOL.style.display='none';};
   document.getElementById('mclose').onclick=function(){monthOL.style.display='none';};
 }
