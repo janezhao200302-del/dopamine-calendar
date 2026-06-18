@@ -190,10 +190,12 @@ async function loadCloudData(){
   if(!syncCode)return null;
   try{
     var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?select=data&id=eq.'+encodeURIComponent(syncCode),{headers:{'apikey':SUPABASE_KEY}});
-    if(!r.ok)return null;
+    console.log('loadCloud status:',r.status);
+    if(!r.ok){console.log('loadCloud error:',await r.text());return null;}
     var rows=await r.json();
+    console.log('loadCloud rows:',rows.length);
     return rows.length?rows[0].data:null;
-  }catch(e){return null;}
+  }catch(e){console.log('loadCloud exception:',e);return null;}
 }
 async function saveCloudData(data){
   if(!syncCode)return;
@@ -201,8 +203,9 @@ async function saveCloudData(data){
     var h={'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
     var body=JSON.stringify({id:syncCode,data:data,updated_at:new Date().toISOString()});
     var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?id=eq.'+encodeURIComponent(syncCode),{method:'PATCH',headers:h,body:body});
-    if(r.status===404){r=await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:body});}
-  }catch(e){}
+    console.log('saveCloud PATCH status:',r.status);
+    if(r.status===404){r=await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:body});console.log('saveCloud POST status:',r.status);}
+  }catch(e){console.log('saveCloud exception:',e);}
 }
 function startSync(){
   if(!syncCode||syncTimer)return;
@@ -452,11 +455,11 @@ function showCelebration(){var n=30,f=document.createDocumentFragment();for(var 
 // ==================== 提醒弹窗 ====================
 function showReminderPopup(){
   var today=getTodayKey();if(localStorage.getItem('popupDismissed')===today)return;
-  var upc=getUpcomingMemorials(30),ma=upc.filter(function(u){return u.daysUntil>0&&u.daysUntil<=7}),ta=[];
+  var upc=getUpcomingMemorials(30),ma=upc.filter(function(u){return u.daysUntil<=7}),ta=[];
   for(var d=0;d<=5;d++){var cd=new Date(new Date(today+'T00:00:00').getTime()+d*86400000),ck=dateKey(cd.getFullYear(),cd.getMonth(),cd.getDate()),tks=(state.tasksByDate[ck]||[]).filter(function(t){return!t.done&&(t.priority||0)>=3});for(var t=0;t<tks.length;t++)ta.push({text:tks[t].text,daysLeft:d});}
   if(!ma.length&&!ta.length)return;
   var msg='<h3 style="text-align:center">今日提醒</h3><div style="max-height:200px;overflow-y:auto">';
-  if(ma.length){msg+='<div style="font-weight:600;color:var(--mint)">纪念日</div>';for(var a=0;a<ma.length;a++)msg+='<div style="padding:3px 0;border-bottom:1px solid #f0f0f0">'+(MEM_ICONS[ma[a].mem.type]||'📌')+' <b>'+ma[a].mem.name+'</b> — '+ma[a].daysUntil+'天后'+(ma[a].daysUntil<=3?' 🔔':'')+'</div>';}
+  if(ma.length){msg+='<div style="font-weight:600;color:var(--mint);margin-bottom:4px">纪念日</div>';for(var a=0;a<ma.length;a++){var dd=ma[a].daysUntil;msg+='<div style="padding:4px 0;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;gap:8px"><span style="font-size:1.2rem">'+(MEM_ICONS[ma[a].mem.type]||'📌')+'</span><b>'+ma[a].mem.name+'</b><span style="margin-left:auto;color:'+(dd<=3?'#E74C3C':'#999')+'">'+(dd===0?'🎉今天!':dd+'天后')+(dd<=3&&dd>0?' 🔔':'')+'</span></div>';}}
   if(ta.length){msg+='<div style="font-weight:600;color:#E74C3C;margin-top:6px">紧急重要</div>';for(var b=0;b<ta.length;b++)msg+='<div style="padding:3px 0;border-bottom:1px solid #f0f0f0;color:#E74C3C">🚨 <b>'+ta[b].text+'</b> — '+(ta[b].daysLeft===0?'今天!':ta[b].daysLeft+'天后')+'</div>';}
   msg+='</div><div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between"><label style="font-size:0.75rem;color:#999;cursor:pointer"><input type="checkbox" id="popup-dismiss"> 今日不再提醒</label><button class="btn-cancel" id="popup-close" style="margin:0">关闭</button></div>';
   var ov=document.createElement('div');ov.className='picker-overlay show';ov.style.zIndex='500';ov.id='reminder-popup';ov.innerHTML='<div class="picker-popup">'+msg+'</div>';document.body.appendChild(ov);
