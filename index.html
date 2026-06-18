@@ -189,22 +189,23 @@ window.openLogin=function(){
 async function loadCloudData(){
   if(!syncCode)return null;
   try{
-    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?select=data&id=eq.'+encodeURIComponent(syncCode),{headers:{'apikey':SUPABASE_KEY}});
+    var url=SUPABASE_URL+'/rest/v1/user_data?select=data&id=eq.'+encodeURIComponent(syncCode);
+    console.log('loadCloud URL:',url);
+    var r=await fetch(url,{headers:{'apikey':SUPABASE_KEY}});
     console.log('loadCloud status:',r.status);
     if(!r.ok){console.log('loadCloud error:',await r.text());return null;}
     var rows=await r.json();
-    console.log('loadCloud rows:',rows.length);
+    console.log('loadCloud rows:',rows.length,JSON.stringify(rows).slice(0,200));
     return rows.length?rows[0].data:null;
   }catch(e){console.log('loadCloud exception:',e);return null;}
 }
 async function saveCloudData(data){
   if(!syncCode)return;
   try{
-    var h={'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'return=minimal'};
+    var h={'apikey':SUPABASE_KEY,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'};
     var body=JSON.stringify({id:syncCode,data:data,updated_at:new Date().toISOString()});
-    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data?id=eq.'+encodeURIComponent(syncCode),{method:'PATCH',headers:h,body:body});
-    console.log('saveCloud PATCH status:',r.status);
-    if(r.status===404){r=await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:body});console.log('saveCloud POST status:',r.status);}
+    var r=await fetch(SUPABASE_URL+'/rest/v1/user_data',{method:'POST',headers:h,body:body});
+    console.log('saveCloud status:',r.status);
   }catch(e){console.log('saveCloud exception:',e);}
 }
 function startSync(){
