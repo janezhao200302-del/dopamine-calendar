@@ -1,7 +1,8 @@
 {
   "name": "多巴胺日历",
-  "short_name": "日历",
-  "description": "每日待办，薄荷心情 - 日历+日程+纪念日+农历",
+  "short_name": "多巴胺日历",
+  "description": "日历+待办+纪念日+农历——多设备同步",
+  "id": "dopamine-calendar-v4",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
@@ -9,13 +10,7 @@
   "background_color": "#FFF9F0",
   "theme_color": "#7EC8A0",
   "lang": "zh-CN",
-  "id": "dopamine-calendar",
   "icons": [
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
