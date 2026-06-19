@@ -3,14 +3,14 @@
   "short_name": "多巴胺日历",
   "description": "日历+待办+纪念日+农历——多设备同步",
   "id": "dopamine-calendar-v4",
-  "start_url": ".",
-  "scope": ".",
+  "start_url": "https://janezhao200302-del.github.io/dopamine-calendar/",
+  "scope": "https://janezhao200302-del.github.io/dopamine-calendar/",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#FFF9F0",
   "theme_color": "#7EC8A0",
   "lang": "zh-CN",
   "icons": [
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    { "src": "https://janezhao200302-del.github.io/dopamine-calendar/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ]
 }
