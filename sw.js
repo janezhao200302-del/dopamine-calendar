@@ -1,5 +1,5 @@
 // Service Worker — 离线缓存 (PWA)
-const CACHE_NAME = 'dopamine-calendar-v2';
+const CACHE_NAME = 'dopamine-calendar-v3';
 const FILES_TO_CACHE = [
   '.',
   'index.html',
