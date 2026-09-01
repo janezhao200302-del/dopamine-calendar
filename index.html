@@ -105,6 +105,16 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 .icon-btn:hover{background:#eee}
 .dialog-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.3);z-index:600;justify-content:center;align-items:center;display:none}
 .dialog-box{background:#fff;border-radius:16px;padding:20px;max-width:320px;width:88%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.2)}
+.wr-row{border:1px solid var(--border);border-radius:10px;padding:6px 8px;margin-bottom:5px;background:#fcfcfc}
+.wr-head{display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-size:0.8rem}
+.wr-head:hover{color:var(--mint)}
+.wr-item{display:flex;align-items:center;gap:4px;font-size:0.75rem;padding:1px 0;word-break:break-word}
+.wr-item .task-checkbox{width:14px;height:14px;border-width:1.5px;flex-shrink:0}
+.wr-item .task-checkbox:checked::after{font-size:9px;top:-1px;left:1px}
+.qrow{display:flex;gap:4px;margin:6px 0}
+.qrow input,.qrow select{flex:1;min-width:0;padding:6px 8px;border:2px solid var(--border);border-radius:10px;font-family:inherit;font-size:0.8rem;background:#fafafa;outline:none}
+.sec-title{font-size:0.78rem;font-weight:700;color:var(--text-muted);margin:10px 0 4px}
+.memorial-icon{cursor:pointer}
 .btn-save{background:var(--mint);color:#fff;padding:8px 18px;border:none;border-radius:18px;cursor:pointer;font-family:inherit}
 .btn-cancel{background:#eee;padding:8px 18px;border:none;border-radius:18px;cursor:pointer;font-family:inherit}
 .btn-delete{background:var(--red);color:#fff;padding:6px 14px;border:none;border-radius:14px;cursor:pointer;font-family:inherit;font-size:0.8rem}
@@ -124,7 +134,7 @@ body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;backgroun
 <span class="month-text" id="month-text">6月</span>
 <button class="nav-btn" data-action="next">&#9654;</button>
 <button class="today-btn" data-action="today" style="padding:5px 8px;font-size:0.75rem">今天</button>
-<button class="today-btn" style="background:rgba(255,255,255,0.25);padding:5px 7px;font-size:0.8rem" onclick="openEvents()">⭐ 事件</button>
+<button class="today-btn" style="background:rgba(255,255,255,0.25);padding:5px 7px;font-size:0.8rem" onclick="openEvents()">📔 周期</button>
 <button class="today-btn" id="btn-login" style="background:rgba(255,255,255,0.25);padding:5px 7px;font-size:0.8rem;font-weight:700" onclick="openLogin()">↻</button>
 <button class="today-btn" style="background:rgba(255,255,255,0.25);padding:5px 9px;font-size:0.9rem;font-weight:700" onclick="showHelp()">?</button>
 </header>
@@ -250,11 +260,11 @@ function deepMerge(local,remote){
   return r;
 }
 function dumpState(){return{tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals,events:state.events};}
-function applyState(data){if(data.tasks)state.tasksByDate=data.tasks;if(data.memorials)state.memorials=data.memorials;if(data.moods)state.moods=data.moods;if(data.journals)state.journals=data.journals;if(data.events)state.events=data.events;}
+function applyState(data){if(data.tasks)state.tasksByDate=data.tasks;if(data.memorials)state.memorials=data.memorials.map(function(m){if(!m.id)m.id=genId();return m;});if(data.moods)state.moods=data.moods;if(data.journals)state.journals=data.journals;if(data.events)state.events=data.events;}
 function updateLoginBtn(){var b=document.getElementById('btn-login');if(b)b.textContent=syncCode?'已同步':'登录';}
 
 // ==================== 持久化 ====================
-function loadLocalState(){try{var r=localStorage.getItem(STORAGE_KEY);if(r)applyState(JSON.parse(r));}catch(e){}}
+function loadLocalState(){try{var r=localStorage.getItem(STORAGE_KEY);if(r){applyState(JSON.parse(r));saveLocalState();}}catch(e){}}
 function saveLocalState(data){try{localStorage.setItem(STORAGE_KEY,JSON.stringify({version:5,tasks:state.tasksByDate,memorials:state.memorials,moods:state.moods,journals:state.journals,events:state.events}));}catch(e){}}
 async function loadState(){
   var now=new Date();state.currentYear=now.getFullYear();state.currentMonth=now.getMonth();state.selectedDate=getTodayKey();
@@ -397,7 +407,7 @@ function renderCalendar(){
     var lunar=solarToLunar(c.year,c.month,c.day),holiday=getLegalHoliday(c.year,c.month,c.day),term=getTermName(c.year,c.month,c.day),obs=getObservance(c.year,c.month,c.day),mems=getMemorialsForDate(key),evs=getEventsForDate(key);
     var cls='calendar-cell';if(isToday)cls+=' today';if(isSel)cls+=' selected';if(isOth)cls+=' other-month';if(holiday&&holiday.isRest)cls+=' holiday';
     h+='<div class="'+cls+'" data-date="'+key+'"><span class="day-num">'+c.day+'</span>';
-    if(mems.length)for(var k=0;k<Math.min(mems.length,2);k++)h+='<span class="memorial-icon" title="'+escAttr(mems[k].name)+'">'+(MEM_ICONS[mems[k].type]||'📌')+'</span>';
+    if(mems.length)for(var k=0;k<Math.min(mems.length,2);k++)h+='<span class="memorial-icon" data-memorial-id="'+mems[k].id+'" title="'+escAttr(mems[k].name)+'">'+(MEM_ICONS[mems[k].type]||'📌')+'</span>';
     if(evs.length)for(var k2=0;k2<Math.min(evs.length,2);k2++)h+='<span class="event-icon" title="'+escAttr(evs[k2].name)+'">⭐</span>';
     if(holiday&&holiday.isRest){if(holiday.name||obs)h+='<span class="lunar-text observance">'+(holiday.name||obs)+'</span>';h+='<span class="lunar-text" style="color:#388E5C;font-weight:700">休</span>';}
     else if(holiday&&holiday.isWork){h+='<span class="lunar-text" style="color:#999">'+holiday.name+'</span><span class="lunar-text" style="color:#999">班</span>';}
@@ -424,10 +434,10 @@ function renderSidePanel(){
   var mood=state.moods[dk]||'';h+='<div class="mood-section" style="text-align:center"><div style="display:inline-block;cursor:pointer;padding:12px 20px" id="mood-label"><div style="font-size:3rem;line-height:1.2">'+(mood||'⋯')+'</div><div style="font-size:0.75rem;color:var(--text-muted)">'+(mood?'点击换心情':'点此记录心情')+'</div></div></div>';
   var jnl=state.journals[dk]||'';h+='<div class="journal-section"><h4>今日总结</h4><textarea class="journal-textarea" id="journal-textarea" placeholder="今天发生了什么？">'+jnl+'</textarea><div style="font-size:0.65rem;color:#999;text-align:right">自动保存</div></div>';
   h+='</div>';
-  var upcoming=[];var upc=getUpcomingMemorials(8);for(var u=0;u<upc.length;u++)upcoming.push({name:upc[u].mem.name,days:upc[u].daysUntil,icon:MEM_ICONS[upc[u].mem.type]||'📌'});
-  for(var ei2=0;ei2<state.events.length;ei2++){var nx=getNextEventOccurrence(state.events[ei2]);if(nx)upcoming.push({name:state.events[ei2].name,days:nx.daysUntil,icon:'⭐',label:EV_PERIODS[state.events[ei2].period]});}
+  var upcoming=[];var upc=getUpcomingMemorials(8);for(var u=0;u<upc.length;u++)upcoming.push({id:upc[u].mem.id,kind:'mem',name:upc[u].mem.name,days:upc[u].daysUntil,icon:MEM_ICONS[upc[u].mem.type]||'📌'});
+  for(var ei2=0;ei2<state.events.length;ei2++){var nx=getNextEventOccurrence(state.events[ei2]);if(nx)upcoming.push({id:state.events[ei2].id,kind:'ev',name:state.events[ei2].name,days:nx.daysUntil,icon:'⭐',label:EV_PERIODS[state.events[ei2].period]});}
   upcoming.sort(function(a,b){return a.days-b.days;});upcoming=upcoming.slice(0,6);
-  if(upcoming.length){h+='<div class="memorial-section"><h4>即将到来</h4>';for(var uu=0;uu<upcoming.length;uu++){var it=upcoming[uu];h+='<div class="memorial-item"><span>'+(it.icon||'📌')+'</span> '+it.name+(it.label?' <span style="font-size:0.62rem;color:#999">'+it.label+'</span>':'')+'<span class="memorial-countdown">'+(it.days===0?'今天!':'还有'+it.days+'天')+'</span></div>';}h+='</div>';}
+  if(upcoming.length){h+='<div class="memorial-section"><h4>即将到来</h4>';for(var uu=0;uu<upcoming.length;uu++){var it=upcoming[uu];h+='<div class="memorial-item '+(it.kind==='ev'?'ev-clickable':'memorial-clickable')+'" '+(it.kind==='ev'?'data-evid':'data-memorial-id')+'="'+it.id+'"><span>'+(it.icon||'📌')+'</span> '+it.name+(it.label?' <span style="font-size:0.62rem;color:#999">'+it.label+'</span>':'')+'<span class="memorial-countdown">'+(it.days===0?'今天!':'还有'+it.days+'天')+'</span></div>';}h+='</div>';}
   var urg=[];for(var d2=0;d2<=7;d2++){var cd=new Date(new Date(getTodayKey()+'T00:00:00').getTime()+d2*86400000),ck=dateKey(cd.getFullYear(),cd.getMonth(),cd.getDate()),tks=(state.tasksByDate[ck]||[]).filter(function(t){return!t.done&&(t.priority||0)>=3});for(var t2=0;t2<tks.length;t2++)urg.push({text:tks[t2].text,daysLeft:d2});}
   if(urg.length){h+='<div class="memorial-section"><h4>紧急重要</h4>';for(var u2=0;u2<Math.min(urg.length,5);u2++)h+='<div class="memorial-item"><span>🚨</span> '+urg[u2].text+'<span class="memorial-countdown">'+(urg[u2].daysLeft===0?'今天!':'还有'+urg[u2].daysLeft+'天')+'</span></div>';h+='</div>';}
   sideP.innerHTML=h;
@@ -480,10 +490,15 @@ function showMemorialForm(dk,editMem){
   h+='<div class="form-group" id="mem-lunar-day-grp" style="display:none"><label>农历日</label><select id="mem-lunar-day">';for(var j=1;j<=30;j++)h+='<option value="'+j+'"'+(editMem&&editMem.lunarDay===j?' selected':(lunar.lunarDay===j?' selected':''))+'>'+(LUNAR_DAYS[j]||j)+'</option>';h+='</select></div>';
   h+='<div class="form-group" id="mem-lunar-chk" style="display:none"><label><input type="checkbox" id="mem-lunar-isleap"'+(editMem&&editMem.lunarIsLeap?' checked':'')+'> 闰月</label></div>';
   h+='<div class="form-group" id="mem-lunar-yr" style="display:none"><label>农历年份</label><input type="number" id="mem-lunar-year" value="'+(editMem&&editMem.originalYear?editMem.originalYear:y)+'" min="1900" max="2100"></div>';
+  h+='<div class="form-group" id="mem-lunar-preview" style="display:none"><label>对应公历（预览核对）</label><div id="mem-lunar-pv" style="font-size:0.85rem;color:var(--mint);font-weight:700"></div></div>';
   h+='<div class="form-group"><label>重复</label><select id="mem-repeat"><option value="yearly"'+(editMem&&editMem.repeat==='yearly'?' selected':'')+'>每年</option><option value="monthly"'+(editMem&&editMem.repeat==='monthly'?' selected':'')+'>每月</option><option value="weekly"'+(editMem&&editMem.repeat==='weekly'?' selected':'')+'>每周</option><option value="once"'+(editMem&&editMem.repeat==='once'?' selected':'')+'>仅一次</option></select></div>';
   h+='<div class="btn-row" style="justify-content:flex-end">';if(editMem)h+='<button class="btn-delete" id="btn-del-mem">删除</button>';h+='<button class="btn-cancel" id="mem-cancel">取消</button><button class="btn-save" id="mem-save">保存</button></div>';
   memBox.innerHTML=h;memModal.style.display='flex';
-  document.getElementById('mem-cal').onchange=function(){var v=this.value;document.getElementById('mem-solar').style.display=v==='solar'?'block':'none';document.getElementById('mem-lunar').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-day-grp').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-chk').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-yr').style.display=v==='lunar'?'block':'none';};
+  document.getElementById('mem-cal').onchange=function(){var v=this.value;document.getElementById('mem-solar').style.display=v==='solar'?'block':'none';document.getElementById('mem-lunar').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-day-grp').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-chk').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-yr').style.display=v==='lunar'?'block':'none';document.getElementById('mem-lunar-preview').style.display=v==='lunar'?'block':'none';if(v==='lunar')updLunarPreview();};
+  function updLunarPreview(){var pv=document.getElementById('mem-lunar-pv');if(!pv)return;var yy=+document.getElementById('mem-lunar-year').value||2026,lm=+document.getElementById('mem-lunar-month').value,ld=+document.getElementById('mem-lunar-day').value,il=document.getElementById('mem-lunar-isleap').checked;var s=lunarToSolar(yy,lm,ld,il);pv.innerHTML=s.year+'年'+(s.month+1)+'月'+s.day+'日';}
+  var lpIds=['mem-lunar-year','mem-lunar-month','mem-lunar-day','mem-lunar-isleap'];
+  for(var li=0;li<lpIds.length;li++){var le=document.getElementById(lpIds[li]);if(le)le.onchange=updLunarPreview;}
+  if(editMem&&editMem.calendar==='lunar')updLunarPreview();
   document.getElementById('mem-cancel').onclick=function(){memModal.style.display='none';};
   document.getElementById('mem-save').onclick=function(){
     var name=sanitize(document.getElementById('mem-name').value);if(!name){uiAlert('请输入名称');return;}
@@ -545,23 +560,86 @@ function getEventDesc(ev){
   if(ev.period==='yearly')return'每年'+(ev.month||1)+'月'+(ev.day||1)+'日';
   return'学期内'+(ev.semWeek?'第'+ev.semWeek+'周':'每')+' '+EV_DOW_NAMES[ev.semDow];
 }
-window.openEvents=function(){renderEventsModal();};
-function renderEventsModal(){
-  var tabs=[['weekly','每周'],['monthly','每月'],['semester','每学期'],['yearly','每年']],counts={};
-  for(var i=0;i<state.events.length;i++)counts[state.events[i].period]=(counts[state.events[i].period]||0)+1;
-  var h='<h3 style="text-align:center">⭐ 重要事件</h3>';
-  h+='<div class="tab-row">';for(var t=0;t<tabs.length;t++)h+='<button class="tab-btn'+(evTab===tabs[t][0]?' active':'')+'" data-evtab="'+tabs[t][0]+'">'+tabs[t][1]+(counts[tabs[t][0]]?' ('+counts[tabs[t][0]]+')':'')+'</button>';h+='</div>';
-  h+='<div id="ev-list" style="max-height:300px;overflow-y:auto">';
-  var evs=state.events.filter(function(e){return e.period===evTab;});
-  if(!evs.length)h+='<div class="panel-empty">还没有'+EV_PERIODS[evTab]+'的重要事件<br>点下方按钮添加</div>';
-  else for(var j=0;j<evs.length;j++){var ev=evs[j],nx=getNextEventOccurrence(ev);
+window.openEvents=function(){evTab='weekly';renderEventsModal();};
+function getWeekInfo(){
+  var today=new Date(getTodayKey()+'T00:00:00'),dow=(today.getDay()+6)%7,mon=new Date(today.getTime()-dow*86400000),days=[];
+  for(var i=0;i<7;i++){var d=new Date(mon.getTime()+i*86400000);days.push({dk:dateKey(d.getFullYear(),d.getMonth(),d.getDate()),label:WEEKDAY_LABELS[i],md:(d.getMonth()+1)+'/'+d.getDate(),isToday:i===dow});}
+  return{start:days[0].dk,end:days[6].dk,days:days};
+}
+function getImportantTasks(dk){return (state.tasksByDate[dk]||[]).filter(function(t){return !t.done&&(t.priority||0)>=1;});}
+function wrDayRows(days,showEmpty){
+  var h='';
+  for(var i=0;i<days.length;i++){
+    var d=days[i],evs=getEventsForDate(d.dk),tks=getImportantTasks(d.dk);
+    if(!showEmpty&&!evs.length&&!tks.length)continue;
+    h+='<div class="wr-row"><div class="wr-head" data-xdk="'+d.dk+'"><span>'+d.label+' '+d.md+(d.isToday?' <span style="color:var(--red);font-size:0.65rem">今天</span>':'')+'</span><span style="color:#ccc;font-size:0.6rem">查看 ▸</span></div>';
+    if(!evs.length&&!tks.length)h+='<div class="wr-item" style="color:#ccc">— 无安排 —</div>';
+    for(var e=0;e<evs.length;e++)h+='<div class="wr-item">⭐ '+evs[e].name+'</div>';
+    for(var t=0;t<tks.length;t++)h+='<div class="wr-item"><input type="checkbox" class="task-checkbox" data-xtk="'+tks[t].id+'" data-xdk="'+d.dk+'"><span style="flex:1">'+tks[t].text+'</span>'+['','⭐','🔥','🚨'][tks[t].priority||0]+'</div>';
+    h+='</div>';
+  }
+  return h;
+}
+function eventListHTML(period){
+  var evs=state.events.filter(function(e){return e.period===period;}),h='';
+  if(!evs.length)return '<div class="panel-empty">还没有循环设定,点下方按钮添加</div>';
+  for(var j=0;j<evs.length;j++){var ev=evs[j],nx=getNextEventOccurrence(ev);
     h+='<div class="event-item" style="border-left-color:'+EV_PERIOD_COLORS[ev.period]+'"><span style="font-size:1rem">⭐</span><div style="flex:1;min-width:0"><div style="font-size:0.85rem;font-weight:600;word-break:break-word">'+ev.name+'</div><small>'+getEventDesc(ev)+'</small>'+(nx?'<small style="color:'+EV_PERIOD_COLORS[ev.period]+'">下次 '+nx.key+'</small>':'<small>周期内暂无下次（可修改设定）</small>')+'</div>'+(nx?'<span class="event-next">'+(nx.daysUntil===0?'今天':'还有'+nx.daysUntil+'天')+'</span>':'')+'<span class="event-actions"><button class="icon-btn" data-evedit="'+ev.id+'">✏️</button><button class="icon-btn" data-evdel="'+ev.id+'">🗑</button></span></div>';
   }
-  h+='</div><button class="btn-save" id="btn-add-ev" style="width:100%;margin-top:10px">+ 添加'+EV_PERIODS[evTab]+'事件</button>';
+  return h;
+}
+function renderEventsModal(){
+  var tabs=[['weekly','周记'],['monthly','月记'],['semester','学期记'],['yearly','年记']];
+  var h='<h3 style="text-align:center">📔 周期视图</h3>';
+  h+='<div class="tab-row">';for(var t=0;t<tabs.length;t++)h+='<button class="tab-btn'+(evTab===tabs[t][0]?' active':'')+'" data-evtab="'+tabs[t][0]+'">'+tabs[t][1]+'</button>';h+='</div>';
+  var now=new Date(),ty=now.getFullYear(),tm=now.getMonth(),td=now.getDate(),wk=null;
+  if(evTab==='weekly'){
+    wk=getWeekInfo();
+    h+='<div style="text-align:center;color:#999;font-size:0.75rem;margin-bottom:6px">本周 '+wk.start+' ~ '+wk.end+'</div>';
+    h+=wrDayRows(wk.days,true);
+    h+='<div class="sec-title">📝 添加本周待办（⭐重要）</div><div class="qrow"><select id="qw-dow">';
+    for(var i=0;i<7;i++)h+='<option value="'+i+'"'+(wk.days[i].isToday?' selected':'')+'>'+wk.days[i].label+' '+wk.days[i].md+'</option>';
+    h+='</select></div><div class="qrow"><input id="qw-text" placeholder="写点什么..." maxlength="120"><button class="add-task-btn" id="qw-add">添加</button></div>';
+    h+='<div class="sec-title">🔁 每周循环设定</div>'+eventListHTML('weekly');
+    h+='<button class="btn-save" id="btn-add-ev" style="width:100%;margin-top:6px">+ 添加每周设定</button>';
+  }else if(evTab==='monthly'){
+    var dim=daysInMonth(ty,tm),mdays=[];
+    for(var d2=1;d2<=dim;d2++)mdays.push({dk:dateKey(ty,tm,d2),label:['周日','周一','周二','周三','周四','周五','周六'][new Date(ty,tm,d2).getDay()],md:(tm+1)+'/'+d2,isToday:d2===td});
+    h+='<div style="text-align:center;color:#999;font-size:0.75rem;margin-bottom:6px">本月 '+ty+'年'+(tm+1)+'月</div>';
+    var mrows=wrDayRows(mdays,false);
+    h+=mrows||'<div class="panel-empty">本月暂无重要安排</div>';
+    h+='<div class="sec-title">📝 添加本月待办（⭐重要）</div><div class="qrow"><select id="qm-day">';
+    for(var d3=1;d3<=dim;d3++)h+='<option value="'+d3+'"'+(d3===td?' selected':'')+'>'+(tm+1)+'月'+d3+'日</option>';
+    h+='</select></div><div class="qrow"><input id="qm-text" placeholder="写点什么..." maxlength="120"><button class="add-task-btn" id="qm-add">添加</button></div>';
+    h+='<div class="sec-title">🔁 每月循环设定</div>'+eventListHTML('monthly');
+    h+='<button class="btn-save" id="btn-add-ev" style="width:100%;margin-top:6px">+ 添加每月设定</button>';
+  }else if(evTab==='semester'){
+    var semStart=(tm>=7)?(ty+'-09-01'):(ty+'-03-01');
+    var se=new Date(+semStart.slice(0,4),+semStart.slice(5,7)-1,+semStart.slice(8,10)+125);
+    h+='<div style="text-align:center;color:#999;font-size:0.75rem;margin-bottom:6px">本学期 '+semStart+' 起（约18周）</div>';
+    h+=eventListHTML('semester');
+    h+='<div class="sec-title">📝 添加本学期待办（⭐重要）</div><div class="qrow"><input type="date" id="qs-date" value="'+dateKey(ty,tm,td)+'" min="'+semStart+'" max="'+dateKey(se.getFullYear(),se.getMonth(),se.getDate())+'"></div><div class="qrow"><input id="qs-text" placeholder="写点什么..." maxlength="120"><button class="add-task-btn" id="qs-add">添加</button></div>';
+    h+='<button class="btn-save" id="btn-add-ev" style="width:100%;margin-top:6px">+ 添加学期设定</button>';
+  }else{
+    h+='<div style="text-align:center;color:#999;font-size:0.75rem;margin-bottom:6px">今年 '+ty+'年</div>';
+    h+=eventListHTML('yearly');
+    h+='<div class="sec-title">📝 添加今年待办（⭐重要）</div><div class="qrow"><input type="date" id="qy-date" value="'+dateKey(ty,tm,td)+'" min="'+ty+'-01-01" max="'+ty+'-12-31'+'"></div><div class="qrow"><input id="qy-text" placeholder="写点什么..." maxlength="120"><button class="add-task-btn" id="qy-add">添加</button></div>';
+    h+='<button class="btn-save" id="btn-add-ev" style="width:100%;margin-top:6px">+ 添加每年设定</button>';
+  }
   evBox.innerHTML=h;evModal.style.display='flex';
   var tb=evBox.querySelectorAll('.tab-btn');for(var b=0;b<tb.length;b++)tb[b].onclick=function(){evTab=this.dataset.evtab;renderEventsModal();};
+  var hd=evBox.querySelectorAll('.wr-head');for(var hi=0;hi<hd.length;hi++)hd[hi].onclick=function(){state.selectedDate=this.dataset.xdk;renderApp();evModal.style.display='none';};
+  var cbx=evBox.querySelectorAll('.task-checkbox');for(var ci=0;ci<cbx.length;ci++)cbx[ci].onclick=function(){toggleTask(this.dataset.xdk,this.dataset.xtk);renderEventsModal();renderApp();};
   var eb=evBox.querySelectorAll('[data-evedit]');for(var e1=0;e1<eb.length;e1++)eb[e1].onclick=function(){var id=this.dataset.evedit,ev=state.events.find(function(x){return x.id===id;});if(ev)showEventForm(ev);};
   var db2=evBox.querySelectorAll('[data-evdel]');for(var e2=0;e2<db2.length;e2++)db2[e2].onclick=function(){var id=this.dataset.evdel,ev=state.events.find(function(x){return x.id===id;});if(ev)uiConfirm('确定删除事件「'+ev.name+'」？',function(){state.events=state.events.filter(function(x){return x.id!==id;});saveState();renderEventsModal();renderApp();},'删除');};
+  var qwA=document.getElementById('qw-add');
+  if(qwA)qwA.onclick=function(){var tx=document.getElementById('qw-text').value.trim();if(!tx)return;addTask(wk.days[+document.getElementById('qw-dow').value].dk,tx,1);renderEventsModal();renderApp();};
+  var qmA=document.getElementById('qm-add');
+  if(qmA)qmA.onclick=function(){var tx=document.getElementById('qm-text').value.trim();if(!tx)return;addTask(dateKey(ty,tm,+document.getElementById('qm-day').value),tx,1);renderEventsModal();renderApp();};
+  var qsA=document.getElementById('qs-add');
+  if(qsA)qsA.onclick=function(){var tx=document.getElementById('qs-text').value.trim();if(!tx)return;addTask(document.getElementById('qs-date').value,tx,1);renderEventsModal();renderApp();};
+  var qyA=document.getElementById('qy-add');
+  if(qyA)qyA.onclick=function(){var tx=document.getElementById('qy-text').value.trim();if(!tx)return;addTask(document.getElementById('qy-date').value,tx,1);renderEventsModal();renderApp();};
   document.getElementById('btn-add-ev').onclick=function(){showEventForm(null);};
 }
 function showEventForm(editEv){
@@ -631,9 +709,11 @@ function handleDeleteTask(tid){if(!state.selectedDate)return;deleteTask(state.se
 
 app.addEventListener('click',function(e){
   var ab=e.target.closest('[data-action]');if(ab){handleHeaderClick(ab.dataset.action);return;}
+  var mic=e.target.closest('.memorial-icon');if(mic){var mm=state.memorials.find(function(x){return x.id===mic.dataset.memorialId});if(mm)showMemDetailPopup(mm);return;}
   var cell=e.target.closest('.calendar-cell');if(cell){handleCalendarClick(cell.dataset.date,cell);return;}
   var del=e.target.closest('.task-delete');if(del){var ti=del.closest('.task-item');if(ti)handleDeleteTask(ti.dataset.taskId);return;}
   var mc=e.target.closest('.memorial-clickable');if(mc){var mem=state.memorials.find(function(m){return m.id===mc.dataset.memorialId});if(mem)showMemDetailPopup(mem);return;}
+  var ec=e.target.closest('.ev-clickable');if(ec){var evv=state.events.find(function(x){return x.id===ec.dataset.evid});if(evv)showEventForm(evv);return;}
   if(e.target===yearTxt){yearOL.style.display='flex';return;}
   if(e.target===monthTxt){monthOL.style.display='flex';return;}
   if(e.target===yearOL){yearOL.style.display='none';return;}
@@ -657,7 +737,7 @@ function showHelp(){
     {t:'日历',d:'点击任意日期查看和添加任务。◀ ▶ 切换月份，点击年份/月份快速跳转。'},
     {t:'任务',d:'输入任务后点添加。<br>可设优先级：<br>○ 普通<br>⭐ 重要<br>🔥 紧急<br>🚨 重要且紧急<br>勾选完成会撒花！'},
     {t:'纪念日',d:'点 ＋ 添加纪念日，支持生日/节日/正数日/倒数日。可设阳历或阴历循环。'},
-    {t:'重要事件',d:'点顶部 ⭐事件，添加每周 / 每月 / 每学期 / 每年的重要事件。日历上会显示 ⭐ 标记，侧栏展示今日事件和倒计时。'},
+    {t:'周期视图',d:'点顶部 📔周期，打开周记/月记/学期记/年记：查看本周每天的重要事项、直接勾选完成或添加待办，还可设置每周/每月/每学期/每年循环事件。'},
     {t:'心情',d:'点 😊 方块选择今日心情，下方写每日总结。数据自动保存。'},
     {t:'同步',d:'点 登录 设置同步码。其他设备输入相同同步码，数据自动同步。无需邮箱密码。'},
   ];
